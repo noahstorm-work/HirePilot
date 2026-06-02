@@ -10,9 +10,10 @@ const schema = z.object({
 })
 
 export async function POST(request: Request) {
+  let supabaseClient: any
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    supabaseClient = await createClient()
+    const { data: { user } } = await supabaseClient.auth.getUser()
     if (!user) {
       return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 })
     }
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
       cover_letter: result.cover_letter,
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from("ai_results")
       .upsert(analysis, { onConflict: "application_id" })
       .select()
@@ -48,7 +49,26 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, data, error: null })
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Internal server error"
-    return NextResponse.json({ success: false, data: null, error: message }, { status: 500 })
+    // Log the error to the database
+    try {
+      const errorSupabase = await createClient()
+      await errorSupabase.from("error_logs").insert({
+        level: "error",
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+        user_id: null, // In catch block, we don't have reliable user info
+        url: request.url,
+        method: request.method,
+        metadata: {
+          timestamp: new Date().toISOString(),
+          source: "analyze-job-route",
+        },
+      })
+    } catch (loggingError) {
+      // If logging fails, we don't want to break the app
+      console.error("Failed to log error:", loggingError)
+    }
+
+    return NextResponse.json({ success: false, data: null, error: "Internal server error" }, { status: 500 })
   }
 }
