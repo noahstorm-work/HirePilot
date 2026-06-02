@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Sparkles } from "lucide-react"
+import { Sparkles, Play } from "lucide-react"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -30,6 +30,21 @@ export default function LoginPage() {
       router.push("/dashboard")
     }
     setLoading(false)
+  }
+
+  const handleDemo = async () => {
+    setLoading(true)
+    setError("")
+    setEmail("demo@hirepilot.app")
+    setPassword("Demo123456!")
+    await new Promise((r) => setTimeout(r, 100))
+    const { error } = await supabase.auth.signInWithPassword({ email: "demo@hirepilot.app", password: "Demo123456!" })
+    if (error) {
+      setError(error.message)
+      setLoading(false)
+    } else {
+      router.push("/dashboard")
+    }
   }
 
   return (
@@ -57,6 +72,18 @@ export default function LoginPage() {
               {loading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-gray-500">or</span>
+            </div>
+          </div>
+          <Button variant="outline" className="w-full gap-2" onClick={handleDemo} disabled={loading}>
+            <Play className="h-4 w-4" />
+            Try Demo
+          </Button>
           <p className="mt-4 text-center text-sm text-gray-500">
             Don&apos;t have an account?{" "}
             <Link href="/register" className="font-medium text-violet-600 hover:text-violet-700">
