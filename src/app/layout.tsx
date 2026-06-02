@@ -5,7 +5,7 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "HirePilot - Your AI Career Operating System",
+  title: "ApplyPilot - Your AI Career Operating System",
   description: "AI-powered career optimization. Get more interviews and get hired faster.",
 }
 
