@@ -1,4 +1,4 @@
-import { getOpenAI } from "./openai"
+import { getOpenAI, AI_MODEL } from "./openai"
 import {
   CAREER_ANALYSIS_PROMPT,
   JOB_ANALYZE_PROMPT,
@@ -10,7 +10,7 @@ import {
 
 async function callAI<T>(systemPrompt: string, userContent: string, temperature = 0.3): Promise<T> {
   const completion = await getOpenAI().chat.completions.create({
-    model: "gpt-4o-mini",
+    model: AI_MODEL,
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userContent },
