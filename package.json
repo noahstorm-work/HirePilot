@@ -38,6 +38,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "string.prototype.matchall": "^4.0.12",
+    "supabase": "^2.104.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
