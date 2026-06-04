@@ -94,7 +94,7 @@ export function Sidebar() {
       {/* Mobile toggle */}
       <button
         onClick={() => setMobileOpen(true)}
-        className={`fixed top-4 left-4 z-50 md:hidden p-2 rounded-lg bg-[#16161a] border border-[#1e1e24] text-[#a0a0ab] transition-opacity ${mobileOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+        className={`fixed top-4 left-4 z-30 md:hidden p-2 rounded-lg bg-[#16161a] border border-[#1e1e24] text-[#a0a0ab] transition-opacity ${mobileOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       >
         <Menu className="h-5 w-5" />
       </button>
