@@ -6,10 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import {
-  Sparkles, Brain, Code, MessageSquare, Building2,
-  CheckCircle2, ArrowRight, RefreshCw
-} from "lucide-react"
+import { SectionHeader } from "@/components/ui/section-header"
+import { EmptyState } from "@/components/ui/empty-state"
+import { Sparkles, Code, MessageSquare, Building2, CheckCircle2 } from "lucide-react"
 
 export default function InterviewCoachPage() {
   const [company, setCompany] = useState("")
@@ -48,96 +47,84 @@ export default function InterviewCoachPage() {
   ] as const
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold font-[family-name:var(--font-display)] tracking-tight">Interview Coach</h1>
-        <p className="text-sm text-[#63636e] mt-1">Generate tailored interview questions and preparation strategies</p>
-      </div>
+    <div className="space-y-5">
+      <SectionHeader
+        title="Interview Coach"
+        description="Generate tailored questions and preparation strategies"
+        icon={<Sparkles className="h-4 w-4 text-[var(--color-accent-emerald)]" />}
+      />
 
       {/* Input */}
-      <div className="p-6 rounded-2xl border border-[#1e1e24] bg-[#0f0f12]">
-        <div className="grid md:grid-cols-3 gap-4 mb-4">
+      <div className="surface-card p-5 space-y-3.5">
+        <div className="grid sm:grid-cols-3 gap-3">
           <div>
-            <Label className="text-xs text-[#63636e] mb-1.5 block">Role *</Label>
-            <Input value={role} onChange={(e) => setRole(e.target.value)} className="bg-[#16161a] border-[#1e1e24] text-[#fafafa] focus:border-violet-500" placeholder="e.g. Senior Frontend Engineer" />
+            <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Role *</Label>
+            <Input value={role} onChange={(e) => setRole(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="e.g. Senior Frontend Engineer" />
           </div>
           <div>
-            <Label className="text-xs text-[#63636e] mb-1.5 block">Company</Label>
-            <Input value={company} onChange={(e) => setCompany(e.target.value)} className="bg-[#16161a] border-[#1e1e24] text-[#fafafa] focus:border-violet-500" placeholder="e.g. Google" />
+            <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Company</Label>
+            <Input value={company} onChange={(e) => setCompany(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="e.g. Google" />
           </div>
           <div className="flex items-end">
-            <Button onClick={handleGenerate} disabled={loading || !role.trim()} className="w-full gradient-violet text-white border-0 hover:opacity-90">
-              {loading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <><Sparkles className="h-4 w-4 mr-2" /> Generate Prep</>}
+            <Button onClick={handleGenerate} disabled={loading || !role.trim()} className="w-full gradient-violet text-white border-0 hover:opacity-90 shadow-glow h-9 text-sm">
+              {loading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <><Sparkles className="h-3.5 w-3.5 mr-1.5" /> Generate</>}
             </Button>
           </div>
         </div>
         <div>
-          <Label className="text-xs text-[#63636e] mb-1.5 block">Job Description (optional)</Label>
-          <Textarea value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} className="bg-[#16161a] border-[#1e1e24] text-[#fafafa] focus:border-violet-500 min-h-[80px] resize-none" placeholder="Paste the job description for more tailored questions..." />
+          <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Job Description (optional)</Label>
+          <Textarea value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] min-h-[70px] resize-none text-sm" placeholder="Paste job description for more tailored questions..." />
         </div>
       </div>
 
-      {error && <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20"><p className="text-xs text-rose-400">{error}</p></div>}
+      {error && <div className="p-2.5 rounded-lg bg-[var(--color-accent-rose)]/10 border border-[var(--color-accent-rose)]/20"><p className="text-[11px] text-[var(--color-accent-rose)]">{error}</p></div>}
 
-      {/* Results */}
       {result && (
         <div className="animate-fade-in">
-          {/* Tabs */}
-          <div className="flex gap-1 p-1 rounded-xl bg-[#0f0f12] border border-[#1e1e24] mb-6 overflow-x-auto w-full">
+          <div className="flex gap-1 p-0.5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] mb-5 overflow-x-auto w-full">
             {tabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm whitespace-nowrap transition-all ${
-                  activeTab === tab.key ? "bg-violet-500/10 text-violet-400 font-medium" : "text-[#63636e] hover:text-[#a0a0ab]"
-                }`}
-              >
-                <tab.icon className="h-3.5 w-3.5" />
-                {tab.label}
+              <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all ${activeTab === tab.key ? "bg-[var(--color-accent-violet)]/10 text-[var(--color-accent-violet)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"}`}>
+                <tab.icon className="h-3 w-3" /> {tab.label}
               </button>
             ))}
           </div>
 
-          {/* Tab Content */}
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {activeTab === "technical" && (result.technical_questions || []).map((q: any, i: number) => (
-              <div key={i} className="p-5 rounded-xl border border-[#1e1e24] bg-[#0f0f12]">
-                <div className="flex items-start gap-3">
-                  <span className="text-xs font-bold font-[family-name:var(--font-mono)] text-violet-400 mt-0.5">Q{i + 1}</span>
+              <div key={i} className="p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)]">
+                <div className="flex items-start gap-2.5">
+                  <span className="text-[10px] font-bold font-[family-name:var(--font-mono)] text-[var(--color-accent-violet)] mt-0.5">Q{i + 1}</span>
                   <div>
-                    <p className="text-sm font-medium">{typeof q === "string" ? q : q.question}</p>
-                    {typeof q === "object" && q.hint && <p className="text-xs text-[#63636e] mt-2">Hint: {q.hint}</p>}
+                    <p className="text-xs font-medium">{typeof q === "string" ? q : q.question}</p>
+                    {typeof q === "object" && q.hint && <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5">Hint: {q.hint}</p>}
                   </div>
                 </div>
               </div>
             ))}
-
             {activeTab === "behavioral" && (result.behavioral_questions || []).map((q: any, i: number) => (
-              <div key={i} className="p-5 rounded-xl border border-[#1e1e24] bg-[#0f0f12]">
-                <div className="flex items-start gap-3">
-                  <span className="text-xs font-bold font-[family-name:var(--font-mono)] text-blue-400 mt-0.5">Q{i + 1}</span>
+              <div key={i} className="p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)]">
+                <div className="flex items-start gap-2.5">
+                  <span className="text-[10px] font-bold font-[family-name:var(--font-mono)] text-[var(--color-accent-blue)] mt-0.5">Q{i + 1}</span>
                   <div>
-                    <p className="text-sm font-medium">{typeof q === "string" ? q : q.question}</p>
-                    {typeof q === "object" && q.framework && <p className="text-xs text-[#63636e] mt-2">Framework: {q.framework}</p>}
+                    <p className="text-xs font-medium">{typeof q === "string" ? q : q.question}</p>
+                    {typeof q === "object" && q.framework && <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5">Framework: {q.framework}</p>}
                   </div>
                 </div>
               </div>
             ))}
-
             {activeTab === "star" && (result.star_responses || result.star_examples || []).map((item: any, i: number) => (
-              <div key={i} className="p-5 rounded-xl border border-[#1e1e24] bg-[#0f0f12]">
-                <p className="text-sm font-medium mb-3 text-emerald-400">{item.situation || item.question || `Example ${i + 1}`}</p>
-                <div className="space-y-2 text-xs text-[#a0a0ab]">
-                  {item.task && <p><span className="text-[#63636e] font-medium">Task:</span> {item.task}</p>}
-                  {item.action && <p><span className="text-[#63636e] font-medium">Action:</span> {item.action}</p>}
-                  {item.result && <p><span className="text-[#63636e] font-medium">Result:</span> {item.result}</p>}
+              <div key={i} className="p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)]">
+                <p className="text-xs font-medium mb-2.5 text-[var(--color-accent-emerald)]">{item.situation || item.question || `Example ${i + 1}`}</p>
+                <div className="space-y-1.5 text-[11px] text-[var(--color-text-secondary)]">
+                  {item.task && <p><span className="text-[var(--color-text-muted)] font-medium">Task:</span> {item.task}</p>}
+                  {item.action && <p><span className="text-[var(--color-text-muted)] font-medium">Action:</span> {item.action}</p>}
+                  {item.result && <p><span className="text-[var(--color-text-muted)] font-medium">Result:</span> {item.result}</p>}
                 </div>
               </div>
             ))}
-
             {activeTab === "company" && (
-              <div className="p-5 rounded-xl border border-[#1e1e24] bg-[#0f0f12]">
-                <p className="text-sm text-[#a0a0ab]">{result.company_research || result.company_prep || "Generate prep with a company name to see company-specific research."}</p>
+              <div className="p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)]">
+                <p className="text-xs text-[var(--color-text-secondary)]">{result.company_research || result.company_prep || "Generate prep with a company name to see company-specific research."}</p>
               </div>
             )}
           </div>
@@ -145,10 +132,11 @@ export default function InterviewCoachPage() {
       )}
 
       {!result && !loading && (
-        <div className="text-center py-16">
-          <Sparkles className="h-10 w-10 text-[#45454e] mx-auto mb-3" />
-          <p className="text-sm text-[#63636e]">Enter a role and generate interview preparation</p>
-        </div>
+        <EmptyState
+          icon={Sparkles}
+          title="Interview Coach"
+          description="Enter a role and generate AI-powered interview preparation with technical questions, STAR responses, and company research."
+        />
       )}
     </div>
   )

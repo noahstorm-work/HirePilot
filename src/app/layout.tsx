@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Syne, Inter } from "next/font/google"
 import "./globals.css"
 import { ErrorLogging } from "@/components/ErrorLogging"
+import { CommandPalette } from "@/components/CommandPalette"
 
 const syne = Syne({
   subsets: ["latin"],
@@ -15,8 +16,17 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "HirePilot AI - Your AI Co-Pilot For Getting Hired",
-  description: "AI-powered career optimization. Understand why you're not getting interviews, improve your CV, find the right jobs, and land offers faster.",
+  title: {
+    default: "HirePilot AI — Your AI Co-Pilot For Getting Hired",
+    template: "%s | HirePilot AI",
+  },
+  description: "AI-powered career operating system. Understand why you're not getting interviews, optimize your CV, find matching jobs, and land offers faster.",
+  keywords: ["career", "AI", "resume", "CV", "interview", "job search", "ATS", "career analysis"],
+  openGraph: {
+    title: "HirePilot AI — Your AI Co-Pilot For Getting Hired",
+    description: "AI-powered career operating system. Understand why you're not getting interviews.",
+    type: "website",
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -28,8 +38,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className={`${syne.variable} ${inter.variable} min-h-screen bg-[#09090b] text-[#fafafa] antialiased`}>
+      <body className={`${syne.variable} ${inter.variable} min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] antialiased`}>
         <ErrorLogging />
+        <CommandPalette />
         {children}
       </body>
     </html>

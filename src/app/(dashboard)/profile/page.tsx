@@ -5,17 +5,20 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { SectionHeader } from "@/components/ui/section-header"
+import { LoadingScreen } from "@/components/ui/loading-screen"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
-import {
-  User, Save, CheckCircle2, Plus, Trash2, ExternalLink
-} from "lucide-react"
+import { User, Save, ExternalLink } from "lucide-react"
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
   const [cvText, setCvText] = useState("")
+  const [linkedin, setLinkedin] = useState("")
+  const [github, setGithub] = useState("")
+  const [portfolio, setPortfolio] = useState("")
+  const [targetRole, setTargetRole] = useState("")
   const supabase = createClient()
 
   useEffect(() => { loadProfile() }, [])
@@ -23,118 +26,97 @@ export default function ProfilePage() {
   const loadProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-
     const { data } = await supabase.from("user_profiles").select("*").eq("id", user.id).maybeSingle()
     if (data) {
       setProfile(data)
       setCvText(data.cv_text || "")
+      setLinkedin(data.linkedin_url || "")
+      setGithub(data.github_url || "")
+      setPortfolio(data.portfolio_url || "")
+      setTargetRole(data.target_role || "")
     }
     setLoading(false)
   }
 
   const handleSave = async () => {
+    setSaving(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    setSaving(true)
-
-    if (profile) {
-      await supabase.from("user_profiles").update({
-        cv_text: cvText,
-        linkedin_url: profile.linkedin_url,
-        github_url: profile.github_url,
-        portfolio_url: profile.portfolio_url,
-        target_role: profile.target_role,
-      }).eq("id", user.id)
-    } else {
-      const { data } = await supabase.from("user_profiles").insert({
-        id: user.id,
-        cv_text: cvText,
-        linkedin_url: profile?.linkedin_url || "",
-        github_url: profile?.github_url || "",
-        portfolio_url: profile?.portfolio_url || "",
-        target_role: profile?.target_role || "",
-      }).select().single()
-      if (data) setProfile(data)
-    }
-
+    await supabase.from("user_profiles").upsert({
+      id: user.id,
+      cv_text: cvText,
+      linkedin_url: linkedin || null,
+      github_url: github || null,
+      portfolio_url: portfolio || null,
+      target_role: targetRole || null,
+    })
     setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
   }
 
-  if (loading) {
-    return <div className="flex items-center justify-center py-32"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" /></div>
-  }
+  if (loading) return <LoadingScreen />
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <div>
-        <h1 className="text-2xl font-bold font-[family-name:var(--font-display)] tracking-tight">Profile</h1>
-        <p className="text-sm text-[#63636e] mt-1">Manage your career profile and CV</p>
-      </div>
+      <SectionHeader
+        title="Profile"
+        description="Manage your career profile and CV"
+        icon={<User className="h-4 w-4 text-[var(--color-accent-violet)]" />}
+      />
 
-      {/* CV Section */}
-      <div className="p-6 rounded-2xl border border-[#1e1e24] bg-[#0f0f12]">
-        <h2 className="text-sm font-medium text-[#a0a0ab] mb-4 flex items-center gap-2">
-          <User className="h-4 w-4 text-violet-400" />
-          CV / Resume
-        </h2>
+      {/* CV */}
+      <div className="surface-card p-5">
+        <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-2 block">CV / Resume</Label>
         <RichTextEditor
           value={cvText}
           onChange={setCvText}
-          placeholder="Paste your CV or resume text here..."
-          className="min-h-[300px]"
+          placeholder="Paste your CV text here..."
         />
       </div>
 
-      {/* Links Section */}
-      <div className="p-6 rounded-2xl border border-[#1e1e24] bg-[#0f0f12]">
-        <h2 className="text-sm font-medium text-[#a0a0ab] mb-4">Online Presence</h2>
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <Label className="text-xs text-[#63636e] mb-1.5 block">LinkedIn URL</Label>
-            <Input
-              value={profile?.linkedin_url || ""}
-              onChange={(e) => setProfile({ ...profile, linkedin_url: e.target.value })}
-              className="bg-[#16161a] border-[#1e1e24] text-[#fafafa] placeholder:text-[#45454e] focus:border-violet-500"
-              placeholder="https://linkedin.com/in/..."
-            />
+      {/* Links */}
+      <div className="surface-card p-5 space-y-3.5">
+        <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] block">Links</Label>
+        <div>
+          <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">LinkedIn URL</Label>
+          <div className="relative">
+            <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
+            <Input value={linkedin} onChange={(e) => setLinkedin(e.target.value)} className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://linkedin.com/in/..." />
           </div>
-          <div>
-            <Label className="text-xs text-[#63636e] mb-1.5 block">GitHub URL</Label>
-            <Input
-              value={profile?.github_url || ""}
-              onChange={(e) => setProfile({ ...profile, github_url: e.target.value })}
-              className="bg-[#16161a] border-[#1e1e24] text-[#fafafa] placeholder:text-[#45454e] focus:border-violet-500"
-              placeholder="https://github.com/..."
-            />
+        </div>
+        <div>
+          <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">GitHub URL</Label>
+          <div className="relative">
+            <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
+            <Input value={github} onChange={(e) => setGithub(e.target.value)} className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://github.com/..." />
           </div>
-          <div>
-            <Label className="text-xs text-[#63636e] mb-1.5 block">Portfolio URL</Label>
-            <Input
-              value={profile?.portfolio_url || ""}
-              onChange={(e) => setProfile({ ...profile, portfolio_url: e.target.value })}
-              className="bg-[#16161a] border-[#1e1e24] text-[#fafafa] placeholder:text-[#45454e] focus:border-violet-500"
-              placeholder="https://yoursite.com"
-            />
-          </div>
-          <div>
-            <Label className="text-xs text-[#63636e] mb-1.5 block">Target Role</Label>
-            <Input
-              value={profile?.target_role || ""}
-              onChange={(e) => setProfile({ ...profile, target_role: e.target.value })}
-              className="bg-[#16161a] border-[#1e1e24] text-[#fafafa] placeholder:text-[#45454e] focus:border-violet-500"
-              placeholder="e.g. Senior Software Engineer"
-            />
+        </div>
+        <div>
+          <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Portfolio URL</Label>
+          <div className="relative">
+            <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
+            <Input value={portfolio} onChange={(e) => setPortfolio(e.target.value)} className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://..." />
           </div>
         </div>
       </div>
 
-      {/* Save Button */}
-      <div className="flex items-center gap-3">
-        <Button onClick={handleSave} disabled={saving} className="gradient-violet text-white border-0 hover:opacity-90">
-          {saving ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" /> : saved ? <CheckCircle2 className="h-4 w-4 mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-          {saved ? "Saved!" : "Save Profile"}
+      {/* Career Settings */}
+      <div className="surface-card p-5 space-y-3.5">
+        <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] block">Career Settings</Label>
+        <div>
+          <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Target Role</Label>
+          <Input value={targetRole} onChange={(e) => setTargetRole(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="e.g. Senior Frontend Engineer" />
+        </div>
+      </div>
+
+      {/* Save */}
+      <div className="flex justify-end">
+        <Button onClick={handleSave} disabled={saving} className="gradient-violet text-white border-0 px-5 h-9 text-sm font-semibold hover:opacity-90 shadow-glow group">
+          {saving ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : (
+            <>
+              <Save className="h-3.5 w-3.5 mr-1.5" />
+              Save Profile
+            </>
+          )}
         </Button>
       </div>
     </div>
