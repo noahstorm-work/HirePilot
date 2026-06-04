@@ -1,97 +1,142 @@
-import { createClient } from "@/lib/supabase/server"
-import { Navbar } from "@/components/Navbar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+"use client"
+
+import { useEffect, useState } from "react"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { ProfileForm } from "@/components/profile/ProfileForm"
-import { CvUploader } from "@/components/profile/CvUploader"
-import { CvHistoryList } from "@/components/profile/CvHistoryList"
-import { Sparkles } from "lucide-react"
-import Link from "next/link"
-import type { CvVersion } from "@/types"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
+import {
+  User, Save, CheckCircle2, Plus, Trash2, ExternalLink
+} from "lucide-react"
 
-export default async function ProfilePage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+export default function ProfilePage() {
+  const [profile, setProfile] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [cvText, setCvText] = useState("")
+  const supabase = createClient()
 
-  if (!user) return null
+  useEffect(() => { loadProfile() }, [])
 
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single()
+  const loadProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
 
-  const { data: cvVersions } = await supabase
-    .from("cv_versions")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
+    const { data } = await supabase.from("user_profiles").select("*").eq("id", user.id).maybeSingle()
+    if (data) {
+      setProfile(data)
+      setCvText(data.cv_text || "")
+    }
+    setLoading(false)
+  }
 
-  const hasCv = !!profile?.cv_text
+  const handleSave = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    setSaving(true)
+
+    if (profile) {
+      await supabase.from("user_profiles").update({
+        cv_text: cvText,
+        linkedin_url: profile.linkedin_url,
+        github_url: profile.github_url,
+        portfolio_url: profile.portfolio_url,
+        target_role: profile.target_role,
+      }).eq("id", user.id)
+    } else {
+      const { data } = await supabase.from("user_profiles").insert({
+        id: user.id,
+        cv_text: cvText,
+        linkedin_url: profile?.linkedin_url || "",
+        github_url: profile?.github_url || "",
+        portfolio_url: profile?.portfolio_url || "",
+        target_role: profile?.target_role || "",
+      }).select().single()
+      if (data) setProfile(data)
+    }
+
+    setSaving(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  if (loading) {
+    return <div className="flex items-center justify-center py-32"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" /></div>
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <main className="mx-auto max-w-4xl px-6 py-8">
-        <div className="flex items-center justify-between mb-8">
+    <div className="space-y-6 max-w-3xl">
+      <div>
+        <h1 className="text-2xl font-bold font-[family-name:var(--font-display)] tracking-tight">Profile</h1>
+        <p className="text-sm text-[#63636e] mt-1">Manage your career profile and CV</p>
+      </div>
+
+      {/* CV Section */}
+      <div className="p-6 rounded-2xl border border-[#1e1e24] bg-[#0f0f12]">
+        <h2 className="text-sm font-medium text-[#a0a0ab] mb-4 flex items-center gap-2">
+          <User className="h-4 w-4 text-violet-400" />
+          CV / Resume
+        </h2>
+        <RichTextEditor
+          value={cvText}
+          onChange={setCvText}
+          placeholder="Paste your CV or resume text here..."
+          className="min-h-[300px]"
+        />
+      </div>
+
+      {/* Links Section */}
+      <div className="p-6 rounded-2xl border border-[#1e1e24] bg-[#0f0f12]">
+        <h2 className="text-sm font-medium text-[#a0a0ab] mb-4">Online Presence</h2>
+        <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Profile & CV</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage your career profile and CV versions</p>
+            <Label className="text-xs text-[#63636e] mb-1.5 block">LinkedIn URL</Label>
+            <Input
+              value={profile?.linkedin_url || ""}
+              onChange={(e) => setProfile({ ...profile, linkedin_url: e.target.value })}
+              className="bg-[#16161a] border-[#1e1e24] text-[#fafafa] placeholder:text-[#45454e] focus:border-violet-500"
+              placeholder="https://linkedin.com/in/..."
+            />
           </div>
-          {hasCv && (
-            <Link href="/dashboard">
-              <Button>
-                <Sparkles className="h-4 w-4 mr-1.5" />
-                Run Analysis
-              </Button>
-            </Link>
-          )}
+          <div>
+            <Label className="text-xs text-[#63636e] mb-1.5 block">GitHub URL</Label>
+            <Input
+              value={profile?.github_url || ""}
+              onChange={(e) => setProfile({ ...profile, github_url: e.target.value })}
+              className="bg-[#16161a] border-[#1e1e24] text-[#fafafa] placeholder:text-[#45454e] focus:border-violet-500"
+              placeholder="https://github.com/..."
+            />
+          </div>
+          <div>
+            <Label className="text-xs text-[#63636e] mb-1.5 block">Portfolio URL</Label>
+            <Input
+              value={profile?.portfolio_url || ""}
+              onChange={(e) => setProfile({ ...profile, portfolio_url: e.target.value })}
+              className="bg-[#16161a] border-[#1e1e24] text-[#fafafa] placeholder:text-[#45454e] focus:border-violet-500"
+              placeholder="https://yoursite.com"
+            />
+          </div>
+          <div>
+            <Label className="text-xs text-[#63636e] mb-1.5 block">Target Role</Label>
+            <Input
+              value={profile?.target_role || ""}
+              onChange={(e) => setProfile({ ...profile, target_role: e.target.value })}
+              className="bg-[#16161a] border-[#1e1e24] text-[#fafafa] placeholder:text-[#45454e] focus:border-violet-500"
+              placeholder="e.g. Senior Software Engineer"
+            />
+          </div>
         </div>
+      </div>
 
-        <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Personal Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ProfileForm
-                initialData={{
-                  full_name: profile?.full_name,
-                  target_role: profile?.target_role,
-                  target_seniority: profile?.target_seniority,
-                  years_experience: profile?.years_experience,
-                  linkedin_url: profile?.linkedin_url,
-                  github_url: profile?.github_url,
-                  portfolio_url: profile?.portfolio_url,
-                }}
-              />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">CV Text</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CvUploader initialCvText={profile?.cv_text} />
-            </CardContent>
-          </Card>
-
-          {cvVersions && cvVersions.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">CV Version History</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CvHistoryList
-                  versions={cvVersions as CvVersion[]}
-                  activeVersionId={profile?.cv_text ? cvVersions[0]?.id : null}
-                />
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </main>
+      {/* Save Button */}
+      <div className="flex items-center gap-3">
+        <Button onClick={handleSave} disabled={saving} className="gradient-violet text-white border-0 hover:opacity-90">
+          {saving ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" /> : saved ? <CheckCircle2 className="h-4 w-4 mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+          {saved ? "Saved!" : "Save Profile"}
+        </Button>
+      </div>
     </div>
   )
 }

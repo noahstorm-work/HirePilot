@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor, getEditorPlainText } from "@/components/ui/rich-text-editor"
 import { Upload, Loader2 } from "lucide-react"
 
 interface Props {
@@ -18,7 +18,7 @@ export function CvUploader({ initialCvText }: Props) {
   const supabase = createClient()
 
   const handleSave = async () => {
-    if (!cvText.trim()) return
+    if (!getEditorPlainText(cvText).trim()) return
     setSaving(true)
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -37,13 +37,13 @@ export function CvUploader({ initialCvText }: Props) {
 
   return (
     <div className="space-y-3">
-      <Textarea
+      <RichTextEditor
         value={cvText}
-        onChange={(e) => setCvText(e.target.value)}
+        onChange={setCvText}
         placeholder="Paste your CV text here..."
-        className="min-h-[300px] text-sm leading-relaxed"
+        className="min-h-[300px]"
       />
-      <Button onClick={handleSave} disabled={saving || !cvText.trim()}>
+      <Button onClick={handleSave} disabled={saving || !getEditorPlainText(cvText).trim()}>
         {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Upload className="h-4 w-4 mr-1.5" />}
         Save CV
       </Button>

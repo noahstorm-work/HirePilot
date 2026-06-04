@@ -46,7 +46,6 @@ export async function searchAdzuna(
     app_key: apiKey,
     results_per_page: "20",
     what: query,
-    content_type: "application/json",
   })
 
   if (location) params.set("where", location)

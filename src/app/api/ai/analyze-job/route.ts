@@ -49,26 +49,21 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, data, error: null })
   } catch (err) {
-    // Log the error to the database
+    console.error("Analyze job error:", err)
     try {
       const errorSupabase = await createClient()
       await errorSupabase.from("error_logs").insert({
         level: "error",
         message: err instanceof Error ? err.message : String(err),
         stack: err instanceof Error ? err.stack : undefined,
-        user_id: null, // In catch block, we don't have reliable user info
+        user_id: null,
         url: request.url,
-        method: request.method,
-        metadata: {
-          timestamp: new Date().toISOString(),
-          source: "analyze-job-route",
-        },
+        metadata: { source: "analyze-job-route" },
       })
     } catch (loggingError) {
-      // If logging fails, we don't want to break the app
       console.error("Failed to log error:", loggingError)
     }
-
-    return NextResponse.json({ success: false, data: null, error: "Internal server error" }, { status: 500 })
+    const errorMessage = err instanceof Error ? err.message : "Internal server error"
+    return NextResponse.json({ success: false, data: null, error: errorMessage }, { status: 500 })
   }
 }

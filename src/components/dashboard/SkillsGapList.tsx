@@ -21,7 +21,7 @@ export function SkillsGapList({ gaps, keywords, technologies, experienceAreas }:
     <div className="space-y-4">
       {gaps.length > 0 && (
         <div>
-          <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Skills Gap Analysis</h4>
+          <h4 className="text-xs font-medium text-[#63636e] uppercase tracking-wider mb-2">Skills Gap Analysis</h4>
           <div className="space-y-2">
             {gaps.map((gap, i) => (
               <div key={i} className="flex items-start gap-2 text-sm">
@@ -29,8 +29,8 @@ export function SkillsGapList({ gaps, keywords, technologies, experienceAreas }:
                   {gap.severity}
                 </Badge>
                 <div>
-                  <span className="font-medium text-gray-900">{gap.area}</span>
-                  <p className="text-xs text-gray-500">{gap.detail}</p>
+                  <span className="font-medium text-[#fafafa]">{gap.area}</span>
+                  <p className="text-xs text-[#63636e]">{gap.detail}</p>
                 </div>
               </div>
             ))}
@@ -40,7 +40,7 @@ export function SkillsGapList({ gaps, keywords, technologies, experienceAreas }:
 
       {keywords.length > 0 && (
         <div>
-          <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Missing Keywords</h4>
+          <h4 className="text-xs font-medium text-[#63636e] uppercase tracking-wider mb-2">Missing Keywords</h4>
           <div className="flex flex-wrap gap-1.5">
             {keywords.map((k, i) => (
               <Badge key={i} variant="destructive">{k}</Badge>
@@ -51,7 +51,7 @@ export function SkillsGapList({ gaps, keywords, technologies, experienceAreas }:
 
       {technologies.length > 0 && (
         <div>
-          <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Missing Technologies</h4>
+          <h4 className="text-xs font-medium text-[#63636e] uppercase tracking-wider mb-2">Missing Technologies</h4>
           <div className="flex flex-wrap gap-1.5">
             {technologies.map((t, i) => (
               <Badge key={i} variant="destructive">{t}</Badge>
@@ -62,7 +62,7 @@ export function SkillsGapList({ gaps, keywords, technologies, experienceAreas }:
 
       {experienceAreas.length > 0 && (
         <div>
-          <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Missing Experience Areas</h4>
+          <h4 className="text-xs font-medium text-[#63636e] uppercase tracking-wider mb-2">Missing Experience Areas</h4>
           <div className="flex flex-wrap gap-1.5">
             {experienceAreas.map((e, i) => (
               <Badge key={i} variant="warning">{e}</Badge>

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Loader2 } from "lucide-react"
+import { Search } from "lucide-react"
 
 interface Props {
   onSearch: (query: string, location: string) => void
@@ -37,8 +37,8 @@ export function JobSearchBar({ onSearch, loading }: Props) {
           className="h-11"
         />
       </div>
-      <Button type="submit" disabled={loading || !query.trim()} className="h-11">
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+      <Button type="submit" disabled={loading || !query.trim()} className="h-11 gradient-violet text-white border-0 hover:opacity-90">
+        {loading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <Search className="h-4 w-4" />}
         Search
       </Button>
     </form>

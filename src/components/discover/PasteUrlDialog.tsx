@@ -2,17 +2,14 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog"
-import { Link, Loader2 } from "lucide-react"
+import { Link as LinkIcon } from "lucide-react"
 
 export function PasteUrlDialog() {
   const [open, setOpen] = useState(false)
@@ -28,7 +25,6 @@ export function PasteUrlDialog() {
     if (!url.trim()) return
     setLoading(true)
     setResult(null)
-
     try {
       const res = await fetch("/api/jobs/paste-url", {
         method: "POST",
@@ -36,9 +32,7 @@ export function PasteUrlDialog() {
         body: JSON.stringify({ url, company, roleTitle }),
       })
       const json = await res.json()
-      if (json.success) {
-        setResult(json.data)
-      }
+      if (json.success) setResult(json.data)
     } catch {}
     setLoading(false)
   }
@@ -69,60 +63,41 @@ export function PasteUrlDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          <Link className="h-4 w-4 mr-1.5" />
+        <Button variant="outline" className="border-[#27272f] text-[#a0a0ab] hover:text-[#fafafa] hover:bg-[#16161a]">
+          <LinkIcon className="h-4 w-4 mr-1.5" />
           Paste Job URL
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="bg-[#0f0f12] border-[#1e1e24]">
         <DialogHeader>
-          <DialogTitle>Import Job from URL</DialogTitle>
+          <DialogTitle className="font-[family-name:var(--font-display)]">Import Job from URL</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="url">Job URL</Label>
-            <Input
-              id="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://company.com/jobs/..."
-              required
-            />
+            <Label className="text-xs text-[#63636e]">Job URL</Label>
+            <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://company.com/jobs/..." required className="bg-[#16161a] border-[#1e1e24] text-[#fafafa] placeholder:text-[#45454e]" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="company">Company (optional)</Label>
-              <Input
-                id="company"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                placeholder="Acme Corp"
-              />
+              <Label className="text-xs text-[#63636e]">Company (optional)</Label>
+              <Input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Acme Corp" className="bg-[#16161a] border-[#1e1e24] text-[#fafafa] placeholder:text-[#45454e]" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="role">Role Title (optional)</Label>
-              <Input
-                id="role"
-                value={roleTitle}
-                onChange={(e) => setRoleTitle(e.target.value)}
-                placeholder="Senior Engineer"
-              />
+              <Label className="text-xs text-[#63636e]">Role Title (optional)</Label>
+              <Input value={roleTitle} onChange={(e) => setRoleTitle(e.target.value)} placeholder="Senior Engineer" className="bg-[#16161a] border-[#1e1e24] text-[#fafafa] placeholder:text-[#45454e]" />
             </div>
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+          <Button type="submit" className="w-full gradient-violet text-white border-0 hover:opacity-90" disabled={loading}>
+            {loading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-1" /> : null}
             {loading ? "Fetching..." : "Fetch Job Details"}
           </Button>
         </form>
-
         {result && (
-          <div className="mt-4 p-3 rounded-xl bg-gray-50 space-y-2">
-            <p className="text-sm font-medium text-gray-900">{result.role_title}</p>
-            {result.company && <p className="text-xs text-gray-500">{result.company}</p>}
-            {result.description && (
-              <p className="text-xs text-gray-500 line-clamp-3">{result.description}</p>
-            )}
-            <Button size="sm" className="w-full" onClick={handleSaveAsApplication}>
+          <div className="mt-4 p-4 rounded-xl bg-[#16161a] border border-[#1e1e24] space-y-2">
+            <p className="text-sm font-medium text-[#fafafa]">{result.role_title}</p>
+            {result.company && <p className="text-xs text-[#63636e]">{result.company}</p>}
+            {result.description && <p className="text-xs text-[#45454e] line-clamp-3">{result.description}</p>}
+            <Button size="sm" className="w-full gradient-violet text-white border-0 hover:opacity-90" onClick={handleSaveAsApplication}>
               Save as Application
             </Button>
           </div>
