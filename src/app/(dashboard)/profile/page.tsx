@@ -9,6 +9,7 @@ import { SectionHeader } from "@/components/ui/section-header"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { User, Save, ExternalLink } from "lucide-react"
+import { RoleAutocomplete } from "@/components/ui/role-autocomplete"
 import { toast } from "sonner"
 
 export default function ProfilePage() {
@@ -107,7 +108,7 @@ export default function ProfilePage() {
         <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] block">Career Settings</Label>
         <div>
           <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Target Role</Label>
-          <Input value={targetRole} onChange={(e) => setTargetRole(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="e.g. Senior Frontend Engineer" />
+          <RoleAutocomplete value={targetRole} onChange={setTargetRole} placeholder="e.g. Senior Frontend Engineer" />
         </div>
       </div>
 

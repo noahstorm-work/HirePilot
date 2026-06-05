@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
-import { Search, MapPin, Briefcase, ExternalLink, Bookmark, BookmarkCheck, Trash2, Plus } from "lucide-react"
+import { Search, MapPin, Briefcase, ExternalLink, Bookmark, BookmarkCheck, Trash2, Plus, Clock, X } from "lucide-react"
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete"
 import { toast } from "sonner"
 import type { JobSearchResult } from "@/lib/jobs-api"
@@ -20,9 +20,17 @@ export default function DiscoverPage() {
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>([])
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
+  const [showRecent, setShowRecent] = useState(false)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const recentDropdownRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
-  useEffect(() => { loadSavedJobs() }, [])
+  useEffect(() => {
+    loadSavedJobs()
+    const stored = localStorage.getItem("recentJobSearches")
+    if (stored) setRecentSearches(JSON.parse(stored))
+  }, [])
 
   const loadSavedJobs = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -31,8 +39,16 @@ export default function DiscoverPage() {
     if (data) setSavedJobs(data as SavedJob[])
   }
 
+  const saveRecentSearch = (term: string) => {
+    const updated = [term, ...recentSearches.filter((s) => s !== term)].slice(0, 8)
+    setRecentSearches(updated)
+    localStorage.setItem("recentJobSearches", JSON.stringify(updated))
+  }
+
   const handleSearch = async () => {
     if (!query.trim()) return
+    saveRecentSearch(query.trim())
+    setShowRecent(false)
     setLoading(true)
     setSearched(true)
     try {
@@ -42,6 +58,27 @@ export default function DiscoverPage() {
     } catch {}
     setLoading(false)
   }
+
+  const handleClearRecent = (term: string) => {
+    const updated = recentSearches.filter((s) => s !== term)
+    setRecentSearches(updated)
+    localStorage.setItem("recentJobSearches", JSON.stringify(updated))
+  }
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        recentDropdownRef.current &&
+        !recentDropdownRef.current.contains(e.target as Node) &&
+        searchInputRef.current &&
+        !searchInputRef.current.contains(e.target as Node)
+      ) {
+        setShowRecent(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   const handleSave = async (job: JobSearchResult) => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -91,12 +128,36 @@ export default function DiscoverPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
             <Input
+              ref={searchInputRef}
               placeholder="Job title, skills, or keywords..."
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => { setQuery(e.target.value); setShowRecent(false) }}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-focus)] h-10 text-sm"
+              onFocus={() => { if (!query && recentSearches.length > 0) setShowRecent(true) }}
+              className="pl-9 bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-focus)] h-10 text-sm"
             />
+            {showRecent && recentSearches.length > 0 && (
+              <div ref={recentDropdownRef} className="absolute z-50 w-full mt-1.5 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] shadow-lg overflow-hidden">
+                <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)]">Recent searches</p>
+                {recentSearches.map((term) => (
+                  <div key={term} className="flex items-center gap-2 px-3 py-2 hover:bg-[var(--color-bg-hover)] group">
+                    <Clock className="h-3 w-3 text-[var(--color-text-muted)] shrink-0" />
+                    <button
+                      onClick={() => { setQuery(term); setShowRecent(false); searchInputRef.current?.focus() }}
+                      className="flex-1 text-left text-sm text-[var(--color-text-secondary)] truncate"
+                    >
+                      {term}
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleClearRecent(term) }}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)]"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <LocationAutocomplete
             value={location}

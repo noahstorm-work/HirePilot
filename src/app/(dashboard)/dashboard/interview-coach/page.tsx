@@ -9,6 +9,8 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Sparkles, Code, MessageSquare, Building2, CheckCircle2 } from "lucide-react"
+import { CompanyAutocomplete } from "@/components/ui/company-autocomplete"
+import { RoleAutocomplete } from "@/components/ui/role-autocomplete"
 import { toast } from "sonner"
 
 export default function InterviewCoachPage() {
@@ -63,11 +65,11 @@ export default function InterviewCoachPage() {
         <div className="grid sm:grid-cols-3 gap-3">
           <div>
             <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Role *</Label>
-            <Input value={role} onChange={(e) => setRole(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="e.g. Senior Frontend Engineer" />
+            <RoleAutocomplete value={role} onChange={setRole} placeholder="e.g. Senior Frontend Engineer" />
           </div>
           <div>
             <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Company</Label>
-            <Input value={company} onChange={(e) => setCompany(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="e.g. Google" />
+            <CompanyAutocomplete value={company} onChange={setCompany} placeholder="e.g. Google" />
           </div>
           <div className="flex items-end">
             <Button onClick={handleGenerate} disabled={loading || !role.trim()} className="w-full gradient-violet text-white border-0 hover:opacity-90 shadow-glow h-9 text-sm">

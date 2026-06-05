@@ -11,6 +11,8 @@ import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { Briefcase, Plus, ChevronRight } from "lucide-react"
+import { CompanyAutocomplete } from "@/components/ui/company-autocomplete"
+import { RoleAutocomplete } from "@/components/ui/role-autocomplete"
 import { toast } from "sonner"
 import Link from "next/link"
 
@@ -99,11 +101,11 @@ export default function ApplicationsPage() {
               <div className="space-y-3 mt-3">
                 <div>
                   <Label className="text-[11px] text-[var(--color-text-muted)] mb-1 block">Company *</Label>
-                  <Input value={newApp.company} onChange={(e) => setNewApp({ ...newApp, company: e.target.value })} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="Acme Inc" />
+                  <CompanyAutocomplete value={newApp.company} onChange={(v) => setNewApp({ ...newApp, company: v })} placeholder="Acme Inc" />
                 </div>
                 <div>
                   <Label className="text-[11px] text-[var(--color-text-muted)] mb-1 block">Role *</Label>
-                  <Input value={newApp.role_title} onChange={(e) => setNewApp({ ...newApp, role_title: e.target.value })} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="Senior Engineer" />
+                  <RoleAutocomplete value={newApp.role_title} onChange={(v) => setNewApp({ ...newApp, role_title: v })} placeholder="Senior Engineer" />
                 </div>
                 <div>
                   <Label className="text-[11px] text-[var(--color-text-muted)] mb-1 block">Job URL</Label>
