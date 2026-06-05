@@ -48,17 +48,28 @@ export async function POST(request: Request) {
       jobDescription = jobDescription || app?.job_description || app?.notes || ""
     }
 
-    const result = await generateInterviewPrep({ jobDescription, cvText, applicationId: applicationId || "" })
+    // Ensure we have minimum required data
+    if (!jobDescription) {
+      jobDescription = data.role ? `Position: ${data.role}` : ""
+    }
+    if (!cvText) {
+      cvText = "No CV provided"
+    }
 
-    const { error } = await supabase
-      .from("ai_results")
-      .upsert({
-        application_id: parsed.data.applicationId,
-        interview_questions: result,
-      }, { onConflict: "application_id" })
+    const result = await generateInterviewPrep({ jobDescription, cvText })
 
-    if (error) {
-      return NextResponse.json({ success: false, data: null, error: error.message }, { status: 500 })
+    // Only save to DB if we have an applicationId
+    if (applicationId) {
+      const { error } = await supabase
+        .from("ai_results")
+        .upsert({
+          application_id: applicationId,
+          interview_questions: result,
+        }, { onConflict: "application_id" })
+
+      if (error) {
+        console.error("DB save error:", error.message)
+      }
     }
 
     return NextResponse.json({ success: true, data: result, error: null })
