@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { ScoreRing } from "@/components/ui/score-ring"
@@ -23,10 +22,11 @@ export default function ATSCheckerPage() {
     setError("")
     try {
       const plainText = cvText.replace(/<[^>]*>/g, "").trim()
+      const plainJd = jobDescription.replace(/<[^>]*>/g, "").trim()
       const res = await fetch("/api/ai/cv-improve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cv_text: plainText, job_description: jobDescription }),
+        body: JSON.stringify({ cv_text: plainText, job_description: plainJd }),
       })
       const json = await res.json()
       if (!json.success) throw new Error(json.error)
@@ -57,10 +57,9 @@ export default function ATSCheckerPage() {
         </div>
         <div>
           <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Target Job Description (optional)</Label>
-          <Textarea
+          <RichTextEditor
             value={jobDescription}
-            onChange={(e) => setJobDescription(e.target.value)}
-            className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] min-h-[80px] text-sm"
+            onChange={setJobDescription}
             placeholder="Paste job description for targeted ATS analysis..."
           />
         </div>

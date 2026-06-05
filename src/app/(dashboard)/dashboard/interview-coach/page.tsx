@@ -4,8 +4,8 @@ import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Sparkles, Code, MessageSquare, Building2, CheckCircle2 } from "lucide-react"
@@ -25,10 +25,11 @@ export default function InterviewCoachPage() {
     setLoading(true)
     setError("")
     try {
+      const plainJd = jobDescription.replace(/<[^>]*>/g, "").trim()
       const res = await fetch("/api/ai/interview-coach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role, company, job_description: jobDescription }),
+        body: JSON.stringify({ role, company, job_description: plainJd }),
       })
       const json = await res.json()
       if (!json.success) throw new Error(json.error)
@@ -73,7 +74,7 @@ export default function InterviewCoachPage() {
         </div>
         <div>
           <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Job Description (optional)</Label>
-          <Textarea value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] min-h-[70px] resize-none text-sm" placeholder="Paste job description for more tailored questions..." />
+          <RichTextEditor value={jobDescription} onChange={setJobDescription} placeholder="Paste job description for more tailored questions..." />
         </div>
       </div>
 
