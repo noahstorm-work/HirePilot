@@ -39,7 +39,7 @@ export function PasteUrlDialog() {
 
   const handleSaveAsApplication = async () => {
     if (!result) return
-    const res = await fetch("/api/applications", {
+    const res = await fetch("/api/applications/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

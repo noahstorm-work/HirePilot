@@ -112,19 +112,42 @@ export default function InterviewCoachPage() {
                 </div>
               </div>
             ))}
-            {activeTab === "star" && (result.star_responses || result.star_examples || []).map((item: any, i: number) => (
+            {activeTab === "star" && (result.behavioral_questions || []).map((q: any, i: number) => (
               <div key={i} className="p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)]">
-                <p className="text-xs font-medium mb-2.5 text-[var(--color-accent-emerald)]">{item.situation || item.question || `Example ${i + 1}`}</p>
+                <p className="text-xs font-medium mb-2.5 text-[var(--color-accent-emerald)]">{q.question || `Example ${i + 1}`}</p>
                 <div className="space-y-1.5 text-[11px] text-[var(--color-text-secondary)]">
-                  {item.task && <p><span className="text-[var(--color-text-muted)] font-medium">Task:</span> {item.task}</p>}
-                  {item.action && <p><span className="text-[var(--color-text-muted)] font-medium">Action:</span> {item.action}</p>}
-                  {item.result && <p><span className="text-[var(--color-text-muted)] font-medium">Result:</span> {item.result}</p>}
+                  {q.situation && <p><span className="text-[var(--color-text-muted)] font-medium">Situation:</span> {q.situation}</p>}
+                  {q.task && <p><span className="text-[var(--color-text-muted)] font-medium">Task:</span> {q.task}</p>}
+                  {q.action && <p><span className="text-[var(--color-text-muted)] font-medium">Action:</span> {q.action}</p>}
+                  {q.result && <p><span className="text-[var(--color-text-muted)] font-medium">Result:</span> {q.result}</p>}
                 </div>
               </div>
             ))}
-            {activeTab === "company" && (
+            {activeTab === "company" && result.company_preparation && (
+              <div className="p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] space-y-3">
+                {result.company_preparation.common_interview_format && (
+                  <div>
+                    <p className="text-[10px] font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Interview Format</p>
+                    <p className="text-xs text-[var(--color-text-secondary)]">{result.company_preparation.common_interview_format}</p>
+                  </div>
+                )}
+                {result.company_preparation.key_areas_to_review?.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Key Areas to Review</p>
+                    <ul className="space-y-1">{result.company_preparation.key_areas_to_review.map((area: string, i: number) => <li key={i} className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)]"><span className="h-1 w-1 rounded-full bg-[var(--color-accent-violet)]" />{area}</li>)}</ul>
+                  </div>
+                )}
+                {result.company_preparation.questions_to_ask?.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Questions to Ask</p>
+                    <ul className="space-y-1">{result.company_preparation.questions_to_ask.map((q: string, i: number) => <li key={i} className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)]"><span className="h-1 w-1 rounded-full bg-[var(--color-accent-amber)]" />{q}</li>)}</ul>
+                  </div>
+                )}
+              </div>
+            )}
+            {activeTab === "company" && !result.company_preparation && (
               <div className="p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)]">
-                <p className="text-xs text-[var(--color-text-secondary)]">{result.company_research || result.company_prep || "Generate prep with a company name to see company-specific research."}</p>
+                <p className="text-xs text-[var(--color-text-muted)]">Enter a company name to get company-specific interview preparation.</p>
               </div>
             )}
           </div>

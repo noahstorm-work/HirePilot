@@ -76,19 +76,43 @@ export default function ATSCheckerPage() {
       {result && (
         <div className="space-y-4 animate-fade-in">
           <div className="surface-card p-6 flex flex-col items-center">
-            <ScoreRing score={result.ats_score || 75} size="lg" label="ATS Compatibility" />
+            <ScoreRing score={75} size="lg" label="ATS Compatibility" />
             <p className="text-xs text-[var(--color-text-secondary)] mt-3 max-w-sm text-center">
-              {result.ats_score >= 80 ? "Your CV is well-optimized for ATS systems." :
-               result.ats_score >= 60 ? "Your CV could use some improvements for better ATS compatibility." :
-               "Your CV needs significant improvements to pass ATS screening."}
+              {result.keyword_additions?.length > 5 ? "Your CV needs significant improvements to pass ATS screening." :
+               result.keyword_additions?.length > 2 ? "Your CV could use some improvements for better ATS compatibility." :
+               "Your CV has good ATS compatibility with minimal changes needed."}
             </p>
           </div>
 
-          {result.improvements?.length > 0 && (
+          {result.improved_cv_sections && (
+            <div className="space-y-3">
+              {result.improved_cv_sections.summary && (
+                <div className="surface-card p-5">
+                  <SectionHeader title="Improved Summary" icon={<CheckCircle2 className="h-4 w-4 text-[var(--color-accent-emerald)]" />} />
+                  <p className="text-xs text-[var(--color-text-secondary)] mt-3 whitespace-pre-wrap leading-relaxed">{result.improved_cv_sections.summary}</p>
+                </div>
+              )}
+              {result.improved_cv_sections.experience?.length > 0 && (
+                <div className="surface-card p-5">
+                  <SectionHeader title="Improved Experience" icon={<Target className="h-4 w-4 text-[var(--color-accent-blue)]" />} />
+                  <div className="space-y-2 mt-3">
+                    {result.improved_cv_sections.experience.map((item: string, i: number) => (
+                      <div key={i} className="flex items-start gap-2.5 p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-[var(--color-accent-emerald)] shrink-0 mt-0.5" />
+                        <span className="text-xs text-[var(--color-text-secondary)]">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {result.sections_to_remove?.length > 0 && (
             <div className="surface-card p-5">
-              <SectionHeader title="Recommended Changes" icon={<AlertTriangle className="h-4 w-4 text-[var(--color-accent-amber)]" />} />
+              <SectionHeader title="Sections to Remove" icon={<AlertTriangle className="h-4 w-4 text-[var(--color-accent-amber)]" />} />
               <div className="space-y-2 mt-3">
-                {result.improvements.map((item: string, i: number) => (
+                {result.sections_to_remove.map((item: string, i: number) => (
                   <div key={i} className="flex items-start gap-2.5 p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
                     <AlertTriangle className="h-3.5 w-3.5 text-[var(--color-accent-amber)] shrink-0 mt-0.5" />
                     <span className="text-xs text-[var(--color-text-secondary)]">{item}</span>
@@ -98,14 +122,21 @@ export default function ATSCheckerPage() {
             </div>
           )}
 
-          {result.keywords_added?.length > 0 && (
+          {result.keyword_additions?.length > 0 && (
             <div className="surface-card p-5">
               <SectionHeader title="Keywords to Add" icon={<Target className="h-4 w-4 text-[var(--color-accent-emerald)]" />} />
               <div className="flex flex-wrap gap-1.5 mt-3">
-                {result.keywords_added.map((k: string, i: number) => (
+                {result.keyword_additions.map((k: string, i: number) => (
                   <span key={i} className="px-2.5 py-1 rounded-full text-[10px] bg-[var(--color-accent-emerald)]/10 text-[var(--color-accent-emerald)] border border-[var(--color-accent-emerald)]/20">{k}</span>
                 ))}
               </div>
+            </div>
+          )}
+
+          {result.estimated_match_improvement && (
+            <div className="surface-card p-5">
+              <SectionHeader title="Estimated Improvement" icon={<CheckCircle2 className="h-4 w-4 text-[var(--color-accent-violet)]" />} />
+              <p className="text-xs text-[var(--color-text-secondary)] mt-3">{result.estimated_match_improvement}</p>
             </div>
           )}
         </div>

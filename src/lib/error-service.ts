@@ -20,7 +20,7 @@ export function setupClientErrorLogging() {
           error instanceof Error ? error.message : String(error);
         const errorStack = error instanceof Error ? error.stack : undefined;
 
-        await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/api/error-log`, {
+        await fetch("/api/error-log", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -62,7 +62,7 @@ export function setupClientErrorLogging() {
       context: Record<string, any> = {}
     ) {
       try {
-        await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/api/error-log`, {
+        await fetch("/api/error-log", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -102,7 +102,7 @@ export function setupClientErrorLogging() {
       context: Record<string, any> = {}
     ) {
       try {
-        await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/api/error-log`, {
+        await fetch("/api/error-log", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
