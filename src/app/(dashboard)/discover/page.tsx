@@ -60,11 +60,15 @@ export default function DiscoverPage() {
   }
 
   const handleSaveAsApplication = async (saved: SavedJob) => {
-    await fetch("/api/applications/create", {
+    const res = await fetch("/api/applications/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ company: saved.company, role_title: saved.role_title, job_url: saved.job_url, job_description: saved.description, application_source: saved.source, status: "Saved" }),
     })
+    const json = await res.json()
+    if (json.success) {
+      setSavedJobs((prev) => prev.filter((s) => s.id !== saved.id))
+    }
   }
 
   return (

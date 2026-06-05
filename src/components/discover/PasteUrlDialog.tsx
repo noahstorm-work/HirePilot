@@ -46,6 +46,7 @@ export function PasteUrlDialog() {
         company: result.company || company || "Unknown",
         role_title: result.role_title || roleTitle || "Unknown Role",
         job_url: url,
+        job_description: result.description || "",
         application_source: "url",
       }),
     })

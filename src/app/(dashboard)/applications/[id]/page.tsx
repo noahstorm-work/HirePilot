@@ -43,7 +43,7 @@ export default function ApplicationDetailPage() {
       const res = await fetch("/api/ai/analyze-job", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ application_id: app.id, job_url: app.job_url, job_description: app.notes || "", company: app.company, role: app.role_title }),
+        body: JSON.stringify({ application_id: app.id, job_description: app.job_description || app.notes || "", company: app.company, role: app.role_title }),
       })
       const json = await res.json()
       if (json.success) setAiResult(json.data)
