@@ -7,6 +7,7 @@ import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { GitBranch, Plus, Trash2, Eye } from "lucide-react"
+import { toast } from "sonner"
 
 interface CVVersion {
   id: string; version_label: string; cv_text: string;
@@ -35,18 +36,21 @@ export default function CVVersionsPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     const { data: profile } = await supabase.from("user_profiles").select("cv_text").eq("id", user.id).maybeSingle()
-    if (!profile?.cv_text) { setCreating(false); return }
+    if (!profile?.cv_text) { setCreating(false); toast.error("No CV text in profile. Add a CV first."); return }
     const versionNum = versions.length + 1
-    const { data } = await supabase.from("cv_versions").insert({
+    const { data, error } = await supabase.from("cv_versions").insert({
       user_id: user.id, version_label: `v${versionNum}`, cv_text: profile.cv_text,
     }).select().single()
+    if (error) { toast.error("Failed to save version"); setCreating(false); return }
     if (data) setVersions((prev) => [data as CVVersion, ...prev])
     setCreating(false)
+    toast.success(`Version v${versionNum} saved`)
   }
 
   const handleDelete = async (id: string) => {
     await supabase.from("cv_versions").delete().eq("id", id)
     setVersions((prev) => prev.filter((v) => v.id !== id))
+    toast.success("Version deleted")
   }
 
   if (loading) return <LoadingScreen />

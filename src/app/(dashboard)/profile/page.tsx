@@ -9,6 +9,7 @@ import { SectionHeader } from "@/components/ui/section-header"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { User, Save, ExternalLink } from "lucide-react"
+import { toast } from "sonner"
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null)
@@ -42,7 +43,7 @@ export default function ProfilePage() {
     setSaving(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    await supabase.from("user_profiles").upsert({
+    const { error } = await supabase.from("user_profiles").upsert({
       id: user.id,
       cv_text: cvText,
       linkedin_url: linkedin || null,
@@ -51,6 +52,8 @@ export default function ProfilePage() {
       target_role: targetRole || null,
     })
     setSaving(false)
+    if (error) toast.error("Failed to save profile")
+    else toast.success("Profile saved")
   }
 
   if (loading) return <LoadingScreen />

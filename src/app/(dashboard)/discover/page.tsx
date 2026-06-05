@@ -8,6 +8,7 @@ import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { Search, MapPin, Briefcase, ExternalLink, Bookmark, BookmarkCheck, Trash2, Plus } from "lucide-react"
+import { toast } from "sonner"
 import type { JobSearchResult } from "@/lib/jobs-api"
 import type { SavedJob } from "@/types"
 
@@ -51,12 +52,13 @@ export default function DiscoverPage() {
       salary: job.salary_min ? `${job.salary_currency}${job.salary_min.toLocaleString()}${job.salary_max ? ` - ${job.salary_max.toLocaleString()}` : ""}` : null,
       location: job.location, source: job.source,
     }).select().single()
-    if (data) setSavedJobs((prev) => [data as SavedJob, ...prev])
+    if (data) { setSavedJobs((prev) => [data as SavedJob, ...prev]); toast.success("Job saved") }
   }
 
   const handleRemoveSaved = async (id: string) => {
     await supabase.from("saved_jobs").delete().eq("id", id)
     setSavedJobs((prev) => prev.filter((s) => s.id !== id))
+    toast.success("Job removed")
   }
 
   const handleSaveAsApplication = async (saved: SavedJob) => {
@@ -68,6 +70,9 @@ export default function DiscoverPage() {
     const json = await res.json()
     if (json.success) {
       setSavedJobs((prev) => prev.filter((s) => s.id !== saved.id))
+      toast.success("Added to applications")
+    } else {
+      toast.error("Failed to add to applications")
     }
   }
 

@@ -8,6 +8,7 @@ import { ScoreRing } from "@/components/ui/score-ring"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FileCheck, AlertTriangle, CheckCircle2, Target, Sparkles } from "lucide-react"
+import { toast } from "sonner"
 
 export default function ATSCheckerPage() {
   const [cvText, setCvText] = useState("")
@@ -31,8 +32,10 @@ export default function ATSCheckerPage() {
       const json = await res.json()
       if (!json.success) throw new Error(json.error)
       setResult(json.data)
+      toast.success("ATS check complete")
     } catch (err: any) {
       setError(err.message)
+      toast.error(err.message)
     }
     setLoading(false)
   }

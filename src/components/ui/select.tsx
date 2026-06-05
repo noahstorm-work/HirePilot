@@ -14,14 +14,14 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex h-10 w-full items-center justify-between rounded-xl border border-[#1e1e24] bg-[#16161a] px-3 py-2 text-sm text-[#fafafa] placeholder:text-[#45454e] focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
+      "flex h-10 w-full items-center justify-between rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-violet)]/30 focus:border-[var(--color-border-focus)] disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
       className,
     )}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 text-[#45454e]" />
+      <ChevronDown className="h-4 w-4 text-[var(--color-text-muted)]" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ))
@@ -35,7 +35,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-xl border border-[#1e1e24] bg-[#0f0f12] shadow-2xl animate-in fade-in-80",
+        "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-card)] shadow-2xl animate-in fade-in-80",
         position === "popper" && "translate-y-1",
         className,
       )}
@@ -62,7 +62,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-lg py-1.5 pl-8 pr-2 text-sm text-[#a0a0ab] outline-none focus:bg-violet-500/10 focus:text-violet-400 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 transition-colors",
+      "relative flex w-full cursor-default select-none items-center rounded-lg py-1.5 pl-8 pr-2 text-sm text-[var(--color-text-secondary)] outline-none focus:bg-[var(--color-accent-violet)]/10 focus:text-[var(--color-accent-violet)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50 transition-colors",
       className,
     )}
     {...props}

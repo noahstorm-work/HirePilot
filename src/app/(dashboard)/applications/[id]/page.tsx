@@ -13,6 +13,7 @@ import {
   Mail, MessageSquare, ExternalLink,
   CheckCircle2, AlertTriangle
 } from "lucide-react"
+import { toast } from "sonner"
 import Link from "next/link"
 
 export default function ApplicationDetailPage() {
@@ -46,14 +47,17 @@ export default function ApplicationDetailPage() {
         body: JSON.stringify({ application_id: app.id, job_description: app.job_description || app.notes || "", company: app.company, role: app.role_title }),
       })
       const json = await res.json()
-      if (json.success) setAiResult(json.data)
-    } catch {}
+      if (json.success) { setAiResult(json.data); toast.success("Analysis complete") }
+      else { toast.error(json.error || "Analysis failed") }
+    } catch { toast.error("Analysis failed") }
     setAnalyzing(false)
   }
 
   const handleStatusChange = async (status: string) => {
-    await supabase.from("applications").update({ status }).eq("id", app.id)
+    const { error } = await supabase.from("applications").update({ status }).eq("id", app.id)
+    if (error) { toast.error("Failed to update status"); return }
     setApp({ ...app, status })
+    toast.success(`Status changed to ${status}`)
   }
 
   if (loading) return <LoadingScreen />

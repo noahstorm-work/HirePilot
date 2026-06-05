@@ -4,16 +4,16 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-violet)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg-primary)] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-violet-600 text-white hover:bg-violet-700 shadow-sm",
-        destructive: "bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20",
-        outline: "border border-[#27272f] bg-transparent text-[#a0a0ab] hover:bg-[#16161a] hover:text-[#fafafa]",
-        secondary: "bg-[#16161a] text-[#a0a0ab] border border-[#1e1e24] hover:bg-[#1a1a1f] hover:text-[#fafafa]",
-        ghost: "text-[#63636e] hover:bg-[#16161a] hover:text-[#a0a0ab]",
-        link: "text-violet-400 underline-offset-4 hover:underline",
+        default: "bg-[var(--color-accent-violet)] text-white hover:bg-[var(--color-accent-violet-dim)] shadow-sm",
+        destructive: "bg-[var(--color-accent-rose)]/10 text-[var(--color-accent-rose)] border border-[var(--color-accent-rose)]/20 hover:bg-[var(--color-accent-rose)]/20",
+        outline: "border border-[var(--color-border-default)] bg-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-elevated)] hover:text-[var(--color-text-primary)]",
+        secondary: "bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] border border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)]",
+        ghost: "text-[var(--color-text-tertiary)] hover:bg-[var(--color-bg-elevated)] hover:text-[var(--color-text-secondary)]",
+        link: "text-[var(--color-accent-violet)] underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-4 py-2",

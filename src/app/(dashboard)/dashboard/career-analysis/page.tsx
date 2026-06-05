@@ -10,6 +10,7 @@ import { SectionHeader } from "@/components/ui/section-header"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { Brain, Sparkles, Target, TrendingUp, BarChart3, ExternalLink } from "lucide-react"
+import { toast } from "sonner"
 
 export default function CareerAnalysisPage() {
   const [cvText, setCvText] = useState("")
@@ -51,8 +52,10 @@ export default function CareerAnalysisPage() {
       const json = await res.json()
       if (!json.success) throw new Error(json.error)
       setResult(json.data)
+      toast.success("Analysis complete")
     } catch (err: any) {
       setError(err.message)
+      toast.error(err.message)
     }
     setLoading(false)
   }

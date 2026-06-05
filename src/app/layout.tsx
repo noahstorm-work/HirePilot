@@ -3,6 +3,7 @@ import { Syne, Inter } from "next/font/google"
 import "./globals.css"
 import { ErrorLogging } from "@/components/ErrorLogging"
 import { CommandPalette } from "@/components/CommandPalette"
+import { Toaster } from "sonner"
 
 const syne = Syne({
   subsets: ["latin"],
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${syne.variable} ${inter.variable} min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] antialiased`}>
         <ErrorLogging />
         <CommandPalette />
+        <Toaster theme="dark" position="bottom-right" richColors />
         {children}
       </body>
     </html>

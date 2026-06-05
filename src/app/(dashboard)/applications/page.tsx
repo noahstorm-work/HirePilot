@@ -11,6 +11,7 @@ import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { Briefcase, Plus, ChevronRight } from "lucide-react"
+import { toast } from "sonner"
 import Link from "next/link"
 
 interface Application {
@@ -51,14 +52,16 @@ export default function ApplicationsPage() {
     setCreating(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    const { data } = await supabase.from("applications").insert({
+    const { data, error } = await supabase.from("applications").insert({
       user_id: user.id, company: newApp.company, role_title: newApp.role_title,
       job_url: newApp.job_url || null, notes: newApp.notes || null, status: "Saved",
     }).select().single()
+    if (error) { toast.error("Failed to create application"); setCreating(false); return }
     if (data) setApplications((prev) => [data as Application, ...prev])
     setNewApp({ company: "", role_title: "", job_url: "", notes: "" })
     setDialogOpen(false)
     setCreating(false)
+    toast.success("Application created")
   }
 
   if (loading) return <LoadingScreen />
