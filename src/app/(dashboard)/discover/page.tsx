@@ -8,6 +8,7 @@ import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { Search, MapPin, Briefcase, ExternalLink, Bookmark, BookmarkCheck, Trash2, Plus } from "lucide-react"
+import { LocationAutocomplete } from "@/components/ui/location-autocomplete"
 import { toast } from "sonner"
 import type { JobSearchResult } from "@/lib/jobs-api"
 import type { SavedJob } from "@/types"
@@ -97,16 +98,12 @@ export default function DiscoverPage() {
               className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-focus)] h-10 text-sm"
             />
           </div>
-          <div className="relative w-full sm:w-44">
-            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
-            <Input
-              placeholder="Location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-focus)] h-10 text-sm"
-            />
-          </div>
+          <LocationAutocomplete
+            value={location}
+            onChange={setLocation}
+            placeholder="Location"
+            className="w-full sm:w-52"
+          />
           <Button onClick={handleSearch} disabled={loading || !query.trim()} className="gradient-violet text-white border-0 h-10 px-5 text-sm font-semibold hover:opacity-90 shadow-glow">
             {loading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : "Search"}
           </Button>
