@@ -4,9 +4,11 @@ import { improveCV } from "@/lib/ai-service"
 import { z } from "zod"
 
 const schema = z.object({
-  jobDescription: z.string().min(10),
-  cvText: z.string().min(10),
+  jobDescription: z.string().optional(),
+  cvText: z.string().min(1),
   targetRole: z.string().optional(),
+  cv_text: z.string().optional(),
+  job_description: z.string().optional(),
 })
 
 export async function POST(request: Request) {
@@ -24,7 +26,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, data: null, error: parsed.error.errors[0].message }, { status: 400 })
     }
 
-    const result = await improveCV(parsed.data)
+    // Resolve snake_case or camelCase
+    const data = parsed.data
+    const result = await improveCV({
+      jobDescription: data.jobDescription || data.job_description || "",
+      cvText: data.cvText || data.cv_text || "",
+      targetRole: data.targetRole,
+    })
 
     return NextResponse.json({ success: true, data: result, error: null })
   } catch (err) {
