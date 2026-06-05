@@ -5,11 +5,19 @@ import { z } from "zod"
 
 const schema = z.object({
   jobDescription: z.string().optional(),
-  cvText: z.string().min(1),
+  cvText: z.string().optional(),
   targetRole: z.string().optional(),
   cv_text: z.string().optional(),
   job_description: z.string().optional(),
 })
+
+function resolveCvText(data: any): string {
+  return data.cvText || data.cv_text || ""
+}
+
+function resolveJobDescription(data: any): string {
+  return data.jobDescription || data.job_description || ""
+}
 
 export async function POST(request: Request) {
   let supabaseClient: any
@@ -28,9 +36,16 @@ export async function POST(request: Request) {
 
     // Resolve snake_case or camelCase
     const data = parsed.data
+    const cvText = resolveCvText(data)
+    const jobDescription = resolveJobDescription(data)
+
+    if (!cvText) {
+      return NextResponse.json({ success: false, data: null, error: "CV text is required" }, { status: 400 })
+    }
+
     const result = await improveCV({
-      jobDescription: data.jobDescription || data.job_description || "",
-      cvText: data.cvText || data.cv_text || "",
+      jobDescription,
+      cvText,
       targetRole: data.targetRole,
     })
 
