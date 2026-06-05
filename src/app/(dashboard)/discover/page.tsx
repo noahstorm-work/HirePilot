@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
-import { Search, MapPin, Briefcase, ExternalLink, Bookmark, BookmarkCheck, Trash2, Plus, Clock, X, Link as LinkIcon } from "lucide-react"
+import { Search, MapPin, Briefcase, ExternalLink, Bookmark, BookmarkCheck, Trash2, Plus, Clock, X, Link as LinkIcon, ChevronDown } from "lucide-react"
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete"
 import { PasteUrlDialog } from "@/components/discover/PasteUrlDialog"
 import { toast } from "sonner"
@@ -20,7 +20,10 @@ export default function DiscoverPage() {
   const [results, setResults] = useState<JobSearchResult[]>([])
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>([])
   const [loading, setLoading] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [searched, setSearched] = useState(false)
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
   const [recentSearches, setRecentSearches] = useState<string[]>([])
   const [showRecent, setShowRecent] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -46,18 +49,34 @@ export default function DiscoverPage() {
     localStorage.setItem("recentJobSearches", JSON.stringify(updated))
   }
 
-  const handleSearch = async () => {
+  const handleSearch = async (pageNum = 1) => {
     if (!query.trim()) return
-    saveRecentSearch(query.trim())
-    setShowRecent(false)
-    setLoading(true)
+    if (pageNum === 1) {
+      saveRecentSearch(query.trim())
+      setShowRecent(false)
+      setLoading(true)
+      setResults([])
+    } else {
+      setLoadingMore(true)
+    }
     setSearched(true)
+    setPage(pageNum)
     try {
-      const res = await fetch(`/api/jobs/search?query=${encodeURIComponent(query)}${location ? `&location=${encodeURIComponent(location)}` : ""}`)
+      const params = new URLSearchParams({ query: query.trim(), page: String(pageNum) })
+      if (location) params.set("location", location)
+      const res = await fetch(`/api/jobs/search?${params}`)
       const json = await res.json()
-      if (json.success) setResults(json.data.results)
+      if (json.success) {
+        setTotal(json.data.total || 0)
+        setResults((prev) => pageNum === 1 ? json.data.results : [...prev, ...json.data.results])
+      }
     } catch {}
     setLoading(false)
+    setLoadingMore(false)
+  }
+
+  const handleLoadMore = () => {
+    handleSearch(page + 1)
   }
 
   const handleClearRecent = (term: string) => {
@@ -166,7 +185,7 @@ export default function DiscoverPage() {
             placeholder="Location"
             className="w-full sm:w-52"
           />
-          <Button onClick={handleSearch} disabled={loading || !query.trim()} className="gradient-violet text-white border-0 h-10 px-5 text-sm font-semibold hover:opacity-90 shadow-glow">
+          <Button onClick={() => handleSearch()} disabled={loading || !query.trim()} className="gradient-violet text-white border-0 h-10 px-5 text-sm font-semibold hover:opacity-90 shadow-glow">
             {loading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : "Search"}
           </Button>
           <PasteUrlDialog />
@@ -181,34 +200,45 @@ export default function DiscoverPage() {
           ) : searched && results.length === 0 ? (
             <div className="text-center py-12 text-xs text-[var(--color-text-muted)]">No jobs found. Try a different search.</div>
           ) : results.length > 0 ? (
-            results.map((job, i) => {
-              const isSaved = savedJobs.some((s) => s.external_id === job.external_id)
-              return (
-                <div key={`${job.external_id}-${i}`} className="group p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-border-default)] transition-default">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] truncate">{job.role_title}</h3>
-                      <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{job.company}</p>
-                      <div className="flex items-center gap-3 mt-1.5 text-[10px] text-[var(--color-text-muted)]">
-                        <span className="flex items-center gap-1"><MapPin className="h-2.5 w-2.5" />{job.location}</span>
-                        {job.salary_min && <span>${job.salary_min.toLocaleString()} - ${job.salary_max?.toLocaleString()}</span>}
+            <>
+              <p className="text-[10px] text-[var(--color-text-muted)]">{total.toLocaleString()} jobs found</p>
+              {results.map((job, i) => {
+                const isSaved = savedJobs.some((s) => s.external_id === job.external_id)
+                return (
+                  <div key={`${job.external_id}-${i}`} className="group p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-border-default)] transition-default">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] truncate">{job.role_title}</h3>
+                        <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{job.company}</p>
+                        <div className="flex items-center gap-3 mt-1.5 text-[10px] text-[var(--color-text-muted)]">
+                          <span className="flex items-center gap-1"><MapPin className="h-2.5 w-2.5" />{job.location}</span>
+                          {job.salary_min && <span>${job.salary_min.toLocaleString()} - ${job.salary_max?.toLocaleString()}</span>}
+                        </div>
+                        <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5 line-clamp-2">{job.description.slice(0, 180)}...</p>
                       </div>
-                      <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5 line-clamp-2">{job.description.slice(0, 180)}...</p>
-                    </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <Button variant="ghost" size="sm" onClick={() => handleSave(job)} disabled={isSaved} className="h-7 w-7 p-0 text-[var(--color-text-muted)] hover:text-[var(--color-accent-violet)]">
-                        {isSaved ? <BookmarkCheck className="h-3.5 w-3.5 text-[var(--color-accent-violet)]" /> : <Bookmark className="h-3.5 w-3.5" />}
-                      </Button>
-                      <a href={job.url} target="_blank" rel="noopener noreferrer">
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]">
-                          <ExternalLink className="h-3.5 w-3.5" />
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <Button variant="ghost" size="sm" onClick={() => handleSave(job)} disabled={isSaved} className="h-7 w-7 p-0 text-[var(--color-text-muted)] hover:text-[var(--color-accent-violet)]">
+                          {isSaved ? <BookmarkCheck className="h-3.5 w-3.5 text-[var(--color-accent-violet)]" /> : <Bookmark className="h-3.5 w-3.5" />}
                         </Button>
-                      </a>
+                        <a href={job.url} target="_blank" rel="noopener noreferrer">
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]">
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </Button>
+                        </a>
+                      </div>
                     </div>
                   </div>
+                )
+              })}
+              {results.length < total && (
+                <div className="flex justify-center pt-2">
+                  <Button onClick={handleLoadMore} disabled={loadingMore} variant="outline" size="sm" className="border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] text-xs">
+                    {loadingMore ? <div className="h-3 w-3 animate-spin rounded-full border-2 border-[var(--color-accent-violet)] border-t-transparent mr-1.5" /> : <ChevronDown className="h-3 w-3 mr-1" />}
+                    {loadingMore ? "Loading..." : "Load More"}
+                  </Button>
                 </div>
-              )
-            })
+              )}
+            </>
           ) : (
             <div className="text-center py-16 text-[var(--color-text-muted)]">
               <Search className="h-8 w-8 mx-auto mb-2 opacity-30" />

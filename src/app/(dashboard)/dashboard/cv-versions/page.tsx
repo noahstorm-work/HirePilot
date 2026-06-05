@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
-import { GitBranch, Plus, Trash2, Eye } from "lucide-react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { GitBranch, Plus, Trash2, Eye, RotateCcw } from "lucide-react"
 import { toast } from "sonner"
 
 interface CVVersion {
@@ -19,6 +20,8 @@ export default function CVVersionsPage() {
   const [versions, setVersions] = useState<CVVersion[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
+  const [viewVersion, setViewVersion] = useState<CVVersion | null>(null)
+  const [restoring, setRestoring] = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => { loadVersions() }, [])
@@ -51,6 +54,19 @@ export default function CVVersionsPage() {
     await supabase.from("cv_versions").delete().eq("id", id)
     setVersions((prev) => prev.filter((v) => v.id !== id))
     toast.success("Version deleted")
+  }
+
+  const handleRestore = async (version: CVVersion) => {
+    setRestoring(version.id)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { error } = await supabase.from("user_profiles").upsert({
+      id: user.id,
+      cv_text: version.cv_text,
+    }, { onConflict: "id" })
+    setRestoring(null)
+    if (error) toast.error("Failed to restore version")
+    else toast.success(`${version.version_label} restored to profile`)
   }
 
   if (loading) return <LoadingScreen />
@@ -102,8 +118,14 @@ export default function CVVersionsPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => handleDelete(version.id)} className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)] hover:bg-[var(--color-bg-hover)] transition-colors">
+                <div className="flex items-center gap-1.5">
+                  <button onClick={() => setViewVersion(version)} className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-accent-blue)] hover:bg-[var(--color-bg-hover)] transition-colors" title="View CV">
+                    <Eye className="h-3.5 w-3.5" />
+                  </button>
+                  <button onClick={() => handleRestore(version)} disabled={restoring === version.id} className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-accent-emerald)] hover:bg-[var(--color-bg-hover)] transition-colors disabled:opacity-50" title="Restore to profile">
+                    {restoring === version.id ? <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-accent-emerald)] border-t-transparent" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                  </button>
+                  <button onClick={() => handleDelete(version.id)} className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)] hover:bg-[var(--color-bg-hover)] transition-colors" title="Delete version">
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
@@ -136,6 +158,23 @@ export default function CVVersionsPage() {
           ))}
         </div>
       )}
+
+      {/* View CV Dialog */}
+      <Dialog open={!!viewVersion} onOpenChange={() => setViewVersion(null)}>
+        <DialogContent className="bg-[var(--color-bg-card)] border-[var(--color-border-subtle)] max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-[family-name:var(--font-display)] text-sm">
+              {viewVersion?.version_label} — CV Text
+            </DialogTitle>
+            <DialogDescription className="sr-only">View CV text for this version</DialogDescription>
+          </DialogHeader>
+          {viewVersion && (
+            <div className="mt-3 p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
+              <pre className="text-xs text-[var(--color-text-secondary)] whitespace-pre-wrap leading-relaxed font-[family-name:var(--font-body)]">{viewVersion.cv_text}</pre>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
