@@ -4,9 +4,12 @@ import { generateInterviewPrep } from "@/lib/ai-service"
 import { z } from "zod"
 
 const schema = z.object({
-  jobDescription: z.string().min(10),
-  cvText: z.string().min(10),
-  applicationId: z.string().uuid(),
+  jobDescription: z.string().optional(),
+  cvText: z.string().optional(),
+  applicationId: z.string().uuid().optional(),
+  role: z.string().optional(),
+  company: z.string().optional(),
+  job_description: z.string().optional(),
 })
 
 export async function POST(request: Request) {
@@ -23,7 +26,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, data: null, error: parsed.error.errors[0].message }, { status: 400 })
     }
 
-    const result = await generateInterviewPrep(parsed.data)
+    const data = parsed.data
+
+    // Resolve job description and CV text from either format
+    let jobDescription = data.jobDescription || data.job_description || ""
+    let cvText = data.cvText || ""
+    let applicationId = data.applicationId
+
+    // If standalone mode (role provided, no applicationId), fetch user's CV
+    if (!applicationId && data.role) {
+      const { data: profile } = await supabase.from("user_profiles").select("cv_text").eq("id", user.id).maybeSingle()
+      cvText = profile?.cv_text || ""
+      jobDescription = jobDescription || `Role: ${data.role}${data.company ? ` at ${data.company}` : ""}`
+    }
+
+    // If applicationId provided, fetch from application
+    if (applicationId && !cvText) {
+      const { data: app } = await supabase.from("applications").select("notes, job_description").eq("id", applicationId).maybeSingle()
+      const { data: profile } = await supabase.from("user_profiles").select("cv_text").eq("id", user.id).maybeSingle()
+      cvText = profile?.cv_text || ""
+      jobDescription = jobDescription || app?.job_description || app?.notes || ""
+    }
+
+    const result = await generateInterviewPrep({ jobDescription, cvText, applicationId: applicationId || "" })
 
     const { error } = await supabase
       .from("ai_results")
