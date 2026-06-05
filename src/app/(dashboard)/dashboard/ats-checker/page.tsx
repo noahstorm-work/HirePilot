@@ -79,7 +79,7 @@ export default function ATSCheckerPage() {
       {result && (
         <div className="space-y-4 animate-fade-in">
           <div className="surface-card p-6 flex flex-col items-center">
-            <ScoreRing score={75} size="lg" label="ATS Compatibility" />
+            <ScoreRing score={result.match_score || Math.max(20, 90 - (result.keyword_additions?.length || 0) * 8)} size="lg" label="ATS Compatibility" />
             <p className="text-xs text-[var(--color-text-secondary)] mt-3 max-w-sm text-center">
               {result.keyword_additions?.length > 5 ? "Your CV needs significant improvements to pass ATS screening." :
                result.keyword_additions?.length > 2 ? "Your CV could use some improvements for better ATS compatibility." :

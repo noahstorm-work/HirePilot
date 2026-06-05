@@ -4,14 +4,13 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { SectionHeader } from "@/components/ui/section-header"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import {
   ArrowLeft, Brain, Sparkles, Target,
   Mail, MessageSquare, ExternalLink,
-  CheckCircle2, AlertTriangle
+  CheckCircle2, AlertTriangle, Ban, Send, Loader2
 } from "lucide-react"
 import { toast } from "sonner"
 import Link from "next/link"
@@ -21,9 +20,12 @@ export default function ApplicationDetailPage() {
   const router = useRouter()
   const [app, setApp] = useState<any>(null)
   const [aiResult, setAiResult] = useState<any>(null)
+  const [rejectionResult, setRejectionResult] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [analyzing, setAnalyzing] = useState(false)
-  const [activeTab, setActiveTab] = useState<"analysis" | "cover" | "followup">("analysis")
+  const [generatingFollowup, setGeneratingFollowup] = useState(false)
+  const [analyzingRejection, setAnalyzingRejection] = useState(false)
+  const [activeTab, setActiveTab] = useState<"analysis" | "cover" | "followup" | "rejection">("analysis")
   const supabase = createClient()
 
   useEffect(() => { loadApplication() }, [params.id])
@@ -34,6 +36,10 @@ export default function ApplicationDetailPage() {
       setApp(data)
       const { data: ai } = await supabase.from("ai_results").select("*").eq("application_id", params.id).maybeSingle()
       if (ai) setAiResult(ai)
+      if (data.status === "Rejected") {
+        const { data: rej } = await supabase.from("rejection_analyses").select("*").eq("application_id", params.id).maybeSingle()
+        if (rej) setRejectionResult(rej)
+      }
     }
     setLoading(false)
   }
@@ -53,15 +59,75 @@ export default function ApplicationDetailPage() {
     setAnalyzing(false)
   }
 
+  const handleGenerateFollowup = async () => {
+    setGeneratingFollowup(true)
+    try {
+      const created = new Date(app.created_at)
+      const daysSince = Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24))
+      const res = await fetch("/api/ai/generate-followup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ application_id: app.id, company: app.company, role_title: app.role_title, days_since: daysSince }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        const updated = { ...aiResult, follow_up_email: json.data.body }
+        setAiResult(updated)
+        await supabase.from("ai_results").upsert({
+          application_id: app.id,
+          follow_up_email: json.data.body,
+        }, { onConflict: "application_id" })
+        toast.success("Follow-up email generated")
+        setActiveTab("followup")
+      } else {
+        toast.error(json.error || "Failed to generate")
+      }
+    } catch { toast.error("Failed to generate follow-up") }
+    setGeneratingFollowup(false)
+  }
+
+  const handleAnalyzeRejection = async () => {
+    setAnalyzingRejection(true)
+    try {
+      const res = await fetch("/api/ai/rejection-analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ application_id: app.id, job_description: app.job_description || "", cv_text: "", company: app.company, role: app.role_title }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        setRejectionResult(json.data)
+        toast.success("Rejection analysis complete")
+        setActiveTab("rejection")
+      } else {
+        toast.error(json.error || "Analysis failed")
+      }
+    } catch { toast.error("Rejection analysis failed") }
+    setAnalyzingRejection(false)
+  }
+
   const handleStatusChange = async (status: string) => {
     const { error } = await supabase.from("applications").update({ status }).eq("id", app.id)
     if (error) { toast.error("Failed to update status"); return }
     setApp({ ...app, status })
+    if (status === "Rejected" && !rejectionResult) {
+      const { data: rej } = await supabase.from("rejection_analyses").select("*").eq("application_id", params.id).maybeSingle()
+      if (rej) setRejectionResult(rej)
+    }
     toast.success(`Status changed to ${status}`)
   }
 
   if (loading) return <LoadingScreen />
   if (!app) return <div className="text-center py-16 text-xs text-[var(--color-text-muted)]">Application not found</div>
+
+  const isRejected = app.status === "Rejected"
+
+  const tabs = [
+    { key: "analysis", label: "Analysis", icon: Target },
+    { key: "cover", label: "Cover Letter", icon: Mail },
+    { key: "followup", label: "Follow-up", icon: MessageSquare },
+    ...(isRejected ? [{ key: "rejection", label: "Rejection Analysis", icon: Ban }] : []),
+  ]
 
   return (
     <div className="space-y-5">
@@ -74,7 +140,14 @@ export default function ApplicationDetailPage() {
           <h1 className="text-xl font-bold font-[family-name:var(--font-display)] tracking-tight">{app.company}</h1>
           <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{app.role_title}</p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          {app.status === "Interview" && (
+            <Link href={`/interview-prep/${app.id}`}>
+              <Button variant="outline" size="sm" className="border-[var(--color-accent-violet)]/30 text-[var(--color-accent-violet)] hover:bg-[var(--color-accent-violet)]/10 h-8 text-xs">
+                <Sparkles className="h-3 w-3 mr-1" /> Interview Prep
+              </Button>
+            </Link>
+          )}
           <select
             value={app.status}
             onChange={(e) => handleStatusChange(e.target.value)}
@@ -98,12 +171,20 @@ export default function ApplicationDetailPage() {
       <div className="surface-card p-5">
         <div className="flex items-center justify-between mb-4">
           <SectionHeader title="AI Job Analysis" icon={<Brain className="h-4 w-4 text-[var(--color-accent-violet)]" />} />
-          {!aiResult && (
-            <Button onClick={handleAnalyze} disabled={analyzing} size="sm" className="gradient-violet text-white border-0 hover:opacity-90 shadow-glow h-8 text-xs">
-              {analyzing ? <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent mr-1.5" /> : <Sparkles className="h-3 w-3 mr-1.5" />}
-              {analyzing ? "Analyzing..." : "Run Analysis"}
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {isRejected && !rejectionResult && (
+              <Button onClick={handleAnalyzeRejection} disabled={analyzingRejection} size="sm" variant="outline" className="border-[var(--color-accent-rose)]/30 text-[var(--color-accent-rose)] hover:bg-[var(--color-accent-rose)]/10 h-8 text-xs">
+                {analyzingRejection ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <Ban className="h-3 w-3 mr-1.5" />}
+                {analyzingRejection ? "Analyzing..." : "Analyze Rejection"}
+              </Button>
+            )}
+            {!aiResult && (
+              <Button onClick={handleAnalyze} disabled={analyzing} size="sm" className="gradient-violet text-white border-0 hover:opacity-90 shadow-glow h-8 text-xs">
+                {analyzing ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <Sparkles className="h-3 w-3 mr-1.5" />}
+                {analyzing ? "Analyzing..." : "Run Analysis"}
+              </Button>
+            )}
+          </div>
         </div>
 
         {aiResult ? (
@@ -123,11 +204,7 @@ export default function ApplicationDetailPage() {
 
             {/* Tabs */}
             <div className="flex gap-1 p-0.5 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] overflow-x-auto w-full">
-              {[
-                { key: "analysis", label: "Analysis", icon: Target },
-                { key: "cover", label: "Cover Letter", icon: Mail },
-                { key: "followup", label: "Follow-up", icon: MessageSquare },
-              ].map((tab) => (
+              {tabs.map((tab) => (
                 <button key={tab.key} onClick={() => setActiveTab(tab.key as any)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium whitespace-nowrap transition-all ${activeTab === tab.key ? "bg-[var(--color-accent-violet)]/10 text-[var(--color-accent-violet)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"}`}>
                   <tab.icon className="h-3 w-3" /> {tab.label}
                 </button>
@@ -162,8 +239,65 @@ export default function ApplicationDetailPage() {
               </div>
             )}
             {activeTab === "followup" && (
-              <div className="p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
-                <p className="text-xs text-[var(--color-text-secondary)] whitespace-pre-wrap leading-relaxed">{aiResult.follow_up_email || "No follow-up email generated."}</p>
+              <div className="space-y-3">
+                {aiResult.follow_up_email ? (
+                  <div className="p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
+                    <p className="text-xs text-[var(--color-text-secondary)] whitespace-pre-wrap leading-relaxed">{aiResult.follow_up_email}</p>
+                  </div>
+                ) : (
+                  <div className="text-center py-6">
+                    <p className="text-xs text-[var(--color-text-muted)] mb-3">No follow-up email generated yet</p>
+                    <Button onClick={handleGenerateFollowup} disabled={generatingFollowup} size="sm" className="gradient-violet text-white border-0 hover:opacity-90 h-8 text-xs">
+                      {generatingFollowup ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <Send className="h-3 w-3 mr-1.5" />}
+                      {generatingFollowup ? "Generating..." : "Generate Follow-up Email"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+            {activeTab === "rejection" && isRejected && (
+              <div className="space-y-3">
+                {rejectionResult ? (
+                  <>
+                    {rejectionResult.likely_reasons?.length > 0 && (
+                      <div className="p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
+                        <h3 className="text-[11px] font-medium text-[var(--color-accent-rose)] mb-2 flex items-center gap-1"><Ban className="h-3 w-3" /> Likely Reasons</h3>
+                        <ul className="space-y-1">{rejectionResult.likely_reasons.map((s: string, i: number) => <li key={i} className="text-xs text-[var(--color-text-secondary)]">• {s}</li>)}</ul>
+                      </div>
+                    )}
+                    {rejectionResult.skills_gaps?.length > 0 && (
+                      <div className="p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
+                        <h3 className="text-[11px] font-medium text-[var(--color-accent-amber)] mb-2 flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Skills Gaps</h3>
+                        <div className="flex flex-wrap gap-1.5">{rejectionResult.skills_gaps.map((s: string, i: number) => <span key={i} className="px-2 py-0.5 rounded-full text-[10px] bg-[var(--color-accent-amber)]/10 text-[var(--color-accent-amber)] border border-[var(--color-accent-amber)]/20">{s}</span>)}</div>
+                      </div>
+                    )}
+                    {rejectionResult.cv_weaknesses?.length > 0 && (
+                      <div className="p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
+                        <h3 className="text-[11px] font-medium text-[var(--color-accent-blue)] mb-2 flex items-center gap-1"><Target className="h-3 w-3" /> CV Weaknesses</h3>
+                        <ul className="space-y-1">{rejectionResult.cv_weaknesses.map((s: string, i: number) => <li key={i} className="text-xs text-[var(--color-text-secondary)]">• {s}</li>)}</ul>
+                      </div>
+                    )}
+                    {rejectionResult.improvement_plan?.length > 0 && (
+                      <div className="p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
+                        <h3 className="text-[11px] font-medium text-[var(--color-accent-emerald)] mb-2 flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Improvement Plan</h3>
+                        <div className="space-y-2">{rejectionResult.improvement_plan.map((item: any, i: number) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${item.priority === "high" ? "bg-[var(--color-accent-rose)]/10 text-[var(--color-accent-rose)]" : item.priority === "medium" ? "bg-[var(--color-accent-amber)]/10 text-[var(--color-accent-amber)]" : "bg-[var(--color-accent-blue)]/10 text-[var(--color-accent-blue)]"}`}>{item.priority}</span>
+                            <span className="text-xs text-[var(--color-text-secondary)]">{item.action}</span>
+                          </div>
+                        ))}</div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-6">
+                    <p className="text-xs text-[var(--color-text-muted)] mb-3">Analyze this rejection to get insights and improvement plans</p>
+                    <Button onClick={handleAnalyzeRejection} disabled={analyzingRejection} size="sm" className="gradient-violet text-white border-0 hover:opacity-90 h-8 text-xs">
+                      {analyzingRejection ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <Ban className="h-3 w-3 mr-1.5" />}
+                      {analyzingRejection ? "Analyzing..." : "Analyze Rejection"}
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>

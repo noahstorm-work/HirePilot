@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
-import { Search, MapPin, Briefcase, ExternalLink, Bookmark, BookmarkCheck, Trash2, Plus, Clock, X } from "lucide-react"
+import { Search, MapPin, Briefcase, ExternalLink, Bookmark, BookmarkCheck, Trash2, Plus, Clock, X, Link as LinkIcon } from "lucide-react"
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete"
+import { PasteUrlDialog } from "@/components/discover/PasteUrlDialog"
 import { toast } from "sonner"
 import type { JobSearchResult } from "@/lib/jobs-api"
 import type { SavedJob } from "@/types"
@@ -168,6 +169,7 @@ export default function DiscoverPage() {
           <Button onClick={handleSearch} disabled={loading || !query.trim()} className="gradient-violet text-white border-0 h-10 px-5 text-sm font-semibold hover:opacity-90 shadow-glow">
             {loading ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : "Search"}
           </Button>
+          <PasteUrlDialog />
         </div>
       </div>
 

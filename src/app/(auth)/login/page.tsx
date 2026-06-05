@@ -9,6 +9,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ArrowRight, Mail, Lock, Zap } from "lucide-react"
 
+const DEMO_EMAIL = process.env.NEXT_PUBLIC_DEMO_EMAIL || "demo@hirepilot.app"
+const DEMO_PASSWORD = process.env.NEXT_PUBLIC_DEMO_PASSWORD || "Demo123456!"
+
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -34,8 +37,8 @@ export default function LoginPage() {
     setLoading(true)
     setError("")
     const { error } = await supabase.auth.signInWithPassword({
-      email: "demo@hirepilot.app",
-      password: "Demo123456!",
+      email: DEMO_EMAIL,
+      password: DEMO_PASSWORD,
     })
     if (error) {
       setError(error.message)

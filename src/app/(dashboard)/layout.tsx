@@ -8,9 +8,9 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-[#09090b]">
+      <div className="min-h-screen bg-[var(--color-bg-primary)]">
         <Sidebar />
-        <main className="md:pl-60 min-h-screen">
+        <main className="md:pl-[240px] md:peer-[]:pl-[68px] min-h-screen transition-[padding] duration-300">
           <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 pt-16 md:pt-8 pb-8">
             {children}
           </div>
