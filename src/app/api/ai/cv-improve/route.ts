@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const body = await request.json()
     const parsed = schema.safeParse(body)
     if (!parsed.success) {
-      return NextResponse.json({ success: false, data: null, error: parsed.error.errors[0].message }, { status: 400 })
+      return NextResponse.json({ success: false, data: null, error: `Validation: ${parsed.error.errors.map(e => e.path.join(".") + " " + e.message).join(", ")}` }, { status: 400 })
     }
 
     // Resolve snake_case or camelCase
@@ -39,8 +39,8 @@ export async function POST(request: Request) {
     const cvText = resolveCvText(data)
     const jobDescription = resolveJobDescription(data)
 
-    if (!cvText) {
-      return NextResponse.json({ success: false, data: null, error: "CV text is required" }, { status: 400 })
+    if (!cvText || !cvText.trim()) {
+      return NextResponse.json({ success: false, data: null, error: "CV text is required. Paste your CV text into the text area." }, { status: 400 })
     }
 
     const result = await improveCV({
