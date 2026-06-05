@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
@@ -91,6 +91,7 @@ export default function ApplicationsPage() {
             <DialogContent className="bg-[var(--color-bg-card)] border-[var(--color-border-subtle)] max-w-md">
               <DialogHeader>
                 <DialogTitle className="font-[family-name:var(--font-display)] text-sm">New Application</DialogTitle>
+                <DialogDescription className="sr-only">Create a new job application</DialogDescription>
               </DialogHeader>
               <div className="space-y-3 mt-3">
                 <div>
