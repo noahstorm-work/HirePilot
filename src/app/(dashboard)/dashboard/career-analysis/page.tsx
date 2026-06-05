@@ -42,10 +42,11 @@ export default function CareerAnalysisPage() {
     setLoading(true)
     setError("")
     try {
+      const plainText = cvText.replace(/<[^>]*>/g, "").trim()
       const res = await fetch("/api/ai/career-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cv_text: cvText, linkedin_url: linkedinUrl, github_url: githubUrl, portfolio_url: portfolioUrl, target_role: targetRole }),
+        body: JSON.stringify({ cv_text: plainText, linkedin_url: linkedinUrl, github_url: githubUrl, portfolio_url: portfolioUrl, target_role: targetRole }),
       })
       const json = await res.json()
       if (!json.success) throw new Error(json.error)

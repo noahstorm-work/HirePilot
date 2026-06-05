@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { ScoreRing } from "@/components/ui/score-ring"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -21,10 +22,11 @@ export default function ATSCheckerPage() {
     setLoading(true)
     setError("")
     try {
+      const plainText = cvText.replace(/<[^>]*>/g, "").trim()
       const res = await fetch("/api/ai/cv-improve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cv_text: cvText, job_description: jobDescription }),
+        body: JSON.stringify({ cv_text: plainText, job_description: jobDescription }),
       })
       const json = await res.json()
       if (!json.success) throw new Error(json.error)
@@ -47,10 +49,9 @@ export default function ATSCheckerPage() {
       <div className="surface-card p-5 space-y-3.5">
         <div>
           <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-2 block">CV / Resume Text</Label>
-          <Textarea
+          <RichTextEditor
             value={cvText}
-            onChange={(e) => setCvText(e.target.value)}
-            className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] min-h-[120px] text-sm"
+            onChange={setCvText}
             placeholder="Paste your CV text here..."
           />
         </div>
