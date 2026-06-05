@@ -1,0 +1,64 @@
+import { NextResponse } from "next/server"
+import { createClient } from "@/lib/supabase/server"
+import type { ZodSchema } from "zod"
+
+export interface ApiSuccessResponse<T> {
+  success: true
+  data: T
+  error: null
+}
+
+export interface ApiErrorResponse {
+  success: false
+  data: null
+  error: string
+}
+
+export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse
+
+export function apiSuccess<T>(data: T): NextResponse<ApiSuccessResponse<T>> {
+  return NextResponse.json({ success: true, data, error: null })
+}
+
+export function apiError(error: string, status = 500): NextResponse<ApiErrorResponse> {
+  return NextResponse.json({ success: false, data: null, error }, { status })
+}
+
+export async function authenticate() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { supabase, user: null }
+  return { supabase, user }
+}
+
+export function requireAuth(user: any): NextResponse | null {
+  if (!user) return apiError("Unauthorized", 401)
+  return null
+}
+
+export function validateBody<T>(schema: ZodSchema<T>, body: unknown): { data: T; error: null } | { data: null; error: NextResponse } {
+  const parsed = schema.safeParse(body)
+  if (!parsed.success) {
+    const msg = parsed.error.errors.map(e => `${e.path.join(".")}: ${e.message}`).join(", ")
+    return { data: null, error: apiError(`Validation: ${msg}`, 400) }
+  }
+  return { data: parsed.data, error: null }
+}
+
+export async function logServerError(err: unknown, request: Request, source: string) {
+  try {
+    const supabase = await createClient()
+    await supabase.from("error_logs").insert({
+      level: "error",
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+      user_id: null,
+      url: request.url,
+      metadata: { source },
+    })
+  } catch {}
+}
+
+export function parseFormData(body: unknown, schema: ZodSchema) {
+  return validateBody(schema, body)
+}

@@ -1,18 +1,14 @@
-import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { NextRequest } from "next/server"
+import { apiSuccess, apiError } from "@/lib/api-handler"
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
-    const { error: authError } = await supabase.auth.getUser()
-    // We don't require authentication for error logging, but we can get the user if available
+
     let userId = null
-    if (!authError) {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        userId = user.id
-      }
-    }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) userId = user.id
 
     const body = await request.json()
     const { level, message, stack, url, user_agent, metadata } = body
@@ -32,13 +28,11 @@ export async function POST(request: Request) {
     })
 
     if (error) {
-      console.error("Failed to log error to Supabase:", error)
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+      return apiError(error.message, 500)
     }
 
-    return NextResponse.json({ success: true })
+    return apiSuccess({ id: null })
   } catch (err) {
-    console.error("Error in error-log API route:", err)
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 })
+    return apiError("Internal server error", 500)
   }
 }

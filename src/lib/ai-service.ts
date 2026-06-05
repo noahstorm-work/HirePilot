@@ -1,4 +1,5 @@
 import { getOpenAI, AI_MODEL } from "./openai"
+import type { SkillsGap, Improvement, WeeklyPlan } from "@/types"
 import {
   CAREER_ANALYSIS_PROMPT,
   JOB_ANALYZE_PROMPT,
@@ -114,24 +115,6 @@ export async function analyzeRejection(input: RejectionAnalysisInput) {
 export async function generateFollowup(input: FollowupInput) {
   const userContent = `Company: ${input.company}\nRole: ${input.roleTitle}\nDays since applying: ${input.daysSince}`
   return callAI<FollowupResult>(GENERATE_FOLLOWUP_PROMPT, userContent, 0.4)
-}
-
-interface SkillsGap {
-  area: string
-  severity: "low" | "medium" | "high"
-  detail: string
-}
-
-interface Improvement {
-  action: string
-  impact: string
-  difficulty: "easy" | "medium" | "hard"
-}
-
-interface WeeklyPlan {
-  week: number
-  actions: string[]
-  expected_score: number
 }
 
 export interface CareerAnalysisResult {

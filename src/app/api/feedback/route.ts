@@ -1,23 +1,18 @@
-import { NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { NextRequest } from "next/server"
+import { apiSuccess, apiError, authenticate } from "@/lib/api-handler"
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
-    }
-
+    const { supabase, user } = await authenticate()
+    if (!user) return apiError("Unauthorized", 401)
     const body = await request.json()
     const { rating, message } = body
 
-    // Validate input
     if (rating < 1 || rating > 5 || !rating) {
-      return NextResponse.json({ success: false, error: "Rating must be between 1 and 5" }, { status: 400 })
+      return apiError("Rating must be between 1 and 5", 400)
     }
     if (!message || message.trim() === "") {
-      return NextResponse.json({ success: false, error: "Message is required" }, { status: 400 })
+      return apiError("Message is required", 400)
     }
 
     const { data, error } = await supabase
@@ -33,11 +28,11 @@ export async function POST(request: Request) {
       .single()
 
     if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+      return apiError(error.message, 500)
     }
 
-    return NextResponse.json({ success: true, data })
+    return apiSuccess(data)
   } catch (err) {
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 })
+    return apiError("Internal server error", 500)
   }
 }

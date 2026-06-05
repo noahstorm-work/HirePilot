@@ -104,8 +104,35 @@ export interface AiResult {
 }
 
 export interface InterviewQuestions {
-  technical: string[]
-  behavioral: string[]
+  technical: Array<{ question: string; expected_areas?: string[]; sample_answer?: string; hint?: string }>
+  behavioral: Array<{ type: string; question: string; situation?: string; task?: string; action?: string; result?: string; framework?: string }>
+  company_preparation?: {
+    common_interview_format?: string
+    key_areas_to_review?: string[]
+    questions_to_ask?: string[]
+  }
+}
+
+export interface ErrorLog {
+  id: string
+  timestamp: string
+  level: "error" | "warn" | "info"
+  message: string
+  stack?: string
+  user_id: string | null
+  url?: string
+  user_agent?: string
+  metadata?: Record<string, unknown>
+  created_at: string
+}
+
+export interface Feedback {
+  id: string
+  user_id: string
+  message: string
+  rating: number | null
+  page_url: string | null
+  created_at: string
 }
 
 export interface SavedJob {
@@ -170,6 +197,6 @@ export interface WeeklyReport {
 
 export interface ApiResponse<T = unknown> {
   success: boolean
-  data?: T | null
+  data: T | null
   error: string | null
 }
