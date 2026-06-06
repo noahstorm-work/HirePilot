@@ -96,7 +96,7 @@ export function Sidebar() {
   const UserFooter = () => (
     <div className="px-2 py-3 border-t border-[var(--color-border-subtle)]">
       {user && !collapsed && (
-        <div className="flex items-center gap-2.5 px-3 py-2 mb-1">
+        <Link href="/profile" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-3 py-2 mb-1 rounded-[10px] hover:bg-[var(--color-bg-hover)] transition-colors">
           <div className="h-7 w-7 rounded-full bg-gradient-to-br from-[var(--color-accent-violet)] to-[var(--color-accent-blue)] flex items-center justify-center text-[11px] font-bold text-white shrink-0">
             {(user.email || "U")[0].toUpperCase()}
           </div>
@@ -104,7 +104,7 @@ export function Sidebar() {
             <p className="text-xs font-medium text-[var(--color-text-secondary)] truncate">{user.user_metadata?.full_name || user.email}</p>
             <p className="text-[10px] text-[var(--color-text-muted)] truncate">{user.email}</p>
           </div>
-        </div>
+        </Link>
       )}
       <button
         onClick={handleSignOut}

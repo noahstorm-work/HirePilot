@@ -23,6 +23,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Career Analysis", href: "/dashboard/career-analysis", icon: "Brain", shortcut: "⌘2" },
       { label: "Discover", href: "/discover", icon: "Search", shortcut: "⌘3" },
       { label: "Applications", href: "/applications", icon: "Briefcase", shortcut: "⌘4" },
+      { label: "Profile", href: "/profile", icon: "User", shortcut: "⌘0" },
     ],
   },
   {
