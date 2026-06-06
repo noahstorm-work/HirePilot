@@ -3,7 +3,7 @@
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import Placeholder from "@tiptap/extension-placeholder"
-import { useEffect } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import {
   Bold, Italic, List, ListOrdered, Heading2, Undo, Redo
 } from "lucide-react"
@@ -13,6 +13,7 @@ interface RichTextEditorProps {
   onChange: (value: string) => void
   placeholder?: string
   className?: string
+  defaultHeight?: number
 }
 
 export function RichTextEditor({
@@ -20,7 +21,13 @@ export function RichTextEditor({
   onChange,
   placeholder = "Paste your CV or resume text here...",
   className = "",
+  defaultHeight = 300,
 }: RichTextEditorProps) {
+  const [height, setHeight] = useState(defaultHeight)
+  const [dragging, setDragging] = useState(false)
+  const startY = useRef(0)
+  const startHeight = useRef(0)
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -36,7 +43,7 @@ export function RichTextEditor({
     },
     editorProps: {
       attributes: {
-        class: "prose prose-sm prose-invert max-w-none focus:outline-none min-h-[200px] px-4 py-3 text-sm text-[var(--color-text-primary)] leading-relaxed",
+        class: "prose prose-sm prose-invert max-w-none focus:outline-none px-4 py-3 text-sm text-[var(--color-text-primary)] leading-relaxed",
       },
     },
   })
@@ -46,6 +53,29 @@ export function RichTextEditor({
       editor.commands.setContent(value || "")
     }
   }, [value, editor])
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    setDragging(true)
+    startY.current = e.clientY
+    startHeight.current = height
+  }, [height])
+
+  useEffect(() => {
+    if (!dragging) return
+    const handleMouseMove = (e: MouseEvent) => {
+      const delta = e.clientY - startY.current
+      const newHeight = Math.min(Math.max(startHeight.current + delta, 150), window.innerHeight * 0.8)
+      setHeight(newHeight)
+    }
+    const handleMouseUp = () => setDragging(false)
+    document.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseup", handleMouseUp)
+    }
+  }, [dragging])
 
   if (!editor) return null
 
@@ -122,8 +152,23 @@ export function RichTextEditor({
         </ToolbarButton>
       </div>
 
-      {/* Editor */}
-      <EditorContent editor={editor} />
+      {/* Editor with scroll */}
+      <div
+        style={{ height: `${height}px` }}
+        className="overflow-y-auto min-h-[150px]"
+      >
+        <EditorContent editor={editor} />
+      </div>
+
+      {/* Drag handle */}
+      <div
+        onMouseDown={handleMouseDown}
+        className={`flex items-center justify-center h-3 border-t border-[var(--color-border-subtle)] bg-[var(--color-bg-primary)] cursor-ns-resize select-none hover:bg-[var(--color-bg-elevated)] transition-colors ${dragging ? "bg-[var(--color-bg-elevated)]" : ""}`}
+      >
+        <div className="flex gap-0.5">
+          <div className="w-4 h-0.5 rounded-full bg-[var(--color-text-muted)]/40" />
+        </div>
+      </div>
     </div>
   )
 }
