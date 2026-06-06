@@ -4,16 +4,25 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
+import { DocumentUpload } from "@/components/ui/document-upload"
 import { ScoreRing } from "@/components/ui/score-ring"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FileCheck, AlertTriangle, CheckCircle2, Target, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 
+interface AtsCheckResult {
+  match_score: number
+  improved_cv_sections?: { summary?: string; experience?: string[] }
+  sections_to_remove?: string[]
+  keyword_additions?: string[]
+  estimated_match_improvement?: string
+}
+
 export default function ATSCheckerPage() {
   const [cvText, setCvText] = useState("")
   const [jobDescription, setJobDescription] = useState("")
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<AtsCheckResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -33,9 +42,10 @@ export default function ATSCheckerPage() {
       if (!json.success) throw new Error(json.error)
       setResult(json.data)
       toast.success("ATS check complete")
-    } catch (err: any) {
-      setError(err.message)
-      toast.error(err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Check failed"
+      setError(message)
+      toast.error(message)
     }
     setLoading(false)
   }
@@ -51,7 +61,10 @@ export default function ATSCheckerPage() {
       {/* Input */}
       <div className="surface-card p-5 space-y-3.5">
         <div>
-          <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-2 block">CV / Resume Text</Label>
+          <div className="flex items-center justify-between mb-2">
+            <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)]">CV / Resume Text</Label>
+            <DocumentUpload onTextExtracted={(text) => setCvText(text.replace(/\n/g, "<br>"))} label="Upload CV" />
+          </div>
           <RichTextEditor
             value={cvText}
             onChange={setCvText}
@@ -81,8 +94,8 @@ export default function ATSCheckerPage() {
           <div className="surface-card p-6 flex flex-col items-center">
             <ScoreRing score={result.match_score || Math.max(20, 90 - (result.keyword_additions?.length || 0) * 8)} size="lg" label="ATS Compatibility" />
             <p className="text-xs text-[var(--color-text-secondary)] mt-3 max-w-sm text-center">
-              {result.keyword_additions?.length > 5 ? "Your CV needs significant improvements to pass ATS screening." :
-               result.keyword_additions?.length > 2 ? "Your CV could use some improvements for better ATS compatibility." :
+              {(result.keyword_additions?.length ?? 0) > 5 ? "Your CV needs significant improvements to pass ATS screening." :
+               (result.keyword_additions?.length ?? 0) > 2 ? "Your CV could use some improvements for better ATS compatibility." :
                "Your CV has good ATS compatibility with minimal changes needed."}
             </p>
           </div>
@@ -95,11 +108,11 @@ export default function ATSCheckerPage() {
                   <p className="text-xs text-[var(--color-text-secondary)] mt-3 whitespace-pre-wrap leading-relaxed">{result.improved_cv_sections.summary}</p>
                 </div>
               )}
-              {result.improved_cv_sections.experience?.length > 0 && (
+              {(result.improved_cv_sections.experience?.length ?? 0) > 0 && (
                 <div className="surface-card p-5">
                   <SectionHeader title="Improved Experience" icon={<Target className="h-4 w-4 text-[var(--color-accent-blue)]" />} />
                   <div className="space-y-2 mt-3">
-                    {result.improved_cv_sections.experience.map((item: string, i: number) => (
+                    {result.improved_cv_sections.experience?.map((item: string, i: number) => (
                       <div key={i} className="flex items-start gap-2.5 p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
                         <CheckCircle2 className="h-3.5 w-3.5 text-[var(--color-accent-emerald)] shrink-0 mt-0.5" />
                         <span className="text-xs text-[var(--color-text-secondary)]">{item}</span>
@@ -111,11 +124,11 @@ export default function ATSCheckerPage() {
             </div>
           )}
 
-          {result.sections_to_remove?.length > 0 && (
+          {(result.sections_to_remove?.length ?? 0) > 0 && (
             <div className="surface-card p-5">
               <SectionHeader title="Sections to Remove" icon={<AlertTriangle className="h-4 w-4 text-[var(--color-accent-amber)]" />} />
               <div className="space-y-2 mt-3">
-                {result.sections_to_remove.map((item: string, i: number) => (
+                {result.sections_to_remove?.map((item: string, i: number) => (
                   <div key={i} className="flex items-start gap-2.5 p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
                     <AlertTriangle className="h-3.5 w-3.5 text-[var(--color-accent-amber)] shrink-0 mt-0.5" />
                     <span className="text-xs text-[var(--color-text-secondary)]">{item}</span>
@@ -125,11 +138,11 @@ export default function ATSCheckerPage() {
             </div>
           )}
 
-          {result.keyword_additions?.length > 0 && (
+          {(result.keyword_additions?.length ?? 0) > 0 && (
             <div className="surface-card p-5">
               <SectionHeader title="Keywords to Add" icon={<Target className="h-4 w-4 text-[var(--color-accent-emerald)]" />} />
               <div className="flex flex-wrap gap-1.5 mt-3">
-                {result.keyword_additions.map((k: string, i: number) => (
+                {result.keyword_additions?.map((k: string, i: number) => (
                   <span key={i} className="px-2.5 py-1 rounded-full text-[10px] bg-[var(--color-accent-emerald)]/10 text-[var(--color-accent-emerald)] border border-[var(--color-accent-emerald)]/20">{k}</span>
                 ))}
               </div>

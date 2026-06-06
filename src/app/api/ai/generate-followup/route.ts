@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { generateFollowup } from "@/lib/ai-service"
+import { checkRateLimit, logServerError } from "@/lib/api-handler"
 import { z } from "zod"
 
 const schema = z.object({
@@ -17,6 +18,9 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 })
     }
+
+    const rl = checkRateLimit(`ai:${user.id}:generate-followup`, 5, 60_000)
+    if (rl) return rl
 
     const body = await request.json()
     const parsed = schema.safeParse(body)
@@ -45,6 +49,7 @@ export async function POST(request: Request) {
       error: null,
     })
   } catch (err) {
+    await logServerError(err, request, "generate-followup")
     const message = err instanceof Error ? err.message : "Internal server error"
     return NextResponse.json({ success: false, data: null, error: message }, { status: 500 })
   }

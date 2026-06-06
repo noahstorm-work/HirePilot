@@ -60,7 +60,7 @@ export function LocationAutocomplete({
         setSuggestions(json.data)
         setIsOpen(json.data.length > 0)
       }
-    } catch {}
+    } catch { /* suggestions will remain empty */ }
     setLoading(false)
   }, [])
 

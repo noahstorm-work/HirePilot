@@ -70,7 +70,7 @@ export default function DiscoverPage() {
         setTotal(json.data.total || 0)
         setResults((prev) => pageNum === 1 ? json.data.results : [...prev, ...json.data.results])
       }
-    } catch {}
+    } catch (err) { console.error("Job search error:", err) }
     setLoading(false)
     setLoadingMore(false)
   }

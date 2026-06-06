@@ -5,7 +5,7 @@ export function setupClientErrorLogging() {
   if (typeof window === "undefined") return;
 
   class ErrorService {
-    private static async log(level: string, message: string, context: Record<string, any> = {}) {
+    private static async log(level: string, message: string, context: Record<string, unknown> = {}) {
       try {
         await fetch("/api/error-log", {
           method: "POST",
@@ -24,17 +24,17 @@ export function setupClientErrorLogging() {
       }
     }
 
-    static async logError(error: unknown, context: Record<string, any> = {}) {
+    static async logError(error: unknown, context: Record<string, unknown> = {}) {
       const message = error instanceof Error ? error.message : String(error)
       const stack = error instanceof Error ? error.stack : undefined
       await this.log("error", message, { ...context, stack })
     }
 
-    static async logWarning(message: string, context: Record<string, any> = {}) {
+    static async logWarning(message: string, context: Record<string, unknown> = {}) {
       await this.log("warn", message, context)
     }
 
-    static async logInfo(message: string, context: Record<string, any> = {}) {
+    static async logInfo(message: string, context: Record<string, unknown> = {}) {
       await this.log("info", message, context)
     }
   }

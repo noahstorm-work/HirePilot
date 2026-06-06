@@ -9,7 +9,7 @@ interface CommandItem {
   id: string
   label: string
   description?: string
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   href: string
   section: string
   shortcut?: string

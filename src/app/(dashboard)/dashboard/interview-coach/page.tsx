@@ -12,12 +12,13 @@ import { Sparkles, Code, MessageSquare, Building2, CheckCircle2 } from "lucide-r
 import { CompanyAutocomplete } from "@/components/ui/company-autocomplete"
 import { RoleAutocomplete } from "@/components/ui/role-autocomplete"
 import { toast } from "sonner"
+import type { InterviewQuestions } from "@/types"
 
 export default function InterviewCoachPage() {
   const [company, setCompany] = useState("")
   const [role, setRole] = useState("")
   const [jobDescription, setJobDescription] = useState("")
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<InterviewQuestions | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [activeTab, setActiveTab] = useState<"technical" | "behavioral" | "star" | "company">("technical")
@@ -38,9 +39,10 @@ export default function InterviewCoachPage() {
       if (!json.success) throw new Error(json.error)
       setResult(json.data)
       toast.success("Interview prep generated")
-    } catch (err: any) {
-      setError(err.message)
-      toast.error(err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Generation failed"
+      setError(message)
+      toast.error(message)
     }
     setLoading(false)
   }
@@ -96,7 +98,7 @@ export default function InterviewCoachPage() {
           </div>
 
           <div className="space-y-2.5">
-            {activeTab === "technical" && (result.technical_questions || []).map((q: any, i: number) => (
+            {activeTab === "technical" && (result.technical || []).map((q: string | { question: string; hint?: string }, i: number) => (
               <div key={i} className="p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)]">
                 <div className="flex items-start gap-2.5">
                   <span className="text-[10px] font-bold font-[family-name:var(--font-mono)] text-[var(--color-accent-violet)] mt-0.5">Q{i + 1}</span>
@@ -107,7 +109,7 @@ export default function InterviewCoachPage() {
                 </div>
               </div>
             ))}
-            {activeTab === "behavioral" && (result.behavioral_questions || []).map((q: any, i: number) => (
+            {activeTab === "behavioral" && (result.behavioral || []).map((q: string | { question: string; framework?: string }, i: number) => (
               <div key={i} className="p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)]">
                 <div className="flex items-start gap-2.5">
                   <span className="text-[10px] font-bold font-[family-name:var(--font-mono)] text-[var(--color-accent-blue)] mt-0.5">Q{i + 1}</span>
@@ -118,7 +120,7 @@ export default function InterviewCoachPage() {
                 </div>
               </div>
             ))}
-            {activeTab === "star" && (result.behavioral_questions || []).map((q: any, i: number) => (
+            {activeTab === "star" && (result.behavioral || []).map((q: { question?: string; situation?: string; task?: string; action?: string; result?: string }, i: number) => (
               <div key={i} className="p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)]">
                 <p className="text-xs font-medium mb-2.5 text-[var(--color-accent-emerald)]">{q.question || `Example ${i + 1}`}</p>
                 <div className="space-y-1.5 text-[11px] text-[var(--color-text-secondary)]">
@@ -137,16 +139,16 @@ export default function InterviewCoachPage() {
                     <p className="text-xs text-[var(--color-text-secondary)]">{result.company_preparation.common_interview_format}</p>
                   </div>
                 )}
-                {result.company_preparation.key_areas_to_review?.length > 0 && (
+                {(result.company_preparation.key_areas_to_review?.length ?? 0) > 0 && (
                   <div>
                     <p className="text-[10px] font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Key Areas to Review</p>
-                    <ul className="space-y-1">{result.company_preparation.key_areas_to_review.map((area: string, i: number) => <li key={i} className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)]"><span className="h-1 w-1 rounded-full bg-[var(--color-accent-violet)]" />{area}</li>)}</ul>
+                    <ul className="space-y-1">{result.company_preparation.key_areas_to_review?.map((area: string, i: number) => <li key={i} className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)]"><span className="h-1 w-1 rounded-full bg-[var(--color-accent-violet)]" />{area}</li>)}</ul>
                   </div>
                 )}
-                {result.company_preparation.questions_to_ask?.length > 0 && (
+                {(result.company_preparation.questions_to_ask?.length ?? 0) > 0 && (
                   <div>
                     <p className="text-[10px] font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Questions to Ask</p>
-                    <ul className="space-y-1">{result.company_preparation.questions_to_ask.map((q: string, i: number) => <li key={i} className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)]"><span className="h-1 w-1 rounded-full bg-[var(--color-accent-amber)]" />{q}</li>)}</ul>
+                    <ul className="space-y-1">{result.company_preparation.questions_to_ask?.map((q: string, i: number) => <li key={i} className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)]"><span className="h-1 w-1 rounded-full bg-[var(--color-accent-amber)]" />{q}</li>)}</ul>
                   </div>
                 )}
               </div>

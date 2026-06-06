@@ -8,11 +8,13 @@ import { Label } from "@/components/ui/label"
 import { SectionHeader } from "@/components/ui/section-header"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
+import { DocumentUpload } from "@/components/ui/document-upload"
 import { User, Save, ExternalLink, X } from "lucide-react"
 import { toast } from "sonner"
+import type { UserProfile } from "@/types"
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<any>(null)
+  const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [cvText, setCvText] = useState("")
@@ -93,7 +95,10 @@ export default function ProfilePage() {
 
       {/* CV */}
       <div className="surface-card p-5">
-        <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-2 block">CV / Resume</Label>
+        <div className="flex items-center justify-between mb-2">
+          <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)]">CV / Resume</Label>
+          <DocumentUpload onTextExtracted={(text) => setCvText(text.replace(/\n/g, "<br>"))} label="Upload CV" />
+        </div>
         <RichTextEditor
           value={cvText}
           onChange={setCvText}

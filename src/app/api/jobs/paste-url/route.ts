@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { logServerError } from "@/lib/api-handler"
 import { z } from "zod"
 
 const schema = z.object({
@@ -59,6 +60,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, data: result, error: null })
   } catch (err) {
+    await logServerError(err, request, "paste-url")
     const message = err instanceof Error ? err.message : "Internal server error"
     return NextResponse.json({ success: false, data: null, error: message }, { status: 500 })
   }

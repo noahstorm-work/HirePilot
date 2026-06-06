@@ -38,7 +38,7 @@ export function AutocompleteInput({
       const results = await fetchSuggestions(q)
       setSuggestions(results)
       setIsOpen(results.length > 0)
-    } catch {}
+    } catch { /* suggestions will remain empty */ }
     setLoading(false)
   }, [fetchSuggestions])
 

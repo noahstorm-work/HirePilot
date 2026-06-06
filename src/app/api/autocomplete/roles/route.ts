@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: false })
       .limit(20)
 
-    const userRoles = [...new Set((apps || []).map((r: any) => r.role_title).filter(Boolean))]
+    const userRoles = [...new Set((apps || []).map((r: { role_title: string }) => r.role_title).filter(Boolean))]
 
     const targetRole = await supabase
       .from("user_profiles")

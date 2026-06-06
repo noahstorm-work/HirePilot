@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { logServerError } from "@/lib/api-handler"
 import { z } from "zod"
 
 const updateSchema = z.object({
@@ -44,12 +45,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     return NextResponse.json({ success: true, data, error: null })
-  } catch {
+  } catch (err) {
+    await logServerError(err, request, "applications-patch")
     return NextResponse.json({ success: false, data: null, error: "Internal server error" }, { status: 500 })
   }
 }
 
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
     const supabase = await createClient()
@@ -81,21 +83,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       .eq("application_id", id)
       .single()
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        application,
-        analysis: analysis ?? null,
-        rejectionAnalysis: rejectionAnalysis ?? null,
-      },
-      error: null,
-    })
-  } catch {
+    return NextResponse.json({ success: true, data: { application, analysis: analysis ?? null, rejectionAnalysis: rejectionAnalysis ?? null }, error: null })
+  } catch (err) {
+    await logServerError(err, request, "applications-get")
     return NextResponse.json({ success: false, data: null, error: "Internal server error" }, { status: 500 })
   }
 }
 
-export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
     const supabase = await createClient()
@@ -115,7 +110,8 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({ success: true, data: null, error: null })
-  } catch {
+  } catch (err) {
+    await logServerError(err, request, "applications-delete")
     return NextResponse.json({ success: false, data: null, error: "Internal server error" }, { status: 500 })
   }
 }

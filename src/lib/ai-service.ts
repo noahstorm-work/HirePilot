@@ -1,4 +1,4 @@
-import { getOpenAI, AI_MODEL } from "./openai"
+import { getLLM, AI_MODEL } from "./llm-client"
 import type { SkillsGap, Improvement, WeeklyPlan } from "@/types"
 import {
   CAREER_ANALYSIS_PROMPT,
@@ -10,7 +10,7 @@ import {
 } from "./prompts"
 
 async function callAI<T>(systemPrompt: string, userContent: string, temperature = 0.3): Promise<T> {
-  const completion = await getOpenAI().chat.completions.create({
+  const completion = await getLLM().chat.completions.create({
     model: AI_MODEL,
     messages: [
       { role: "system", content: systemPrompt },

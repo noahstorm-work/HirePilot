@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { Target, TrendingUp, AlertTriangle, CheckCircle2, Sparkles, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import type { CareerAnalysis, SkillsGap } from "@/types"
 
 interface SkillProgress {
   skill_name: string
@@ -21,7 +22,7 @@ const STATUS_CONFIG = {
 }
 
 export default function SkillsGapPage() {
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<CareerAnalysis | null>(null)
   const [loading, setLoading] = useState(true)
   const [skillProgress, setSkillProgress] = useState<Map<string, string>>(new Map())
   const [rerunning, setRerunning] = useState(false)
@@ -93,7 +94,7 @@ export default function SkillsGapPage() {
   const missingExp = data?.missing_experience_areas || []
   const skillsGap = data?.skills_gap_analysis || []
 
-  const allSkills = [...new Set([...missingTech, ...skillsGap.map((g: any) => g.skill || g.name || "").filter(Boolean)])]
+  const allSkills = [...new Set([...missingTech, ...skillsGap.map((g: SkillsGap) => g.skill || g.name || "").filter(Boolean)])]
   const identified = allSkills.filter((s) => (skillProgress.get(s) || "identified") === "identified").length
   const inProgress = allSkills.filter((s) => skillProgress.get(s) === "in_progress").length
   const completed = allSkills.filter((s) => skillProgress.get(s) === "completed").length
@@ -203,7 +204,7 @@ export default function SkillsGapPage() {
             <div className="surface-card p-5">
               <SectionHeader title="Detailed Skills Analysis" icon={<Target className="h-4 w-4 text-[var(--color-accent-emerald)]" />} />
               <div className="space-y-2 mt-3">
-                {skillsGap.map((gap: any, i: number) => {
+                {skillsGap.map((gap: SkillsGap, i: number) => {
                   const skillName = gap.skill || gap.name || `Skill ${i + 1}`
                   const status = (skillProgress.get(skillName) || "identified") as keyof typeof STATUS_CONFIG
                   const config = STATUS_CONFIG[status]

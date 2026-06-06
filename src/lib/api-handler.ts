@@ -2,6 +2,26 @@ import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import type { ZodSchema } from "zod"
 
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
+
+export function checkRateLimit(key: string, maxRequests = 5, windowMs = 60_000): NextResponse | null {
+  const now = Date.now()
+  const entry = rateLimitMap.get(key)
+
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(key, { count: 1, resetAt: now + windowMs })
+    return null
+  }
+
+  if (entry.count >= maxRequests) {
+    const retryAfter = Math.ceil((entry.resetAt - now) / 1000)
+    return apiError(`Rate limit exceeded. Try again in ${retryAfter}s.`, 429)
+  }
+
+  entry.count++
+  return null
+}
+
 export interface ApiSuccessResponse<T> {
   success: true
   data: T
@@ -31,7 +51,7 @@ export async function authenticate() {
   return { supabase, user }
 }
 
-export function requireAuth(user: any): NextResponse | null {
+export function requireAuth(user: { id: string } | null): NextResponse | null {
   if (!user) return apiError("Unauthorized", 401)
   return null
 }
@@ -56,7 +76,7 @@ export async function logServerError(err: unknown, request: Request, source: str
       url: request.url,
       metadata: { source },
     })
-  } catch {}
+  } catch { /* best-effort logging */ }
 }
 
 export function parseFormData(body: unknown, schema: ZodSchema) {

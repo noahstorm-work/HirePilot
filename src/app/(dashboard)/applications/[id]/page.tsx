@@ -14,13 +14,15 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import Link from "next/link"
+import type { Application, AiResult, RejectionAnalysis } from "@/types"
+import { APPLICATION_STATUSES } from "@/lib/constants"
 
 export default function ApplicationDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const [app, setApp] = useState<any>(null)
-  const [aiResult, setAiResult] = useState<any>(null)
-  const [rejectionResult, setRejectionResult] = useState<any>(null)
+  const [app, setApp] = useState<Application | null>(null)
+  const [aiResult, setAiResult] = useState<AiResult | null>(null)
+  const [rejectionResult, setRejectionResult] = useState<RejectionAnalysis | null>(null)
   const [loading, setLoading] = useState(true)
   const [analyzing, setAnalyzing] = useState(false)
   const [generatingFollowup, setGeneratingFollowup] = useState(false)
@@ -45,6 +47,7 @@ export default function ApplicationDetailPage() {
   }
 
   const handleAnalyze = async () => {
+    if (!app) return
     setAnalyzing(true)
     try {
       const res = await fetch("/api/ai/analyze-job", {
@@ -60,6 +63,7 @@ export default function ApplicationDetailPage() {
   }
 
   const handleGenerateFollowup = async () => {
+    if (!app) return
     setGeneratingFollowup(true)
     try {
       const created = new Date(app.created_at)
@@ -71,7 +75,7 @@ export default function ApplicationDetailPage() {
       })
       const json = await res.json()
       if (json.success) {
-        const updated = { ...aiResult, follow_up_email: json.data.body }
+        const updated = { ...aiResult!, follow_up_email: json.data.body }
         setAiResult(updated)
         await supabase.from("ai_results").upsert({
           application_id: app.id,
@@ -87,12 +91,13 @@ export default function ApplicationDetailPage() {
   }
 
   const handleAnalyzeRejection = async () => {
+    if (!app) return
     setAnalyzingRejection(true)
     try {
       const res = await fetch("/api/ai/rejection-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ application_id: app.id, job_description: app.job_description || "", cv_text: "", company: app.company, role: app.role_title }),
+        body: JSON.stringify({ applicationId: app.id, jobDescription: app.job_description || "", cvText: "" }),
       })
       const json = await res.json()
       if (json.success) {
@@ -107,9 +112,10 @@ export default function ApplicationDetailPage() {
   }
 
   const handleStatusChange = async (status: string) => {
-    const { error } = await supabase.from("applications").update({ status }).eq("id", app.id)
+    if (!app) return
+    const { error } = await supabase.from("applications").update({ status: status as Application["status"] }).eq("id", app.id)
     if (error) { toast.error("Failed to update status"); return }
-    setApp({ ...app, status })
+    setApp({ ...app, status: status as Application["status"] })
     if (status === "Rejected" && !rejectionResult) {
       const { data: rej } = await supabase.from("rejection_analyses").select("*").eq("application_id", params.id).maybeSingle()
       if (rej) setRejectionResult(rej)
@@ -123,10 +129,10 @@ export default function ApplicationDetailPage() {
   const isRejected = app.status === "Rejected"
 
   const tabs = [
-    { key: "analysis", label: "Analysis", icon: Target },
-    { key: "cover", label: "Cover Letter", icon: Mail },
-    { key: "followup", label: "Follow-up", icon: MessageSquare },
-    ...(isRejected ? [{ key: "rejection", label: "Rejection Analysis", icon: Ban }] : []),
+    { key: "analysis" as const, label: "Analysis", icon: Target },
+    { key: "cover" as const, label: "Cover Letter", icon: Mail },
+    { key: "followup" as const, label: "Follow-up", icon: MessageSquare },
+    ...(isRejected ? [{ key: "rejection" as const, label: "Rejection Analysis", icon: Ban }] : []),
   ]
 
   return (
@@ -153,7 +159,7 @@ export default function ApplicationDetailPage() {
             onChange={(e) => handleStatusChange(e.target.value)}
             className="px-2.5 py-1.5 rounded-lg text-[11px] bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] focus:border-[var(--color-border-focus)]"
           >
-            {["Saved", "Applied", "Interview", "Offer", "Rejected"].map((s) => (
+            {APPLICATION_STATUSES.map((s) => (
               <option key={s} value={s}>{s}</option>
             ))}
           </select>
@@ -205,7 +211,7 @@ export default function ApplicationDetailPage() {
             {/* Tabs */}
             <div className="flex gap-1 p-0.5 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] overflow-x-auto w-full">
               {tabs.map((tab) => (
-                <button key={tab.key} onClick={() => setActiveTab(tab.key as any)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium whitespace-nowrap transition-all ${activeTab === tab.key ? "bg-[var(--color-accent-violet)]/10 text-[var(--color-accent-violet)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"}`}>
+                <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium whitespace-nowrap transition-all ${activeTab === tab.key ? "bg-[var(--color-accent-violet)]/10 text-[var(--color-accent-violet)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"}`}>
                   <tab.icon className="h-3 w-3" /> {tab.label}
                 </button>
               ))}
@@ -280,7 +286,7 @@ export default function ApplicationDetailPage() {
                     {rejectionResult.improvement_plan?.length > 0 && (
                       <div className="p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
                         <h3 className="text-[11px] font-medium text-[var(--color-accent-emerald)] mb-2 flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Improvement Plan</h3>
-                        <div className="space-y-2">{rejectionResult.improvement_plan.map((item: any, i: number) => (
+                        <div className="space-y-2">{rejectionResult.improvement_plan.map((item: { priority: string; action: string }, i: number) => (
                           <div key={i} className="flex items-start gap-2">
                             <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${item.priority === "high" ? "bg-[var(--color-accent-rose)]/10 text-[var(--color-accent-rose)]" : item.priority === "medium" ? "bg-[var(--color-accent-amber)]/10 text-[var(--color-accent-amber)]" : "bg-[var(--color-accent-blue)]/10 text-[var(--color-accent-blue)]"}`}>{item.priority}</span>
                             <span className="text-xs text-[var(--color-text-secondary)]">{item.action}</span>

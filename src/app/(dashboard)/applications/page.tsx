@@ -15,22 +15,17 @@ import { CompanyAutocomplete } from "@/components/ui/company-autocomplete"
 import { RoleAutocomplete } from "@/components/ui/role-autocomplete"
 import { toast } from "sonner"
 import Link from "next/link"
+import { APPLICATION_STATUSES, STATUS_COLORS } from "@/lib/constants"
 
-interface Application {
+interface AppItem {
   id: string; company: string; role_title: string; job_url: string | null;
   status: string; match_score: number | null; created_at: string; notes: string | null; location: string | null;
 }
 
-const columns = [
-  { key: "Saved", color: "text-[var(--color-text-muted)]", dot: "bg-[var(--color-text-muted)]" },
-  { key: "Applied", color: "text-[var(--color-accent-blue)]", dot: "bg-[var(--color-accent-blue)]" },
-  { key: "Interview", color: "text-[var(--color-accent-violet)]", dot: "bg-[var(--color-accent-violet)]" },
-  { key: "Offer", color: "text-[var(--color-accent-emerald)]", dot: "bg-[var(--color-accent-emerald)]" },
-  { key: "Rejected", color: "text-[var(--color-accent-rose)]", dot: "bg-[var(--color-accent-rose)]" },
-]
+const columns = APPLICATION_STATUSES.map((status) => ({ key: status, color: STATUS_COLORS[status].text, dot: STATUS_COLORS[status].dot }))
 
 export default function ApplicationsPage() {
-  const [applications, setApplications] = useState<Application[]>([])
+  const [applications, setApplications] = useState<AppItem[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [newApp, setNewApp] = useState({ company: "", role_title: "", job_url: "", notes: "" })
@@ -45,7 +40,7 @@ export default function ApplicationsPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     const { data } = await supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
-    if (data) setApplications(data as Application[])
+    if (data) setApplications(data as AppItem[])
     setLoading(false)
   }
 
@@ -59,7 +54,7 @@ export default function ApplicationsPage() {
       job_url: newApp.job_url || null, notes: newApp.notes || null, status: "Saved",
     }).select().single()
     if (error) { toast.error("Failed to create application"); setCreating(false); return }
-    if (data) setApplications((prev) => [data as Application, ...prev])
+    if (data) setApplications((prev) => [data as AppItem, ...prev])
     setNewApp({ company: "", role_title: "", job_url: "", notes: "" })
     setDialogOpen(false)
     setCreating(false)
@@ -213,12 +208,8 @@ export default function ApplicationsPage() {
                       <span className="text-xs font-bold font-[family-name:var(--font-mono)] text-[var(--color-accent-violet)]">{app.match_score}</span>
                     )}
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                      app.status === "Rejected" ? "bg-[var(--color-accent-rose)]/10 text-[var(--color-accent-rose)]" :
-                      app.status === "Offer" ? "bg-[var(--color-accent-emerald)]/10 text-[var(--color-accent-emerald)]" :
-                      app.status === "Interview" ? "bg-[var(--color-accent-violet)]/10 text-[var(--color-accent-violet)]" :
-                      app.status === "Applied" ? "bg-[var(--color-accent-blue)]/10 text-[var(--color-accent-blue)]" :
-                      "bg-[var(--color-bg-elevated)] text-[var(--color-text-muted)]"
-                    }`}>{app.status}</span>
+                      STATUS_COLORS[app.status as keyof typeof STATUS_COLORS]?.bg || "bg-[var(--color-bg-elevated)]"
+                    } ${STATUS_COLORS[app.status as keyof typeof STATUS_COLORS]?.text || "text-[var(--color-text-muted)]"}`}>{app.status}</span>
                     <span className="text-[10px] text-[var(--color-text-muted)]">{new Date(app.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>

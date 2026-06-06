@@ -10,13 +10,21 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import Link from "next/link"
 import {
-  Brain, Target, TrendingUp, Briefcase, BarChart3,
-  ArrowRight, Sparkles, ChevronRight, Search, Plus,
-  FileCheck, GitBranch
+  Brain, Target, TrendingUp, BarChart3, Briefcase,
+  ArrowRight, Sparkles, Search,
+  FileCheck
 } from "lucide-react"
+import type { Application, CareerAnalysis, Improvement, WeeklyPlan } from "@/types"
+import { APPLICATION_STATUSES } from "@/lib/constants"
+
+interface DashboardData {
+  analysis: CareerAnalysis | null
+  applications: Application[]
+  savedJobs: Record<string, unknown>[]
+}
 
 export default function DashboardPage() {
-  const [data, setData] = useState<any>({ analysis: null, applications: [], savedJobs: [] })
+  const [data, setData] = useState<DashboardData>({ analysis: null, applications: [], savedJobs: [] })
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
@@ -66,11 +74,11 @@ export default function DashboardPage() {
   const score = data.analysis.interview_readiness_score || 0
   const target = data.analysis.target_score || 90
   const appsByStatus = {
-    Saved: data.applications.filter((a: any) => a.status === "Saved").length,
-    Applied: data.applications.filter((a: any) => a.status === "Applied").length,
-    Interview: data.applications.filter((a: any) => a.status === "Interview").length,
-    Offer: data.applications.filter((a: any) => a.status === "Offer").length,
-    Rejected: data.applications.filter((a: any) => a.status === "Rejected").length,
+    Saved: data.applications.filter((a) => a.status === "Saved").length,
+    Applied: data.applications.filter((a) => a.status === "Applied").length,
+    Interview: data.applications.filter((a) => a.status === "Interview").length,
+    Offer: data.applications.filter((a) => a.status === "Offer").length,
+    Rejected: data.applications.filter((a) => a.status === "Rejected").length,
   }
 
   return (
@@ -153,13 +161,13 @@ export default function DashboardPage() {
             />
           </div>
           <div className="p-5 space-y-2">
-            {(data.analysis.top_improvements || []).slice(0, 5).map((item: any, i: number) => (
+            {(data.analysis.top_improvements || []).slice(0, 5).map((item: Improvement, i: number) => (
               <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
                 <span className="text-xs font-bold font-[family-name:var(--font-mono)] text-[var(--color-accent-emerald)] shrink-0">
                   +{item.impact || item.points || 3}
                 </span>
                 <div className="h-px w-6 bg-[var(--color-border-subtle)] shrink-0" />
-                <span className="text-xs text-[var(--color-text-secondary)]">{item.action || item.improvement || item}</span>
+                <span className="text-xs text-[var(--color-text-secondary)]">{item.action || item.description || ""}</span>
               </div>
             ))}
             {(!data.analysis.top_improvements || data.analysis.top_improvements.length === 0) && (
@@ -180,7 +188,7 @@ export default function DashboardPage() {
           </div>
           <div className="p-5">
             <div className="grid grid-cols-5 gap-2">
-              {(["Saved", "Applied", "Interview", "Offer", "Rejected"] as const).map((status) => (
+              {APPLICATION_STATUSES.map((status) => (
                 <div key={status} className="text-center p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
                   <p className="text-lg sm:text-xl font-bold font-[family-name:var(--font-display)]">
                     {appsByStatus[status]}
@@ -206,7 +214,7 @@ export default function DashboardPage() {
           </div>
           <div className="p-5">
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-              {(Array.isArray(data.analysis.thirty_day_plan) ? data.analysis.thirty_day_plan : []).slice(0, 4).map((week: any, i: number) => (
+              {(Array.isArray(data.analysis.thirty_day_plan) ? data.analysis.thirty_day_plan : []).slice(0, 4).map((week: WeeklyPlan, i: number) => (
                 <div key={i} className="p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
                   <p className="text-[10px] font-semibold text-[var(--color-accent-violet)] mb-1.5">Week {i + 1}</p>
                   <p className="text-xs font-medium text-[var(--color-text-primary)] mb-1">{week.title || `Week ${i + 1}`}</p>

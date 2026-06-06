@@ -9,8 +9,10 @@ import { ScoreRing } from "@/components/ui/score-ring"
 import { SectionHeader } from "@/components/ui/section-header"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
+import { DocumentUpload } from "@/components/ui/document-upload"
 import { Brain, Sparkles, Target, TrendingUp, BarChart3, ExternalLink } from "lucide-react"
 import { toast } from "sonner"
+import type { CareerAnalysis, Improvement, WeeklyPlan } from "@/types"
 
 export default function CareerAnalysisPage() {
   const [cvText, setCvText] = useState("")
@@ -18,7 +20,7 @@ export default function CareerAnalysisPage() {
   const [githubUrl, setGithubUrl] = useState("")
   const [portfolioUrl, setPortfolioUrl] = useState("")
   const [targetRole, setTargetRole] = useState("")
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<CareerAnalysis | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
@@ -53,9 +55,10 @@ export default function CareerAnalysisPage() {
       if (!json.success) throw new Error(json.error)
       setResult(json.data)
       toast.success("Analysis complete")
-    } catch (err: any) {
-      setError(err.message)
-      toast.error(err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Analysis failed"
+      setError(message)
+      toast.error(message)
     }
     setLoading(false)
   }
@@ -73,7 +76,10 @@ export default function CareerAnalysisPage() {
       {/* Input */}
       <div className="surface-card p-5 space-y-4">
         <div>
-          <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-2 block">CV / Resume</Label>
+          <div className="flex items-center justify-between mb-2">
+            <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)]">CV / Resume</Label>
+            <DocumentUpload onTextExtracted={(text) => setCvText(text.replace(/\n/g, "<br>"))} label="Upload CV" />
+          </div>
           <RichTextEditor value={cvText} onChange={setCvText} placeholder="Paste your CV text here..." />
         </div>
         <div className="grid sm:grid-cols-3 gap-3">
@@ -151,11 +157,11 @@ export default function CareerAnalysisPage() {
             <div className="surface-card p-5">
               <SectionHeader title="Top Improvements" icon={<TrendingUp className="h-4 w-4 text-[var(--color-accent-emerald)]" />} />
               <div className="space-y-2 mt-3">
-                {result.top_improvements.map((item: any, i: number) => (
+                {result.top_improvements.map((item: Improvement, i: number) => (
                   <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
-                    <span className="text-xs font-bold font-[family-name:var(--font-mono)] text-[var(--color-accent-emerald)] shrink-0">+{item.impact || item.points || 3}</span>
+                    <span className="text-xs font-bold font-[family-name:var(--font-mono)] text-[var(--color-accent-emerald)] shrink-0">+{item.impact || 3}</span>
                     <div className="h-px w-6 bg-[var(--color-border-subtle)] shrink-0" />
-                    <span className="text-xs text-[var(--color-text-secondary)]">{item.action || item.improvement || item}</span>
+                    <span className="text-xs text-[var(--color-text-secondary)]">{item.action}</span>
                   </div>
                 ))}
               </div>
@@ -167,7 +173,7 @@ export default function CareerAnalysisPage() {
             <div className="surface-card p-5">
               <SectionHeader title="30-Day Career Roadmap" icon={<Sparkles className="h-4 w-4 text-[var(--color-accent-violet)]" />} />
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5 mt-3">
-                {(Array.isArray(result.thirty_day_plan) ? result.thirty_day_plan : []).slice(0, 4).map((week: any, i: number) => (
+                {(Array.isArray(result.thirty_day_plan) ? result.thirty_day_plan : []).slice(0, 4).map((week: WeeklyPlan, i: number) => (
                   <div key={i} className="p-3.5 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
                     <p className="text-[10px] font-semibold text-[var(--color-accent-violet)] mb-1">Week {i + 1}</p>
                     <p className="text-xs font-medium mb-1">{week.title || `Week ${i + 1}`}</p>

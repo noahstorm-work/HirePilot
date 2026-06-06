@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         .limit(10)
 
       const all = [...(data || []), ...(savedData || [])]
-      const unique = [...new Set(all.map((r: any) => r.company).filter(Boolean))]
+      const unique = [...new Set(all.map((r: { company: string }) => r.company).filter(Boolean))]
       return apiSuccess(unique.slice(0, 8))
     }
 
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       .limit(10)
 
     const all = [...(apps || []), ...(saved || [])]
-    const unique = [...new Set(all.map((r: any) => r.company).filter(Boolean))]
+    const unique = [...new Set(all.map((r: { company: string }) => r.company).filter(Boolean))]
     return apiSuccess(unique.slice(0, 8))
   } catch (err) {
     return apiError("Internal server error", 500)

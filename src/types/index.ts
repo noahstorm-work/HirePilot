@@ -71,21 +71,33 @@ export interface CareerAnalysis {
 }
 
 export interface SkillsGap {
-  area: string
-  severity: "low" | "medium" | "high"
-  detail: string
+  area?: string
+  skill?: string
+  name?: string
+  severity?: "low" | "medium" | "high"
+  detail?: string
+  impact?: string
+  [key: string]: unknown
 }
 
 export interface Improvement {
   action: string
-  impact: string
-  difficulty: "easy" | "medium" | "hard"
+  impact?: string
+  points?: number
+  difficulty?: "easy" | "medium" | "hard"
+  priority?: string
+  description?: string
+  [key: string]: unknown
 }
 
 export interface WeeklyPlan {
-  week: number
-  actions: string[]
-  expected_score: number
+  week?: number
+  title?: string
+  description?: string
+  tasks?: string
+  actions?: string[]
+  expected_score?: number
+  [key: string]: unknown
 }
 
 export interface AiResult {

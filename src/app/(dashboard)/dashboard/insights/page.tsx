@@ -6,9 +6,20 @@ import { MetricCard } from "@/components/ui/metric-card"
 import { SectionHeader } from "@/components/ui/section-header"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { BarChart3, TrendingUp, Briefcase, Brain, Target, Sparkles } from "lucide-react"
+import type { CareerAnalysis, Application, Improvement } from "@/types"
+import { APPLICATION_STATUSES, STATUS_COLORS } from "@/lib/constants"
+
+interface InsightsData {
+  analysis: CareerAnalysis | null
+  totalApps: number
+  byStatus: Record<string, number>
+  interviewRate: number
+  offerRate: number
+  recentApps: Application[]
+}
 
 export default function InsightsPage() {
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<InsightsData | null>(null)
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
@@ -40,6 +51,7 @@ export default function InsightsPage() {
   }
 
   if (loading) return <LoadingScreen />
+  if (!data) return null
 
   return (
     <div className="space-y-6">
@@ -61,7 +73,7 @@ export default function InsightsPage() {
         <div className="surface-card p-5">
           <SectionHeader title="Application Funnel" icon={<BarChart3 className="h-4 w-4 text-[var(--color-accent-blue)]" />} />
           <div className="space-y-3 mt-4">
-            {(["Saved", "Applied", "Interview", "Offer", "Rejected"] as const).map((status) => {
+            {APPLICATION_STATUSES.map((status) => {
               const count = data.byStatus[status]
               const pct = data.totalApps > 0 ? Math.round((count / data.totalApps) * 100) : 0
               return (
@@ -71,12 +83,7 @@ export default function InsightsPage() {
                     <span className="text-[10px] text-[var(--color-text-muted)]">{count} ({pct}%)</span>
                   </div>
                   <div className="h-1.5 rounded-full bg-[var(--color-bg-elevated)] overflow-hidden">
-                    <div className={`h-full rounded-full transition-all duration-500 ${
-                      status === "Rejected" ? "bg-[var(--color-accent-rose)]/60" :
-                      status === "Offer" ? "bg-[var(--color-accent-emerald)]/60" :
-                      status === "Interview" ? "bg-[var(--color-accent-violet)]/60" :
-                      status === "Applied" ? "bg-[var(--color-accent-blue)]/60" : "bg-[var(--color-text-muted)]/60"
-                    }`} style={{ width: `${pct}%` }} />
+                    <div className={`h-full rounded-full transition-all duration-500 ${STATUS_COLORS[status].pill}`} style={{ width: `${pct}%` }} />
                   </div>
                 </div>
               )
@@ -113,12 +120,12 @@ export default function InsightsPage() {
       <div className="surface-card p-5">
         <SectionHeader title="Recommendations" icon={<Sparkles className="h-4 w-4 text-[var(--color-accent-amber)]" />} />
         <div className="grid sm:grid-cols-2 gap-2.5 mt-4">
-          {(data.analysis?.top_improvements || []).slice(0, 6).map((item: any, i: number) => (
+          {(data.analysis?.top_improvements || []).slice(0, 6).map((item: Improvement, i: number) => (
             <div key={i} className="flex items-center gap-2.5 p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
               <div className="h-7 w-7 rounded-lg bg-[var(--color-accent-violet)]/10 flex items-center justify-center shrink-0">
-                <span className="text-[10px] font-bold text-[var(--color-accent-violet)]">+{item.impact || item.points || 3}</span>
+                <span className="text-[10px] font-bold text-[var(--color-accent-violet)]">+{item.impact || 3}</span>
               </div>
-              <span className="text-xs text-[var(--color-text-secondary)]">{item.action || item.improvement || item}</span>
+              <span className="text-xs text-[var(--color-text-secondary)]">{item.action}</span>
             </div>
           ))}
           {(!data.analysis?.top_improvements || data.analysis.top_improvements.length === 0) && (
@@ -133,7 +140,7 @@ export default function InsightsPage() {
         <div className="space-y-2 mt-4">
           {data.recentApps.length === 0 ? (
             <p className="text-xs text-[var(--color-text-muted)] text-center py-6">No applications yet</p>
-          ) : data.recentApps.map((app: any) => (
+          ) : data.recentApps.map((app: Application) => (
             <div key={app.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
               <div className="min-w-0">
                 <p className="text-xs font-medium truncate">{app.company}</p>
@@ -141,12 +148,8 @@ export default function InsightsPage() {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                  app.status === "Rejected" ? "bg-[var(--color-accent-rose)]/10 text-[var(--color-accent-rose)]" :
-                  app.status === "Offer" ? "bg-[var(--color-accent-emerald)]/10 text-[var(--color-accent-emerald)]" :
-                  app.status === "Interview" ? "bg-[var(--color-accent-violet)]/10 text-[var(--color-accent-violet)]" :
-                  app.status === "Applied" ? "bg-[var(--color-accent-blue)]/10 text-[var(--color-accent-blue)]" :
-                  "bg-[var(--color-bg-hover)] text-[var(--color-text-muted)]"
-                }`}>{app.status}</span>
+                  STATUS_COLORS[app.status as keyof typeof STATUS_COLORS]?.bg || "bg-[var(--color-bg-hover)]"
+                } ${STATUS_COLORS[app.status as keyof typeof STATUS_COLORS]?.text || "text-[var(--color-text-muted)]"}`}>{app.status}</span>
                 <span className="text-[10px] text-[var(--color-text-muted)]">{new Date(app.created_at).toLocaleDateString()}</span>
               </div>
             </div>

@@ -32,7 +32,7 @@ export default async function InterviewPrepPage({
     <div className="space-y-6">
       <Link
         href={`/applications/${id}`}
-        className="inline-flex items-center gap-1.5 text-xs text-[#63636e] hover:text-[#a0a0ab] transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors"
       >
         <ArrowLeft className="h-3 w-3" />
         Back to application
@@ -40,12 +40,12 @@ export default async function InterviewPrepPage({
 
       <div>
         <h1 className="text-2xl font-bold font-[family-name:var(--font-display)] tracking-tight">Interview Preparation</h1>
-        <p className="text-sm text-[#63636e] mt-1">
+        <p className="text-sm text-[var(--color-text-muted)] mt-1">
           {application.company} — {application.role_title}
         </p>
       </div>
 
-      <div className="p-6 rounded-2xl border border-[#1e1e24] bg-[#0f0f12]">
+      <div className="p-6 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-primary)]">
         <InterviewCoach
           applicationId={id}
           jobDescription={application.job_description ?? ""}
