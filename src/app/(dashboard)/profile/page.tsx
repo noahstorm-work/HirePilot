@@ -9,6 +9,7 @@ import { SectionHeader } from "@/components/ui/section-header"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { DocumentUpload } from "@/components/ui/document-upload"
+import type { ExtractedMetadata } from "@/lib/document-parser"
 import { User, Save, ExternalLink, X, Check } from "lucide-react"
 import { toast } from "sonner"
 import type { UserProfile } from "@/types"
@@ -102,6 +103,16 @@ export default function ProfilePage() {
     toast.success("Profile saved")
   }
 
+  const fillFromMetadata = (meta: ExtractedMetadata) => {
+    if (meta.full_name && !fullName) setFullName(meta.full_name)
+    if (meta.linkedin_url && !linkedin) setLinkedin(meta.linkedin_url)
+    if (meta.github_url && !github) setGithub(meta.github_url)
+    if (meta.portfolio_url && !portfolio) setPortfolio(meta.portfolio_url)
+    if (meta.skills?.length && skills.length === 0) setSkills(meta.skills)
+    const filled = [meta.full_name, meta.linkedin_url, meta.github_url, meta.portfolio_url, meta.skills?.length].filter(Boolean).length
+    if (filled > 0) toast.success(`Auto-filled ${filled} field${filled > 1 ? "s" : ""} from document`)
+  }
+
   const addSkill = () => {
     const trimmed = skillInput.trim()
     if (trimmed && !skills.includes(trimmed)) {
@@ -128,7 +139,10 @@ export default function ProfilePage() {
       <div className="surface-card p-5">
         <div className="flex items-center justify-between mb-2">
           <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)]">CV / Resume</Label>
-          <DocumentUpload onTextExtracted={(text) => setCvText(text.replace(/\n/g, "<br>"))} label="Upload CV" />
+          <DocumentUpload onTextExtracted={(text, meta) => {
+            setCvText(text.replace(/\n/g, "<br>"))
+            if (meta) fillFromMetadata(meta)
+          }} label="Upload CV" />
         </div>
         <RichTextEditor
           value={cvText}

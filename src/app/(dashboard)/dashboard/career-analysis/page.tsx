@@ -10,6 +10,7 @@ import { SectionHeader } from "@/components/ui/section-header"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { DocumentUpload } from "@/components/ui/document-upload"
+import type { ExtractedMetadata } from "@/lib/document-parser"
 import { Brain, Sparkles, Target, TrendingUp, BarChart3, ExternalLink } from "lucide-react"
 import { toast } from "sonner"
 import type { CareerAnalysis, Improvement, WeeklyPlan } from "@/types"
@@ -91,7 +92,14 @@ export default function CareerAnalysisPage() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)]">CV / Resume</Label>
-            <DocumentUpload onTextExtracted={(text) => setCvText(text.replace(/\n/g, "<br>"))} label="Upload CV" />
+            <DocumentUpload onTextExtracted={(text, meta) => {
+              setCvText(text.replace(/\n/g, "<br>"))
+              if (meta) {
+                if (meta.linkedin_url && !linkedinUrl) setLinkedinUrl(meta.linkedin_url)
+                if (meta.github_url && !githubUrl) setGithubUrl(meta.github_url)
+                if (meta.portfolio_url && !portfolioUrl) setPortfolioUrl(meta.portfolio_url)
+              }
+            }} label="Upload CV" />
           </div>
           <RichTextEditor value={cvText} onChange={setCvText} placeholder="Paste your CV text here..." />
         </div>

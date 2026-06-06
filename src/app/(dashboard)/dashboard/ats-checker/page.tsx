@@ -83,7 +83,10 @@ export default function ATSCheckerPage() {
           />
         </div>
         <div>
-          <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Target Job Description (optional)</Label>
+          <div className="flex items-center justify-between mb-1">
+            <Label className="text-[10px] text-[var(--color-text-muted)]">Target Job Description (optional)</Label>
+            <DocumentUpload onTextExtracted={(text) => setJobDescription(text.replace(/\n/g, "<br>"))} label="Upload JD" />
+          </div>
           <RichTextEditor
             value={jobDescription}
             onChange={setJobDescription}

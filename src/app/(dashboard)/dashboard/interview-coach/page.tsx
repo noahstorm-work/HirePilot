@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
+import { DocumentUpload } from "@/components/ui/document-upload"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Sparkles, Code, MessageSquare, Building2, CheckCircle2 } from "lucide-react"
@@ -107,7 +108,10 @@ export default function InterviewCoachPage() {
           </div>
         </div>
         <div>
-          <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Job Description (optional)</Label>
+          <div className="flex items-center justify-between mb-1">
+            <Label className="text-[10px] text-[var(--color-text-muted)]">Job Description (optional)</Label>
+            <DocumentUpload onTextExtracted={(text) => setJobDescription(text.replace(/\n/g, "<br>"))} label="Upload JD" />
+          </div>
           <RichTextEditor value={jobDescription} onChange={setJobDescription} placeholder="Paste job description for more tailored questions..." />
         </div>
       </div>

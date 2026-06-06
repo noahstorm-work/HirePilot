@@ -3,11 +3,11 @@
 import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Upload, FileText, Loader2, X } from "lucide-react"
-import { parseDocument } from "@/lib/document-parser"
+import { parseDocument, type ExtractedMetadata } from "@/lib/document-parser"
 import { toast } from "sonner"
 
 interface DocumentUploadProps {
-  onTextExtracted: (text: string) => void
+  onTextExtracted: (text: string, metadata?: ExtractedMetadata) => void
   className?: string
   label?: string
 }
@@ -21,14 +21,14 @@ export function DocumentUpload({ onTextExtracted, className, label = "Upload Doc
     setParsing(true)
     setFileName(file.name)
     try {
-      const text = await parseDocument(file)
+      const { text, metadata } = await parseDocument(file)
       if (!text.trim()) {
         toast.error("No text found in document. The file may be image-based or empty.")
         setParsing(false)
         setFileName(null)
         return
       }
-      onTextExtracted(text)
+      onTextExtracted(text, metadata)
       toast.success(`Extracted text from ${file.name}`)
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to parse document"

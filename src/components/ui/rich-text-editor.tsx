@@ -3,6 +3,7 @@
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import Placeholder from "@tiptap/extension-placeholder"
+import { useEffect } from "react"
 import {
   Bold, Italic, List, ListOrdered, Heading2, Undo, Redo
 } from "lucide-react"
@@ -39,6 +40,12 @@ export function RichTextEditor({
       },
     },
   })
+
+  useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value || "")
+    }
+  }, [value, editor])
 
   if (!editor) return null
 
