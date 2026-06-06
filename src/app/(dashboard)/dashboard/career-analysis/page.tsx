@@ -45,6 +45,19 @@ export default function CareerAnalysisPage() {
     setLoading(true)
     setError("")
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const plainText = cvText.replace(/<[^>]*>/g, "").trim()
+        await supabase.from("user_profiles").upsert({
+          id: user.id,
+          cv_text: cvText,
+          linkedin_url: linkedinUrl || null,
+          github_url: githubUrl || null,
+          portfolio_url: portfolioUrl || null,
+          target_role: targetRole || null,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "id" })
+      }
       const plainText = cvText.replace(/<[^>]*>/g, "").trim()
       const res = await fetch("/api/ai/career-analysis", {
         method: "POST",

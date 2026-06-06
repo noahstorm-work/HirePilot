@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
@@ -25,6 +26,16 @@ export default function ATSCheckerPage() {
   const [result, setResult] = useState<AtsCheckResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const supabase = createClient()
+
+  useEffect(() => { loadProfile() }, [])
+
+  const loadProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data } = await supabase.from("user_profiles").select("cv_text").eq("id", user.id).maybeSingle()
+    if (data?.cv_text) setCvText(data.cv_text)
+  }
 
   const handleCheck = async () => {
     if (!cvText.trim()) return

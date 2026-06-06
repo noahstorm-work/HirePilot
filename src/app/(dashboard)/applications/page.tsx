@@ -24,17 +24,33 @@ interface AppItem {
 
 const columns = APPLICATION_STATUSES.map((status) => ({ key: status, color: STATUS_COLORS[status].text, dot: STATUS_COLORS[status].dot }))
 
+const APPS_STORAGE_KEY = "applications_prefs"
+
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<AppItem[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [newApp, setNewApp] = useState({ company: "", role_title: "", job_url: "", notes: "" })
   const [creating, setCreating] = useState(false)
-  const [filterStatus, setFilterStatus] = useState<string>("All")
-  const [viewMode, setViewMode] = useState<"kanban" | "list">("kanban")
+  const [filterStatus, setFilterStatus] = useState<string>(() => {
+    if (typeof window !== "undefined") return localStorage.getItem(`${APPS_STORAGE_KEY}_filter`) || "All"
+    return "All"
+  })
+  const [viewMode, setViewMode] = useState<"kanban" | "list">(() => {
+    if (typeof window !== "undefined") return (localStorage.getItem(`${APPS_STORAGE_KEY}_view`) as "kanban" | "list") || "kanban"
+    return "kanban"
+  })
   const supabase = createClient()
 
   useEffect(() => { loadApplications() }, [])
+
+  useEffect(() => {
+    localStorage.setItem(`${APPS_STORAGE_KEY}_filter`, filterStatus)
+  }, [filterStatus])
+
+  useEffect(() => {
+    localStorage.setItem(`${APPS_STORAGE_KEY}_view`, viewMode)
+  }, [viewMode])
 
   const loadApplications = async () => {
     const { data: { user } } = await supabase.auth.getUser()

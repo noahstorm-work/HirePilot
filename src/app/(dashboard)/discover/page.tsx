@@ -14,6 +14,8 @@ import { toast } from "sonner"
 import type { JobSearchResult } from "@/lib/jobs-api"
 import type { SavedJob } from "@/types"
 
+const SEARCH_STATE_KEY = "discover_search_state"
+
 export default function DiscoverPage() {
   const [query, setQuery] = useState("")
   const [location, setLocation] = useState("")
@@ -34,7 +36,19 @@ export default function DiscoverPage() {
     loadSavedJobs()
     const stored = localStorage.getItem("recentJobSearches")
     if (stored) setRecentSearches(JSON.parse(stored))
+    const savedState = localStorage.getItem(SEARCH_STATE_KEY)
+    if (savedState) {
+      try {
+        const { query: q, location: l } = JSON.parse(savedState)
+        if (q) setQuery(q)
+        if (l) setLocation(l)
+      } catch {}
+    }
   }, [])
+
+  useEffect(() => {
+    localStorage.setItem(SEARCH_STATE_KEY, JSON.stringify({ query, location }))
+  }, [query, location])
 
   const loadSavedJobs = async () => {
     const { data: { user } } = await supabase.auth.getUser()

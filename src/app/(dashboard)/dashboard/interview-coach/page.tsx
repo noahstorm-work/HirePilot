@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +14,8 @@ import { RoleAutocomplete } from "@/components/ui/role-autocomplete"
 import { toast } from "sonner"
 import type { InterviewQuestions } from "@/types"
 
+const STORAGE_KEY = "interview_coach_draft"
+
 export default function InterviewCoachPage() {
   const [company, setCompany] = useState("")
   const [role, setRole] = useState("")
@@ -23,6 +25,31 @@ export default function InterviewCoachPage() {
   const [error, setError] = useState("")
   const [activeTab, setActiveTab] = useState<"technical" | "behavioral" | "star" | "company">("technical")
   const supabase = createClient()
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      try {
+        const draft = JSON.parse(saved)
+        if (draft.company) setCompany(draft.company)
+        if (draft.role) setRole(draft.role)
+        if (draft.jobDescription) setJobDescription(draft.jobDescription)
+        return
+      } catch {}
+    }
+    loadProfile()
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ company, role, jobDescription }))
+  }, [company, role, jobDescription])
+
+  const loadProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data } = await supabase.from("user_profiles").select("target_role").eq("id", user.id).maybeSingle()
+    if (data?.target_role) setRole(data.target_role)
+  }
 
   const handleGenerate = async () => {
     if (!role.trim()) return

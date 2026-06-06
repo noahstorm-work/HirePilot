@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,7 +9,7 @@ import { SectionHeader } from "@/components/ui/section-header"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { DocumentUpload } from "@/components/ui/document-upload"
-import { User, Save, ExternalLink, X } from "lucide-react"
+import { User, Save, ExternalLink, X, Check } from "lucide-react"
 import { toast } from "sonner"
 import type { UserProfile } from "@/types"
 
@@ -17,6 +17,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [autoSaved, setAutoSaved] = useState(false)
   const [cvText, setCvText] = useState("")
   const [fullName, setFullName] = useState("")
   const [linkedin, setLinkedin] = useState("")
@@ -28,6 +29,50 @@ export default function ProfilePage() {
   const [skills, setSkills] = useState<string[]>([])
   const [skillInput, setSkillInput] = useState("")
   const supabase = createClient()
+  const isDirty = useRef(false)
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const saveProfile = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { error } = await supabase.from("user_profiles").upsert({
+      id: user.id,
+      cv_text: cvText,
+      full_name: fullName || null,
+      linkedin_url: linkedin || null,
+      github_url: github || null,
+      portfolio_url: portfolio || null,
+      target_role: targetRole || null,
+      years_experience: yearsExperience ? parseInt(yearsExperience) : null,
+      target_seniority: targetSeniority || null,
+      skills,
+    }, { onConflict: "id" })
+    isDirty.current = false
+    setAutoSaved(true)
+    setTimeout(() => setAutoSaved(false), 2000)
+    if (error) toast.error("Auto-save failed")
+  }, [cvText, fullName, linkedin, github, portfolio, targetRole, yearsExperience, targetSeniority, skills, supabase])
+
+  const scheduleAutoSave = useCallback(() => {
+    isDirty.current = true
+    setAutoSaved(false)
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+    autoSaveTimer.current = setTimeout(() => saveProfile(), 3000)
+  }, [saveProfile])
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (isDirty.current) {
+        e.preventDefault()
+      }
+    }
+    window.addEventListener("beforeunload", handler)
+    return () => window.removeEventListener("beforeunload", handler)
+  }, [])
+
+  useEffect(() => {
+    return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current) }
+  }, [])
 
   useEffect(() => { loadProfile() }, [])
 
@@ -52,23 +97,9 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     setSaving(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    const { error } = await supabase.from("user_profiles").upsert({
-      id: user.id,
-      cv_text: cvText,
-      full_name: fullName || null,
-      linkedin_url: linkedin || null,
-      github_url: github || null,
-      portfolio_url: portfolio || null,
-      target_role: targetRole || null,
-      years_experience: yearsExperience ? parseInt(yearsExperience) : null,
-      target_seniority: targetSeniority || null,
-      skills,
-    })
+    await saveProfile()
     setSaving(false)
-    if (error) toast.error("Failed to save profile")
-    else toast.success("Profile saved")
+    toast.success("Profile saved")
   }
 
   const addSkill = () => {
@@ -101,7 +132,7 @@ export default function ProfilePage() {
         </div>
         <RichTextEditor
           value={cvText}
-          onChange={setCvText}
+          onChange={(v) => { setCvText(v); scheduleAutoSave() }}
           placeholder="Paste your CV text here..."
         />
       </div>
@@ -111,7 +142,7 @@ export default function ProfilePage() {
         <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] block">Personal Info</Label>
         <div>
           <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Full Name</Label>
-          <Input value={fullName} onChange={(e) => setFullName(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="John Doe" />
+          <Input value={fullName} onChange={(e) => { setFullName(e.target.value); scheduleAutoSave() }} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="John Doe" />
         </div>
       </div>
 
@@ -122,21 +153,21 @@ export default function ProfilePage() {
           <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">LinkedIn URL</Label>
           <div className="relative">
             <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
-            <Input value={linkedin} onChange={(e) => setLinkedin(e.target.value)} className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://linkedin.com/in/..." />
+            <Input value={linkedin} onChange={(e) => { setLinkedin(e.target.value); scheduleAutoSave() }} className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://linkedin.com/in/..." />
           </div>
         </div>
         <div>
           <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">GitHub URL</Label>
           <div className="relative">
             <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
-            <Input value={github} onChange={(e) => setGithub(e.target.value)} className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://github.com/..." />
+            <Input value={github} onChange={(e) => { setGithub(e.target.value); scheduleAutoSave() }} className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://github.com/..." />
           </div>
         </div>
         <div>
           <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Portfolio URL</Label>
           <div className="relative">
             <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
-            <Input value={portfolio} onChange={(e) => setPortfolio(e.target.value)} className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://..." />
+            <Input value={portfolio} onChange={(e) => { setPortfolio(e.target.value); scheduleAutoSave() }} className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://..." />
           </div>
         </div>
       </div>
@@ -146,16 +177,16 @@ export default function ProfilePage() {
         <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] block">Career Settings</Label>
         <div>
           <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Target Role</Label>
-          <RoleAutocomplete value={targetRole} onChange={setTargetRole} placeholder="e.g. Senior Frontend Engineer" />
+          <RoleAutocomplete value={targetRole} onChange={(v) => { setTargetRole(v); scheduleAutoSave() }} placeholder="e.g. Senior Frontend Engineer" />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Years of Experience</Label>
-            <Input type="number" min="0" max="30" value={yearsExperience} onChange={(e) => setYearsExperience(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="0" />
+            <Input type="number" min="0" max="30" value={yearsExperience} onChange={(e) => { setYearsExperience(e.target.value); scheduleAutoSave() }} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="0" />
           </div>
           <div>
             <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Seniority Level</Label>
-            <select value={targetSeniority} onChange={(e) => setTargetSeniority(e.target.value)} className="w-full h-9 rounded-xl px-3 text-sm bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] focus:outline-none">
+            <select value={targetSeniority} onChange={(e) => { setTargetSeniority(e.target.value); scheduleAutoSave() }} className="w-full h-9 rounded-xl px-3 text-sm bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] focus:outline-none">
               <option value="">Select level</option>
               <option value="junior">Junior</option>
               <option value="mid">Mid</option>
@@ -184,7 +215,12 @@ export default function ProfilePage() {
       </div>
 
       {/* Save */}
-      <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-3">
+        {autoSaved && (
+          <span className="flex items-center gap-1.5 text-[11px] text-[var(--color-accent-emerald)]">
+            <Check className="h-3 w-3" /> Auto-saved
+          </span>
+        )}
         <Button onClick={handleSave} disabled={saving} className="gradient-violet text-white border-0 px-5 h-9 text-sm font-semibold hover:opacity-90 shadow-glow group">
           {saving ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : (
             <>
