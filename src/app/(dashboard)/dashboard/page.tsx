@@ -216,9 +216,18 @@ export default function DashboardPage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
               {(Array.isArray(data.analysis.thirty_day_plan) ? data.analysis.thirty_day_plan : []).slice(0, 4).map((week: WeeklyPlan, i: number) => (
                 <div key={i} className="p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
-                  <p className="text-[10px] font-semibold text-[var(--color-accent-violet)] mb-1.5">Week {i + 1}</p>
-                  <p className="text-xs font-medium text-[var(--color-text-primary)] mb-1">{week.title || `Week ${i + 1}`}</p>
-                  <p className="text-[11px] text-[var(--color-text-muted)] leading-relaxed">{week.description || week.tasks || JSON.stringify(week)}</p>
+                  <p className="text-[10px] font-semibold text-[var(--color-accent-violet)] mb-1.5">Week {week.week || i + 1}</p>
+                  <ul className="space-y-1">
+                    {(week.actions || []).slice(0, 3).map((action: string, j: number) => (
+                      <li key={j} className="flex items-start gap-1.5 text-[11px] text-[var(--color-text-muted)] leading-relaxed">
+                        <span className="h-1 w-1 rounded-full bg-[var(--color-accent-violet)] mt-1.5 shrink-0" />
+                        {action}
+                      </li>
+                    ))}
+                  </ul>
+                  {week.expected_score && (
+                    <p className="text-[9px] text-[var(--color-accent-emerald)] mt-2 font-medium">Target: {week.expected_score}%</p>
+                  )}
                 </div>
               ))}
             </div>
