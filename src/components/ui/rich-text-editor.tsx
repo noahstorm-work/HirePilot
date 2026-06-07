@@ -164,6 +164,9 @@ export function RichTextEditor({
       <div
         style={{ height: `${height}px` }}
         className="overflow-y-auto min-h-[150px]"
+        role="textbox"
+        aria-label="Rich text editor"
+        aria-multiline="true"
       >
         <EditorContent editor={editor} />
       </div>

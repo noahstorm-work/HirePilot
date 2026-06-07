@@ -2,7 +2,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
   Brain, Target, TrendingUp, Briefcase, BarChart3,
-  ArrowRight, FileCheck, Sparkles, Zap, ChevronRight, Star
+  ArrowRight, FileCheck, Sparkles, Zap, ChevronRight
 } from "lucide-react"
 
 const features = [
@@ -20,12 +20,6 @@ const steps = [
   { step: "03", title: "Discover Gaps", desc: "See what's missing" },
   { step: "04", title: "Find Jobs", desc: "AI-matched opportunities" },
   { step: "05", title: "Get Hired", desc: "Land more interviews" },
-]
-
-const testimonials = [
-  { name: "Sarah K.", role: "Software Engineer", text: "HirePilot showed me my CV was missing 3 critical keywords. After fixing them, I got 4 interview callbacks in one week.", score: 92 },
-  { name: "Marcus L.", role: "Product Manager", text: "The skills gap analysis was a wake-up call. Now I target the right roles and get more responses.", score: 87 },
-  { name: "Elena R.", role: "Data Scientist", text: "The interview coach prepared me better than any paid course. Landed my dream job.", score: 95 },
 ]
 
 export default function LandingPage() {
@@ -169,9 +163,9 @@ export default function LandingPage() {
       <section className="py-10 px-5 border-y border-[var(--color-border-subtle)]">
         <div className="mx-auto max-w-4xl flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
           {[
-            { value: "12,000+", label: "Analyses run" },
-            { value: "3.2x", label: "More interviews" },
-            { value: "89%", label: "Improve score" },
+            { value: "8", label: "Career dimensions analyzed" },
+            { value: "3", label: "Job search sources" },
+            { value: "Free", label: "Career analysis" },
           ].map((stat, i) => (
             <div key={i} className="text-center">
               <p className="text-xl font-bold font-[family-name:var(--font-display)] gradient-text-violet">{stat.value}</p>
@@ -226,41 +220,6 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-sm font-semibold mb-1 font-[family-name:var(--font-display)]">{feature.title}</h3>
                 <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-20 px-5">
-        <div className="mx-auto max-w-4xl">
-          <div className="text-center mb-14">
-            <p className="text-[11px] font-semibold text-[var(--color-accent-violet)] uppercase tracking-widest mb-2">Results</p>
-            <h2 className="text-2xl sm:text-3xl font-bold font-[family-name:var(--font-display)] tracking-tight">
-              People are landing more interviews
-            </h2>
-          </div>
-
-          <div className="grid sm:grid-cols-3 gap-3">
-            {testimonials.map((t, i) => (
-              <div key={i} className="p-5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)]">
-                <div className="flex items-center gap-0.5 mb-3">
-                  {[...Array(5)].map((_, j) => (
-                    <Star key={j} className="h-3 w-3 fill-[var(--color-accent-amber)] text-[var(--color-accent-amber)]" />
-                  ))}
-                </div>
-                <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed mb-4">&quot;{t.text}&quot;</p>
-                <div className="flex items-center justify-between pt-3 border-t border-[var(--color-border-subtle)]">
-                  <div>
-                    <p className="text-xs font-medium">{t.name}</p>
-                    <p className="text-[10px] text-[var(--color-text-muted)]">{t.role}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] text-[var(--color-text-muted)]">Score</p>
-                    <p className="text-lg font-bold font-[family-name:var(--font-display)] text-[var(--color-accent-emerald)]">{t.score}</p>
-                  </div>
-                </div>
               </div>
             ))}
           </div>

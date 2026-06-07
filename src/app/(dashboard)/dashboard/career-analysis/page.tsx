@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { ScoreRing } from "@/components/ui/score-ring"
 import { SectionHeader } from "@/components/ui/section-header"
@@ -124,11 +125,11 @@ export default function CareerAnalysisPage() {
         </div>
         <div>
           <Label htmlFor="ca-about" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">LinkedIn About Section <span className="text-[var(--color-text-tertiary)]">(paste your summary for better analysis)</span></Label>
-          <textarea
+          <Textarea
             id="ca-about"
             value={linkedinAbout}
             onChange={(e) => setLinkedinAbout(e.target.value)}
-            className="w-full h-20 px-3 py-2 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] focus:outline-none text-xs resize-none"
+            className="h-20 text-xs resize-none"
             placeholder="Go to your LinkedIn profile, copy your About section, and paste it here..."
           />
         </div>

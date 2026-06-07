@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
+import { logServerError } from "@/lib/api-handler"
 
 export async function DELETE(request: Request) {
   try {
@@ -31,7 +32,8 @@ export async function DELETE(request: Request) {
     }
 
     return NextResponse.json({ success: true, data: { deleted: true }, error: null })
-  } catch {
+  } catch (err) {
+    await logServerError(err, request, "account:delete")
     return NextResponse.json({ success: false, data: null, error: "Internal server error" }, { status: 500 })
   }
 }

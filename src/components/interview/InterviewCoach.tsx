@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Sparkles, ChevronDown, ChevronUp } from "lucide-react"
 import type { InterviewQuestions } from "@/types"
@@ -35,10 +36,7 @@ export function InterviewCoach({ applicationId, jobDescription, cvText }: Props)
 
   if (!jobDescription || !cvText) {
     return (
-      <div className="text-center py-8">
-        <Sparkles className="mx-auto h-8 w-8 text-[var(--color-text-muted)] mb-3" />
-        <p className="text-sm text-[var(--color-text-muted)]">Add a job description to generate interview prep.</p>
-      </div>
+      <EmptyState icon={Sparkles} title="Interview Coach" description="Add a job description to generate interview prep." />
     )
   }
 

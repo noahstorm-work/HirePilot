@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { MetricCard } from "@/components/ui/metric-card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { SectionHeader } from "@/components/ui/section-header"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { BarChart3, TrendingUp, Briefcase, Brain, Target, Sparkles, RefreshCw } from "lucide-react"
@@ -230,7 +231,7 @@ export default function InsightsPage() {
             </div>
           ))}
           {(!data.analysis?.top_improvements || data.analysis.top_improvements.length === 0) && (
-            <p className="text-xs text-[var(--color-text-muted)] text-center py-6 col-span-2">Run a career analysis to get recommendations</p>
+            <EmptyState icon={Sparkles} title="No recommendations" description="Run a career analysis to get personalized recommendations." className="py-6 col-span-2" />
           )}
         </div>
       </div>
@@ -240,7 +241,7 @@ export default function InsightsPage() {
         <SectionHeader title="Recent Applications" icon={<Briefcase className="h-4 w-4 text-[var(--color-accent-blue)]" />} />
         <div className="space-y-2 mt-4">
           {data.recentApps.length === 0 ? (
-            <p className="text-xs text-[var(--color-text-muted)] text-center py-6">No applications yet</p>
+            <EmptyState icon={Briefcase} title="No applications yet" description="Start tracking your applications to see insights." className="py-6" />
           ) : data.recentApps.map((app: Application) => (
             <div key={app.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
               <div className="min-w-0">

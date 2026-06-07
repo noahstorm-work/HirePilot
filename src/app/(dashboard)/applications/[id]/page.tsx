@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import { EmptyState } from "@/components/ui/empty-state"
 import { SectionHeader } from "@/components/ui/section-header"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import {
@@ -312,9 +313,7 @@ export default function ApplicationDetailPage() {
             )}
           </div>
         ) : (
-          <div className="text-center py-8">
-            <p className="text-xs text-[var(--color-text-muted)]">Run an AI analysis to get match score, cover letter, and suggestions</p>
-          </div>
+          <EmptyState icon={Brain} title="AI Job Analysis" description="Run an AI analysis to get match score, cover letter, and suggestions" />
         )}
       </div>
     </div>

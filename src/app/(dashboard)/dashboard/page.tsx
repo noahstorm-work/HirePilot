@@ -170,7 +170,7 @@ export default function DashboardPage() {
               </div>
             ))}
             {(!data.analysis.top_improvements || data.analysis.top_improvements.length === 0) && (
-              <p className="text-xs text-[var(--color-text-muted)] text-center py-4">No improvements identified yet</p>
+              <EmptyState icon={TrendingUp} title="No improvements yet" description="Run a career analysis to identify improvement opportunities." className="py-6" />
             )}
           </div>
         </div>

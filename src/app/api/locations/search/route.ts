@@ -27,13 +27,19 @@ export const GET = withAuth(async (request) => {
   params.append("osm_tag", "place:city")
   params.append("osm_tag", "place:town")
 
-  const res = await fetch(`https://photon.komoot.io/api?${params}`, {
-    headers: { "Accept": "application/json" },
-  })
+  let data: { features?: PhotonFeature[] }
+  try {
+    const res = await fetch(`https://photon.komoot.io/api?${params}`, {
+      headers: { "Accept": "application/json" },
+    })
 
-  if (!res.ok) return apiError("Location service unavailable", 502)
+    if (!res.ok) return apiError("Location service unavailable", 502)
 
-  const data = await res.json()
+    data = await res.json()
+  } catch {
+    return apiError("Location service unavailable", 502)
+  }
+
   const suggestions = (data.features || []).map((f: PhotonFeature) => {
     const p = f.properties
     const parts = [p.city || p.name, p.state, p.country].filter(Boolean)

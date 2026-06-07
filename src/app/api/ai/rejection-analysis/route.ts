@@ -6,9 +6,6 @@ const schema = z.object({
   applicationId: z.string().uuid(),
   jobDescription: z.string().min(10),
   cvText: z.string().optional(),
-  application_id: z.string().uuid().optional(),
-  job_description: z.string().optional(),
-  cv_text: z.string().optional(),
   company: z.string().optional(),
   role: z.string().optional(),
   rejectionStage: z.string().optional(),
@@ -22,9 +19,7 @@ export const POST = withAuth(async (request, { supabase, user }) => {
   if (parsed.error) return parsed.error
 
   const d = parsed.data
-  const applicationId = d.applicationId || d.application_id!
-  const jobDescription = d.jobDescription || d.job_description!
-  let cvText = d.cvText || d.cv_text || ""
+  let cvText = d.cvText || ""
 
   if (!cvText || cvText.length < 10) {
     const { data: profile } = await supabase
@@ -39,12 +34,12 @@ export const POST = withAuth(async (request, { supabase, user }) => {
     return apiError("CV text is required. Please add your CV in Profile first.", 400)
   }
 
-  const result = await analyzeRejection({ jobDescription, cvText, rejectionStage: d.rejectionStage })
+  const result = await analyzeRejection({ jobDescription: d.jobDescription, cvText, rejectionStage: d.rejectionStage })
 
   const { data, error } = await supabase
     .from("rejection_analyses")
     .upsert({
-      application_id: applicationId,
+      application_id: d.applicationId,
       user_id: user.id,
       likely_reasons: result.likely_reasons,
       skills_gaps: result.skills_gaps,

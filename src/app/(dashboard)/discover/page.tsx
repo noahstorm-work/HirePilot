@@ -279,7 +279,7 @@ export default function DiscoverPage() {
           {loading ? (
             <LoadingSkeleton rows={4} />
           ) : searched && results.length === 0 ? (
-            <div className="text-center py-12 text-xs text-[var(--color-text-muted)]">No jobs found. Try a different search.</div>
+            <EmptyState icon={Search} title="No jobs found" description="Try a different search query or adjust your filters." />
           ) : results.length > 0 ? (
             <>
               <div className="flex items-center justify-between">
@@ -357,10 +357,7 @@ export default function DiscoverPage() {
               )}
             </>
           ) : (
-            <div className="text-center py-16 text-[var(--color-text-muted)]">
-              <Search className="h-8 w-8 mx-auto mb-2 opacity-30" />
-              <p className="text-xs">Search for jobs to get started</p>
-            </div>
+            <EmptyState icon={Search} title="Discover jobs" description="Search for jobs to get started" />
           )}
         </div>
 
@@ -372,7 +369,7 @@ export default function DiscoverPage() {
               Saved Jobs
             </h3>
             {savedJobs.length === 0 ? (
-              <p className="text-[10px] text-[var(--color-text-muted)] text-center py-4">No saved jobs yet</p>
+              <EmptyState icon={Bookmark} title="No saved jobs" description="Save jobs from search results to track them here." className="py-6" />
             ) : (
               <div className="space-y-2">
                 {savedJobs.map((saved) => (

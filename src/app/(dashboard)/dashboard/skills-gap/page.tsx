@@ -127,7 +127,7 @@ export default function SkillsGapPage() {
       ) : (
         <>
           {/* Summary */}
-          <div className="grid grid-cols-4 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             <div className="surface-card p-4 text-center">
               <p className="text-2xl font-bold font-[family-name:var(--font-display)] text-[var(--color-accent-rose)]">{identified}</p>
               <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5">Missing</p>

@@ -282,7 +282,7 @@ export default function ProfilePage() {
           <Label htmlFor="profile-target-role" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Target Role</Label>
           <RoleAutocomplete id="profile-target-role" value={targetRole} onChange={(v) => { setTargetRole(v); scheduleAutoSave() }} placeholder="e.g. Senior Frontend Engineer" />
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <Label htmlFor="profile-years" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Years of Experience</Label>
             <Input id="profile-years" type="number" min="0" max="30" value={yearsExperience} onChange={(e) => { setYearsExperience(e.target.value); scheduleAutoSave() }} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="0" />
@@ -342,8 +342,8 @@ export default function ProfilePage() {
       <div className="surface-card p-5 space-y-3.5">
         <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] block">Account</Label>
         <div>
-          <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Email</Label>
-          <Input value={userEmail} disabled className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-tertiary)] h-9 text-sm opacity-60" />
+          <Label htmlFor="profile-email" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Email</Label>
+          <Input id="profile-email" value={userEmail} disabled className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-tertiary)] h-9 text-sm opacity-60" />
         </div>
         <div>
           <Label htmlFor="profile-new-password" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Change Password</Label>
