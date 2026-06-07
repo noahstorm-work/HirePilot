@@ -4,6 +4,7 @@ import { searchJooble } from "./jooble"
 import { searchJSearch } from "./jsearch"
 
 export type { JobSearchResult, JobSource } from "./types"
+export { formatSalary, detectCurrency } from "./types"
 
 const ALL_SOURCES: JobSource[] = ["adzuna", "jooble", "jsearch"]
 

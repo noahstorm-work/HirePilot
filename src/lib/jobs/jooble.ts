@@ -1,4 +1,5 @@
 import type { JobSearchResult, JobSearchResponse } from "./types"
+import { detectCurrency } from "./types"
 
 interface JoobleResponse {
   results: Array<{
@@ -52,19 +53,23 @@ export async function searchJooble(
 
   const data: JoobleResponse = await res.json()
 
-  const results: JobSearchResult[] = (data.results || []).map((job) => ({
-    external_id: `jooble_${job.id || `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`}`,
-    company: job.company || "Unknown",
-    role_title: job.title || "Unknown Role",
-    description: job.description || "",
-    url: job.url || "#",
-    salary_min: parseSalary(job.salary, "min"),
-    salary_max: parseSalary(job.salary, "max"),
-    salary_currency: "USD",
-    location: job.location || "Remote",
-    remote_type: null,
-    source: "jooble" as const,
-  }))
+  const results: JobSearchResult[] = (data.results || []).map((job) => {
+    const location = job.location || "Remote"
+    const { code } = detectCurrency(location)
+    return {
+      external_id: `jooble_${job.id || `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`}`,
+      company: job.company || "Unknown",
+      role_title: job.title || "Unknown Role",
+      description: job.description || "",
+      url: job.url || "#",
+      salary_min: parseSalary(job.salary, "min"),
+      salary_max: parseSalary(job.salary, "max"),
+      salary_currency: code,
+      location,
+      remote_type: null,
+      source: "jooble" as const,
+    }
+  })
 
   return { results, total: data.totalCount || 0, source: "jooble" }
 }

@@ -1,4 +1,5 @@
 import type { JobSearchResult, JobSearchResponse } from "./types"
+import { detectCurrency } from "./types"
 
 interface JSearchResponse {
   data: Array<{
@@ -49,19 +50,23 @@ export async function searchJSearch(
 
   const data: JSearchResponse = await res.json()
 
-  const results: JobSearchResult[] = (data.data || []).map((job) => ({
-    external_id: `jsearch_${job.job_id}`,
-    company: job.employer_name || "Unknown",
-    role_title: job.job_title || "Unknown Role",
-    description: job.job_description || "",
-    url: job.job_apply_link || "#",
-    salary_min: job.job_min_salary,
-    salary_max: job.job_max_salary,
-    salary_currency: "USD",
-    location: [job.job_city, job.job_state, job.job_country].filter(Boolean).join(", "),
-    remote_type: job.job_is_remote ? "remote" : null,
-    source: "jsearch" as const,
-  }))
+  const results: JobSearchResult[] = (data.data || []).map((job) => {
+    const location = [job.job_city, job.job_state, job.job_country].filter(Boolean).join(", ")
+    const { code } = detectCurrency(location)
+    return {
+      external_id: `jsearch_${job.job_id}`,
+      company: job.employer_name || "Unknown",
+      role_title: job.job_title || "Unknown Role",
+      description: job.job_description || "",
+      url: job.job_apply_link || "#",
+      salary_min: job.job_min_salary,
+      salary_max: job.job_max_salary,
+      salary_currency: code,
+      location,
+      remote_type: job.job_is_remote ? "remote" : null,
+      source: "jsearch" as const,
+    }
+  })
 
   return { results, total: data.count || 0, source: "jsearch" }
 }

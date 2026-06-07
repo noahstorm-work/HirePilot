@@ -1,4 +1,5 @@
 import type { JobSearchResult, JobSearchResponse } from "./types"
+import { detectCurrency } from "./types"
 
 interface AdzunaResponse {
   results: Array<{
@@ -52,19 +53,23 @@ export async function searchAdzuna(
 
   const data: AdzunaResponse = await res.json()
 
-  const results: JobSearchResult[] = data.results.map((job) => ({
-    external_id: `adzuna_${job.id}`,
-    company: job.company.display_name,
-    role_title: job.title,
-    description: job.description,
-    url: job.redirect_url,
-    salary_min: job.salary_min,
-    salary_max: job.salary_max,
-    salary_currency: "GBP",
-    location: job.location.display_name,
-    remote_type: null,
-    source: "adzuna" as const,
-  }))
+  const results: JobSearchResult[] = data.results.map((job) => {
+    const location = job.location.display_name
+    const { code } = detectCurrency(location)
+    return {
+      external_id: `adzuna_${job.id}`,
+      company: job.company.display_name,
+      role_title: job.title,
+      description: job.description,
+      url: job.redirect_url,
+      salary_min: job.salary_min,
+      salary_max: job.salary_max,
+      salary_currency: code,
+      location,
+      remote_type: null,
+      source: "adzuna" as const,
+    }
+  })
 
   return { results, total: data.count, source: "adzuna" }
 }

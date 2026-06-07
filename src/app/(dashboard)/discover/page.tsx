@@ -12,6 +12,7 @@ import { LocationAutocomplete } from "@/components/ui/location-autocomplete"
 import { PasteUrlDialog } from "@/components/discover/PasteUrlDialog"
 import { toast } from "sonner"
 import type { JobSearchResult } from "@/lib/jobs"
+import { formatSalary } from "@/lib/jobs"
 import type { SavedJob } from "@/types"
 
 const SEARCH_STATE_KEY = "discover_search_state"
@@ -253,12 +254,19 @@ export default function DiscoverPage() {
               </div>
               {results.map((job, i) => {
                 const isSaved = savedJobs.some((s) => s.external_id === job.external_id)
+                const salary = formatSalary(job.salary_min, job.salary_max, job.salary_currency, job.location)
                 return (
-                  <div key={`${job.external_id}-${i}`} className="group p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-border-default)] transition-default">
+                  <a
+                    key={`${job.external_id}-${i}`}
+                    href={job.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block group p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-border-default)] transition-default cursor-pointer"
+                  >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] truncate">{job.role_title}</h3>
+                          <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] truncate group-hover:text-[var(--color-accent-violet)] transition-colors">{job.role_title}</h3>
                           <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium border shrink-0 ${SOURCE_COLORS[job.source]}`}>
                             {SOURCE_LABELS[job.source]}
                           </span>
@@ -266,22 +274,17 @@ export default function DiscoverPage() {
                         <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{job.company}</p>
                         <div className="flex items-center gap-3 mt-1.5 text-[10px] text-[var(--color-text-muted)]">
                           <span className="flex items-center gap-1"><MapPin className="h-2.5 w-2.5" />{job.location}</span>
-                          {job.salary_min && <span>${job.salary_min.toLocaleString()} - ${job.salary_max?.toLocaleString()}</span>}
+                          {salary && <span>{salary}</span>}
                         </div>
                         <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5 line-clamp-2">{job.description.slice(0, 180)}...</p>
                       </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.preventDefault()}>
                         <Button variant="ghost" size="sm" onClick={() => handleSave(job)} disabled={isSaved} className="h-7 w-7 p-0 text-[var(--color-text-muted)] hover:text-[var(--color-accent-violet)]">
                           {isSaved ? <BookmarkCheck className="h-3.5 w-3.5 text-[var(--color-accent-violet)]" /> : <Bookmark className="h-3.5 w-3.5" />}
                         </Button>
-                        <a href={job.url} target="_blank" rel="noopener noreferrer">
-                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]">
-                            <ExternalLink className="h-3.5 w-3.5" />
-                          </Button>
-                        </a>
                       </div>
                     </div>
-                  </div>
+                  </a>
                 )
               })}
               {results.length < total && (
