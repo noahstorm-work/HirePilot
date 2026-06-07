@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
-import { Briefcase, Plus, ChevronRight, Send } from "lucide-react"
+import { Briefcase, Plus, ChevronRight, Send, Trash2 } from "lucide-react"
 import { CompanyAutocomplete } from "@/components/ui/company-autocomplete"
 import { RoleAutocomplete } from "@/components/ui/role-autocomplete"
 import { toast } from "sonner"
@@ -95,6 +95,17 @@ export default function ApplicationsPage() {
     if (!error) {
       setApplications((prev) => prev.map((a) => a.id === app.id ? { ...a, status: "Applied" } : a))
       toast.success("Marked as applied")
+    }
+  }
+
+  const handleDelete = async (app: AppItem) => {
+    const res = await fetch(`/api/applications/${app.id}`, { method: "DELETE" })
+    const json = await res.json()
+    if (json.success) {
+      setApplications((prev) => prev.filter((a) => a.id !== app.id))
+      toast.success(`Deleted ${app.company}`)
+    } else {
+      toast.error("Failed to delete")
     }
   }
 
@@ -224,6 +235,12 @@ export default function ApplicationsPage() {
                                 <Send className="h-2.5 w-2.5" /> Apply
                               </button>
                             )}
+                            <button
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(app) }}
+                              className="p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)] transition-colors opacity-0 group-hover:opacity-100"
+                            >
+                              <Trash2 className="h-2.5 w-2.5" />
+                            </button>
                             <ChevronRight className="h-2.5 w-2.5 text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 transition-opacity" />
                           </div>
                         </div>
@@ -258,6 +275,12 @@ export default function ApplicationsPage() {
                       STATUS_COLORS[app.status as keyof typeof STATUS_COLORS]?.bg || "bg-[var(--color-bg-elevated)]"
                     } ${STATUS_COLORS[app.status as keyof typeof STATUS_COLORS]?.text || "text-[var(--color-text-muted)]"}`}>{app.status}</span>
                     <span className="text-[10px] text-[var(--color-text-muted)]">{new Date(app.created_at).toLocaleDateString()}</span>
+                    <button
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(app) }}
+                      className="p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)] transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
                   </div>
                 </div>
               </div>
