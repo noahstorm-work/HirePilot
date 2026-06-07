@@ -35,7 +35,7 @@ export async function searchJSearch(
     num_pages: "1",
   })
 
-  const res = await fetch(`https://jsearch.p.rapidapi.com/search?${params}`, {
+  const res = await fetch(`https://jsearch.p.rapidapi.com/search-v2?${params}`, {
     headers: {
       "X-RapidAPI-Key": apiKey,
       "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
