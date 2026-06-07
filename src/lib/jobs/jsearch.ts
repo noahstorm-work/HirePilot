@@ -1,5 +1,5 @@
 import type { JobSearchResult, JobSearchResponse } from "./types"
-import { detectCurrency } from "./types"
+import { detectCurrency, extractApplyEmail } from "./types"
 
 interface JSearchResponse {
   data: Array<{
@@ -65,6 +65,7 @@ export async function searchJSearch(
       location,
       remote_type: job.job_is_remote ? "remote" : null,
       source: "jsearch" as const,
+      apply_email: extractApplyEmail(job.job_description || "") || undefined,
     }
   })
 

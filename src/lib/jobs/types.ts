@@ -12,6 +12,7 @@ export interface JobSearchResult {
   location: string
   remote_type: string | null
   source: JobSource
+  apply_email?: string
 }
 
 export interface JobSearchResponse {
@@ -60,4 +61,17 @@ export function formatSalary(min: number | null, max: number | null, currency: s
   if (min && max) return `${fmt(min)} - ${fmt(max)}`
   if (min) return `From ${fmt(min)}`
   return `Up to ${fmt(max!)}`
+}
+
+const EXCLUDED_DOMAINS = new Set(["example.com", "email.com", "company.com", "domain.com", "sentry.io"])
+
+export function extractApplyEmail(text: string): string | null {
+  const regex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g
+  const found = text.match(regex)
+  if (!found) return null
+  for (const email of found) {
+    const domain = email.split("@")[1].toLowerCase()
+    if (!EXCLUDED_DOMAINS.has(domain)) return email
+  }
+  return null
 }

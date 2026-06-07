@@ -1,5 +1,5 @@
 import type { JobSearchResult, JobSearchResponse } from "./types"
-import { detectCurrency } from "./types"
+import { detectCurrency, extractApplyEmail } from "./types"
 
 interface JoobleResponse {
   results: Array<{
@@ -68,6 +68,7 @@ export async function searchJooble(
       location,
       remote_type: null,
       source: "jooble" as const,
+      apply_email: extractApplyEmail(job.description || "") || undefined,
     }
   })
 

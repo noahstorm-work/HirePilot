@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
-import { Search, MapPin, Briefcase, ExternalLink, Bookmark, BookmarkCheck, Trash2, Plus, Clock, X, Link as LinkIcon, ChevronDown, Send } from "lucide-react"
+import { Search, MapPin, Briefcase, ExternalLink, Bookmark, BookmarkCheck, Trash2, Plus, Clock, X, Link as LinkIcon, ChevronDown, Send, Mail } from "lucide-react"
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete"
 import { PasteUrlDialog } from "@/components/discover/PasteUrlDialog"
 import { toast } from "sonner"
@@ -161,7 +161,10 @@ export default function DiscoverPage() {
       if (json.data?.id && saved.description) {
         triggerAnalysis(json.data.id, saved.description, saved.company, saved.role_title)
       }
-      toast.success("Added to applications — analysis running")
+      if (saved.job_url) window.open(saved.job_url, "_blank", "noopener,noreferrer")
+      toast.success(`Added ${saved.company} to pipeline`, {
+        description: saved.job_url ? "Job opened — submit your application on their site" : "Analysis running",
+      })
     } else {
       toast.error("Failed to add to applications")
     }
@@ -185,10 +188,27 @@ export default function DiscoverPage() {
     })
     const json = await res.json()
     if (json.success) {
-      toast.success(`Applied to ${job.company} — analysis running`)
       if (json.data?.id) {
         triggerAnalysis(json.data.id, job.description, job.company, job.role_title)
+        if (job.apply_email) {
+          fetch("/api/applications/apply-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              application_id: json.data.id,
+              to_email: job.apply_email,
+              company: job.company,
+              role_title: job.role_title,
+            }),
+          })
+        }
       }
+      window.open(job.url, "_blank", "noopener,noreferrer")
+      toast.success(`Added ${job.company} to pipeline`, {
+        description: job.apply_email
+          ? `Application email sent to ${job.apply_email} — job site also opened`
+          : "Job opened in a new tab — submit your application on their site",
+      })
     } else {
       toast.error(json.error || "Failed to apply")
     }
@@ -301,6 +321,11 @@ export default function DiscoverPage() {
                           <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium border shrink-0 ${SOURCE_COLORS[job.source]}`}>
                             {SOURCE_LABELS[job.source]}
                           </span>
+                          {job.apply_email && (
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-medium border shrink-0 bg-emerald-500/10 text-emerald-400 border-emerald-500/20 flex items-center gap-1">
+                              <Mail className="h-2.5 w-2.5" /> Email
+                            </span>
+                          )}
                         </div>
                         <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{job.company}</p>
                         <div className="flex items-center gap-3 mt-1.5 text-[10px] text-[var(--color-text-muted)]">
