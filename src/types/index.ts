@@ -66,6 +66,7 @@ export interface CareerAnalysis {
   top_improvements: Improvement[]
   target_score: number
   thirty_day_plan: WeeklyPlan[]
+  github_data?: string | null
   created_at: string
   updated_at: string
 }
@@ -116,8 +117,8 @@ export interface AiResult {
 }
 
 export interface InterviewQuestions {
-  technical: Array<{ question: string; expected_areas?: string[]; sample_answer?: string; hint?: string }>
-  behavioral: Array<{ type: string; question: string; situation?: string; task?: string; action?: string; result?: string; framework?: string }>
+  technical_questions: Array<{ question: string; expected_areas?: string[]; sample_answer?: string; hint?: string }>
+  behavioral_questions: Array<{ type: string; question: string; situation?: string; task?: string; action?: string; result?: string; framework?: string }>
   company_preparation?: {
     common_interview_format?: string
     key_areas_to_review?: string[]
@@ -201,7 +202,7 @@ export interface WeeklyReport {
   week_start: string
   skills_in_demand: string[]
   market_trends: string[]
-  salary_ranges: Record<string, unknown> | null
+  salary_ranges: { min: number; max: number; currency: string } | null
   user_weaknesses: string[]
   recommendations: string[]
   created_at: string

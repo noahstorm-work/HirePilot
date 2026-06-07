@@ -1,6 +1,4 @@
-import { NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
-import { logServerError } from "@/lib/api-handler"
+import { withAuthParams, apiSuccess, apiError, validateBody } from "@/lib/api-handler"
 import { z } from "zod"
 
 const updateSchema = z.object({
@@ -17,101 +15,52 @@ const updateSchema = z.object({
   notes: z.string().optional(),
 })
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 })
-    }
+export const PATCH = withAuthParams<{ id: string }>(async (request, { supabase, user, params }) => {
+  const body = await request.json()
+  const parsed = validateBody(updateSchema, body)
+  if (parsed.error) return parsed.error
 
-    const body = await request.json()
-    const parsed = updateSchema.safeParse(body)
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, data: null, error: parsed.error.errors[0].message }, { status: 400 })
-    }
+  const { data, error } = await supabase
+    .from("applications")
+    .update(parsed.data)
+    .eq("id", params.id)
+    .eq("user_id", user.id)
+    .select()
+    .single()
 
-    const { data, error } = await supabase
-      .from("applications")
-      .update(parsed.data)
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .select()
-      .single()
+  if (error) return apiError(error.message, 500)
+  return apiSuccess(data)
+})
 
-    if (error) {
-      return NextResponse.json({ success: false, data: null, error: error.message }, { status: 500 })
-    }
+export const GET = withAuthParams<{ id: string }>(async (request, { supabase, user, params }) => {
+  const { data: application, error } = await supabase
+    .from("applications")
+    .select("*")
+    .eq("id", params.id)
+    .eq("user_id", user.id)
+    .maybeSingle()
 
-    return NextResponse.json({ success: true, data, error: null })
-  } catch (err) {
-    await logServerError(err, request, "applications-patch")
-    return NextResponse.json({ success: false, data: null, error: "Internal server error" }, { status: 500 })
-  }
-}
+  if (error || !application) return apiError("Application not found", 404)
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 })
-    }
+  const [analysisRes, rejectionRes] = await Promise.all([
+    supabase.from("ai_results").select("*").eq("application_id", params.id).maybeSingle(),
+    supabase.from("rejection_analyses").select("*").eq("application_id", params.id).maybeSingle(),
+  ])
 
-    const { data: application, error } = await supabase
-      .from("applications")
-      .select("*")
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .single()
+  return apiSuccess({
+    application,
+    analysis: analysisRes.data ?? null,
+    rejectionAnalysis: rejectionRes.data ?? null,
+  })
+})
 
-    if (error || !application) {
-      return NextResponse.json({ success: false, data: null, error: "Application not found" }, { status: 404 })
-    }
+export const DELETE = withAuthParams<{ id: string }>(async (request, { supabase, user, params }) => {
+  const { error } = await supabase
+    .from("applications")
+    .delete()
+    .eq("id", params.id)
+    .eq("user_id", user.id)
 
-    const { data: analysis } = await supabase
-      .from("ai_results")
-      .select("*")
-      .eq("application_id", id)
-      .single()
-
-    const { data: rejectionAnalysis } = await supabase
-      .from("rejection_analyses")
-      .select("*")
-      .eq("application_id", id)
-      .single()
-
-    return NextResponse.json({ success: true, data: { application, analysis: analysis ?? null, rejectionAnalysis: rejectionAnalysis ?? null }, error: null })
-  } catch (err) {
-    await logServerError(err, request, "applications-get")
-    return NextResponse.json({ success: false, data: null, error: "Internal server error" }, { status: 500 })
-  }
-}
-
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 })
-    }
-
-    const { error } = await supabase
-      .from("applications")
-      .delete()
-      .eq("id", id)
-      .eq("user_id", user.id)
-
-    if (error) {
-      return NextResponse.json({ success: false, data: null, error: error.message }, { status: 500 })
-    }
-
-    return NextResponse.json({ success: true, data: null, error: null })
-  } catch (err) {
-    await logServerError(err, request, "applications-delete")
-    return NextResponse.json({ success: false, data: null, error: "Internal server error" }, { status: 500 })
-  }
-}
+  if (error) return apiError(error.message, 500)
+  return apiSuccess(null)
+})

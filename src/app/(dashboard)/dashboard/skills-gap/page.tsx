@@ -65,6 +65,7 @@ export default function SkillsGapPage() {
       if (!user) return
       const { data: profile } = await supabase.from("user_profiles").select("*").eq("id", user.id).maybeSingle()
       if (!profile?.cv_text) { toast.error("No CV in profile"); setRerunning(false); return }
+      const linkedinAbout = typeof profile.linkedin_data === "object" && profile.linkedin_data ? (profile.linkedin_data as Record<string, unknown>).about as string || "" : ""
       const res = await fetch("/api/ai/career-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -72,6 +73,7 @@ export default function SkillsGapPage() {
           cv_text: profile.cv_text,
           target_role: profile.target_role,
           linkedin_url: profile.linkedin_url,
+          linkedin_about: linkedinAbout || undefined,
           github_url: profile.github_url,
           portfolio_url: profile.portfolio_url,
         }),

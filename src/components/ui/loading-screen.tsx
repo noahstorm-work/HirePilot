@@ -11,18 +11,6 @@ export function LoadingScreen() {
   )
 }
 
-export function LoadingCard({ className = "" }: { className?: string }) {
-  return (
-    <div className={`surface-card p-5 ${className}`}>
-      <div className="space-y-3">
-        <div className="skeleton h-4 w-1/3" />
-        <div className="skeleton h-8 w-1/2" />
-        <div className="skeleton h-3 w-2/3" />
-      </div>
-    </div>
-  )
-}
-
 export function LoadingSkeleton({ rows = 3, className = "" }: { rows?: number; className?: string }) {
   return (
     <div className={`space-y-3 ${className}`}>

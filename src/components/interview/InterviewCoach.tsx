@@ -65,7 +65,7 @@ export function InterviewCoach({ applicationId, jobDescription, cvText }: Props)
         </TabsList>
 
         <TabsContent value="technical" className="space-y-3">
-          {result.technical?.map((q: { question: string; expected_areas?: string[]; sample_answer?: string }, i: number) => (
+          {result.technical_questions?.map((q: { question: string; expected_areas?: string[]; sample_answer?: string }, i: number) => (
             <div key={i} className="p-4 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)]">
               <button onClick={() => setExpandedQuestion(expandedQuestion === i ? null : i)} className="flex items-start justify-between w-full text-left">
                 <div className="flex-1">
@@ -92,7 +92,7 @@ export function InterviewCoach({ applicationId, jobDescription, cvText }: Props)
         </TabsContent>
 
         <TabsContent value="behavioral" className="space-y-3">
-          {result.behavioral?.map((q: { question: string; type?: string; situation?: string; task?: string; action?: string; result?: string }, i: number) => (
+          {result.behavioral_questions?.map((q: { question: string; type?: string; situation?: string; task?: string; action?: string; result?: string }, i: number) => (
             <div key={i} className="p-4 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)]">
               <button onClick={() => setExpandedBehavioral(expandedBehavioral === i ? null : i)} className="flex items-start justify-between w-full text-left">
                 <div className="flex-1">

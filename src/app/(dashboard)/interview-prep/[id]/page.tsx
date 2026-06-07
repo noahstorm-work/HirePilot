@@ -18,7 +18,7 @@ export default async function InterviewPrepPage({
     .select("*")
     .eq("id", id)
     .eq("user_id", user?.id)
-    .single()
+    .maybeSingle()
 
   if (!application) notFound()
 
@@ -26,7 +26,7 @@ export default async function InterviewPrepPage({
     .from("user_profiles")
     .select("cv_text")
     .eq("id", user?.id)
-    .single()
+    .maybeSingle()
 
   return (
     <div className="space-y-6">

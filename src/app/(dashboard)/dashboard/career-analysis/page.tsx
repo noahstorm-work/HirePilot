@@ -18,6 +18,7 @@ import type { CareerAnalysis, Improvement, WeeklyPlan } from "@/types"
 export default function CareerAnalysisPage() {
   const [cvText, setCvText] = useState("")
   const [linkedinUrl, setLinkedinUrl] = useState("")
+  const [linkedinAbout, setLinkedinAbout] = useState("")
   const [githubUrl, setGithubUrl] = useState("")
   const [portfolioUrl, setPortfolioUrl] = useState("")
   const [targetRole, setTargetRole] = useState("")
@@ -36,6 +37,7 @@ export default function CareerAnalysisPage() {
     if (data) {
       setCvText(data.cv_text || "")
       setLinkedinUrl(data.linkedin_url || "")
+      setLinkedinAbout(typeof data.linkedin_data === "object" && data.linkedin_data ? (data.linkedin_data as Record<string, unknown>).about as string || "" : "")
       setGithubUrl(data.github_url || "")
       setPortfolioUrl(data.portfolio_url || "")
       setTargetRole(data.target_role || "")
@@ -53,6 +55,7 @@ export default function CareerAnalysisPage() {
           id: user.id,
           cv_text: cvText,
           linkedin_url: linkedinUrl || null,
+          linkedin_data: linkedinAbout?.trim() ? { about: linkedinAbout } : null,
           github_url: githubUrl || null,
           portfolio_url: portfolioUrl || null,
           target_role: targetRole || null,
@@ -63,7 +66,7 @@ export default function CareerAnalysisPage() {
       const res = await fetch("/api/ai/career-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cv_text: plainText, linkedin_url: linkedinUrl, github_url: githubUrl, portfolio_url: portfolioUrl, target_role: targetRole }),
+        body: JSON.stringify({ cv_text: plainText, linkedin_url: linkedinUrl, linkedin_about: linkedinAbout || undefined, github_url: githubUrl, portfolio_url: portfolioUrl, target_role: targetRole }),
       })
       const json = await res.json()
       if (!json.success) throw new Error(json.error)
@@ -116,6 +119,15 @@ export default function CareerAnalysisPage() {
             <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Portfolio URL</Label>
             <Input value={portfolioUrl} onChange={(e) => setPortfolioUrl(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://..." />
           </div>
+        </div>
+        <div>
+          <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">LinkedIn About Section <span className="text-[var(--color-text-tertiary)]">(paste your summary for better analysis)</span></Label>
+          <textarea
+            value={linkedinAbout}
+            onChange={(e) => setLinkedinAbout(e.target.value)}
+            className="w-full h-20 px-3 py-2 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] focus:outline-none text-xs resize-none"
+            placeholder="Go to your LinkedIn profile, copy your About section, and paste it here..."
+          />
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1">

@@ -1,78 +1,102 @@
-import { NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { withAuth, apiSuccess, apiError, validateBody } from "@/lib/api-handler"
 import { analyzeCareer } from "@/lib/ai-service"
-import { checkRateLimit, logServerError } from "@/lib/api-handler"
+import { fetchGitHubProfile, formatGitHubDataForAI } from "@/lib/github-api"
 import { z } from "zod"
+
+function extractGitHubUsername(url: string): string | null {
+  try {
+    const u = new URL(url)
+    const parts = u.pathname.replace(/\/$/, "").split("/")
+    return parts[parts.length - 1] || null
+  } catch {
+    return null
+  }
+}
 
 const schema = z.object({
   cv_text: z.string().min(10),
   linkedin_url: z.string().optional(),
+  linkedin_about: z.string().optional(),
   github_url: z.string().optional(),
   portfolio_url: z.string().optional(),
   target_role: z.string().optional(),
   target_seniority: z.string().optional(),
 })
 
-export async function POST(request: Request) {
-  try {
-    const supabaseClient = await createClient()
-    const { data: { user } } = await supabaseClient.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 })
+export const POST = withAuth(async (request, { supabase, user }) => {
+  const body = await request.json()
+  const parsed = validateBody(schema, body)
+  if (parsed.error) return parsed.error
+
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("full_name, years_experience, skills")
+    .eq("id", user.id)
+    .maybeSingle()
+
+  let githubDataStr: string | undefined
+  const githubUrl = parsed.data.github_url
+  if (githubUrl) {
+    const username = extractGitHubUsername(githubUrl)
+    if (username) {
+      const ghProfile = await fetchGitHubProfile(username)
+      if (ghProfile) {
+        githubDataStr = formatGitHubDataForAI(ghProfile)
+      }
     }
-
-    const rl = checkRateLimit(`ai:${user.id}:career-analysis`, 3, 300_000)
-    if (rl) return rl
-
-    const body = await request.json()
-    const parsed = schema.safeParse(body)
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, data: null, error: parsed.error.errors[0].message }, { status: 400 })
-    }
-
-    const result = await analyzeCareer({
-      cvText: parsed.data.cv_text,
-      linkedinData: parsed.data.linkedin_url,
-      githubUrl: parsed.data.github_url,
-      portfolioUrl: parsed.data.portfolio_url,
-      targetRole: parsed.data.target_role || "Software Engineer",
-      targetSeniority: parsed.data.target_seniority,
-    })
-
-    const dbFields = {
-      user_id: user.id,
-      interview_readiness_score: result.interview_readiness_score,
-      cv_score: result.cv_score,
-      linkedin_score: result.linkedin_score,
-      github_score: result.github_score,
-      portfolio_score: result.portfolio_score,
-      market_competitiveness_score: result.market_competitiveness_score,
-      recruiter_appeal_score: result.recruiter_appeal_score,
-      interview_probability: result.interview_probability,
-      skills_gap_analysis: result.skills_gap_analysis,
-      missing_keywords: result.missing_keywords,
-      missing_technologies: result.missing_technologies,
-      missing_experience_areas: result.missing_experience_areas,
-      top_improvements: result.top_improvements,
-      target_score: result.target_score,
-      thirty_day_plan: result.thirty_day_plan,
-    }
-
-    const { data, error } = await supabaseClient
-      .from("career_analyses")
-      .upsert(dbFields, { onConflict: "user_id" })
-      .select()
-      .single()
-
-    if (error) {
-      console.error("DB upsert error:", error.message, error.details, error.hint)
-      return NextResponse.json({ success: false, data: null, error: error.message }, { status: 500 })
-    }
-
-    return NextResponse.json({ success: true, data, error: null })
-  } catch (err) {
-    await logServerError(err, request, "career-analysis")
-    const errorMessage = err instanceof Error ? err.message : "Internal server error"
-    return NextResponse.json({ success: false, data: null, error: errorMessage }, { status: 500 })
   }
-}
+
+  const linkedinAbout = parsed.data.linkedin_about
+  let linkedinDataStr: string | undefined
+  if (parsed.data.linkedin_url) {
+    linkedinDataStr = `LinkedIn URL: ${parsed.data.linkedin_url}`
+    if (linkedinAbout?.trim()) {
+      linkedinDataStr += `\n\nLinkedIn About:\n${linkedinAbout}`
+    }
+  } else if (linkedinAbout?.trim()) {
+    linkedinDataStr = `LinkedIn About:\n${linkedinAbout}`
+  }
+
+  const result = await analyzeCareer({
+    cvText: parsed.data.cv_text,
+    linkedinData: linkedinDataStr,
+    githubUrl: parsed.data.github_url,
+    githubData: githubDataStr,
+    portfolioUrl: parsed.data.portfolio_url,
+    targetRole: parsed.data.target_role || "Software Engineer",
+    targetSeniority: parsed.data.target_seniority,
+    yearsExperience: profile?.years_experience ?? undefined,
+    skills: profile?.skills ?? undefined,
+    fullName: profile?.full_name ?? undefined,
+  })
+
+  const dbFields: Record<string, unknown> = {
+    user_id: user.id,
+    interview_readiness_score: result.interview_readiness_score,
+    cv_score: result.cv_score,
+    linkedin_score: result.linkedin_score,
+    github_score: result.github_score,
+    portfolio_score: result.portfolio_score,
+    market_competitiveness_score: result.market_competitiveness_score,
+    recruiter_appeal_score: result.recruiter_appeal_score,
+    interview_probability: result.interview_probability,
+    skills_gap_analysis: result.skills_gap_analysis,
+    missing_keywords: result.missing_keywords,
+    missing_technologies: result.missing_technologies,
+    missing_experience_areas: result.missing_experience_areas,
+    top_improvements: result.top_improvements,
+    target_score: result.target_score,
+    thirty_day_plan: result.thirty_day_plan,
+  }
+
+  if (githubDataStr) dbFields.github_data = githubDataStr
+
+  const { data, error } = await supabase
+    .from("career_analyses")
+    .upsert(dbFields, { onConflict: "user_id" })
+    .select()
+    .single()
+
+  if (error) return apiError(error.message, 500)
+  return apiSuccess(data)
+})

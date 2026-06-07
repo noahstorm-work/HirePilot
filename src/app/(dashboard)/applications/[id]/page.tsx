@@ -33,7 +33,7 @@ export default function ApplicationDetailPage() {
   useEffect(() => { loadApplication() }, [params.id])
 
   const loadApplication = async () => {
-    const { data } = await supabase.from("applications").select("*").eq("id", params.id).single()
+    const { data } = await supabase.from("applications").select("*").eq("id", params.id).maybeSingle()
     if (data) {
       setApp(data)
       const { data: ai } = await supabase.from("ai_results").select("*").eq("application_id", params.id).maybeSingle()

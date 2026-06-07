@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import type { ZodSchema } from "zod"
+import type { SupabaseClient } from "@supabase/supabase-js"
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
 
@@ -47,7 +48,6 @@ export function apiError(error: string, status = 500): NextResponse<ApiErrorResp
 export async function authenticate() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { supabase, user: null }
   return { supabase, user }
 }
 
@@ -79,6 +79,46 @@ export async function logServerError(err: unknown, request: Request, source: str
   } catch { /* best-effort logging */ }
 }
 
-export function parseFormData(body: unknown, schema: ZodSchema) {
-  return validateBody(schema, body)
+function extractSource(url: string): string {
+  try {
+    const pathname = new URL(url).pathname
+    return pathname.replace(/^\/api\//, "").replace(/\//g, ":")
+  } catch {
+    return "unknown"
+  }
+}
+
+export interface AuthContext {
+  supabase: SupabaseClient
+  user: { id: string; email?: string }
+}
+
+export function withAuth(
+  handler: (request: Request, ctx: AuthContext) => Promise<NextResponse>
+) {
+  return async (request: Request) => {
+    const { supabase, user } = await authenticate()
+    if (!user) return apiError("Unauthorized", 401)
+    try {
+      return await handler(request, { supabase, user })
+    } catch (err) {
+      await logServerError(err, request, extractSource(request.url))
+      return apiError(err instanceof Error ? err.message : "Internal server error", 500)
+    }
+  }
+}
+
+export function withAuthParams<TParams extends Record<string, string>>(
+  handler: (request: Request, ctx: AuthContext & { params: TParams }) => Promise<NextResponse>
+) {
+  return async (request: Request, { params }: { params: Promise<TParams> }) => {
+    const { supabase, user } = await authenticate()
+    if (!user) return apiError("Unauthorized", 401)
+    try {
+      return await handler(request, { supabase, user, params: await params })
+    } catch (err) {
+      await logServerError(err, request, extractSource(request.url))
+      return apiError(err instanceof Error ? err.message : "Internal server error", 500)
+    }
+  }
 }

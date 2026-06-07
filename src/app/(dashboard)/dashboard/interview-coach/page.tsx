@@ -129,7 +129,7 @@ export default function InterviewCoachPage() {
           </div>
 
           <div className="space-y-2.5">
-            {activeTab === "technical" && (result.technical || []).map((q: string | { question: string; hint?: string }, i: number) => (
+            {activeTab === "technical" && (result.technical_questions || []).map((q: string | { question: string; hint?: string }, i: number) => (
               <div key={i} className="p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)]">
                 <div className="flex items-start gap-2.5">
                   <span className="text-[10px] font-bold font-[family-name:var(--font-mono)] text-[var(--color-accent-violet)] mt-0.5">Q{i + 1}</span>
@@ -140,7 +140,7 @@ export default function InterviewCoachPage() {
                 </div>
               </div>
             ))}
-            {activeTab === "behavioral" && (result.behavioral || []).map((q: string | { question: string; framework?: string }, i: number) => (
+            {activeTab === "behavioral" && (result.behavioral_questions || []).map((q: string | { question: string; framework?: string }, i: number) => (
               <div key={i} className="p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)]">
                 <div className="flex items-start gap-2.5">
                   <span className="text-[10px] font-bold font-[family-name:var(--font-mono)] text-[var(--color-accent-blue)] mt-0.5">Q{i + 1}</span>
@@ -151,7 +151,7 @@ export default function InterviewCoachPage() {
                 </div>
               </div>
             ))}
-            {activeTab === "star" && (result.behavioral || []).map((q: { question?: string; situation?: string; task?: string; action?: string; result?: string }, i: number) => (
+            {activeTab === "star" && (result.behavioral_questions || []).map((q: { question?: string; situation?: string; task?: string; action?: string; result?: string }, i: number) => (
               <div key={i} className="p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)]">
                 <p className="text-xs font-medium mb-2.5 text-[var(--color-accent-emerald)]">{q.question || `Example ${i + 1}`}</p>
                 <div className="space-y-1.5 text-[11px] text-[var(--color-text-secondary)]">

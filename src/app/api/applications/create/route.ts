@@ -1,6 +1,4 @@
-import { NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
-import { logServerError } from "@/lib/api-handler"
+import { withAuth, apiSuccess, apiError, validateBody } from "@/lib/api-handler"
 import { z } from "zod"
 
 const schema = z.object({
@@ -18,33 +16,17 @@ const schema = z.object({
   notes: z.string().optional(),
 })
 
-export async function POST(request: Request) {
-  try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 })
-    }
+export const POST = withAuth(async (request, { supabase, user }) => {
+  const body = await request.json()
+  const parsed = validateBody(schema, body)
+  if (parsed.error) return parsed.error
 
-    const body = await request.json()
-    const parsed = schema.safeParse(body)
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, data: null, error: parsed.error.errors[0].message }, { status: 400 })
-    }
+  const { data, error } = await supabase
+    .from("applications")
+    .insert({ user_id: user.id, ...parsed.data })
+    .select()
+    .single()
 
-    const { data, error } = await supabase
-      .from("applications")
-      .insert({ user_id: user.id, ...parsed.data })
-      .select()
-      .single()
-
-    if (error) {
-      return NextResponse.json({ success: false, data: null, error: error.message }, { status: 500 })
-    }
-
-    return NextResponse.json({ success: true, data, error: null }, { status: 201 })
-  } catch (err) {
-    await logServerError(err, request, "applications-create")
-    return NextResponse.json({ success: false, data: null, error: "Internal server error" }, { status: 500 })
-  }
-}
+  if (error) return apiError(error.message, 500)
+  return apiSuccess(data)
+})

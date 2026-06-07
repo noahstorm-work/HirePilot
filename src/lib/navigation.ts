@@ -2,6 +2,7 @@ import {
   LayoutDashboard, Brain, Search, Briefcase, Sparkles,
   FileCheck, Target, BarChart3, GitBranch, User
 } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 
 export interface NavItem {
   label: string
@@ -43,7 +44,7 @@ export const NAV_SECTIONS: NavSection[] = [
   },
 ]
 
-export const ICON_MAP: Record<string, any> = {
+export const ICON_MAP: Record<string, LucideIcon> = {
   LayoutDashboard,
   Brain,
   Search,
