@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
-import { LoadingScreen } from "@/components/ui/loading-screen"
+import { LoadingSkeleton } from "@/components/ui/loading-screen"
 import { Search, MapPin, Briefcase, ExternalLink, Bookmark, BookmarkCheck, Trash2, Plus, Clock, X, Link as LinkIcon, ChevronDown, Send, Mail } from "lucide-react"
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete"
 import { PasteUrlDialog } from "@/components/discover/PasteUrlDialog"
@@ -19,9 +19,9 @@ import type { SavedJob } from "@/types"
 const SEARCH_STATE_KEY = "discover_search_state"
 
 const SOURCE_COLORS: Record<string, string> = {
-  adzuna: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  jooble: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  jsearch: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  adzuna: "bg-[var(--color-accent-blue)]/10 text-[var(--color-accent-blue)] border-[var(--color-accent-blue)]/20",
+  jooble: "bg-[var(--color-accent-emerald)]/10 text-[var(--color-accent-emerald)] border-[var(--color-accent-emerald)]/20",
+  jsearch: "bg-[var(--color-accent-violet)]/10 text-[var(--color-accent-violet)] border-[var(--color-accent-violet)]/20",
 }
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -277,7 +277,7 @@ export default function DiscoverPage() {
         {/* Results */}
         <div className="space-y-2.5 min-w-0">
           {loading ? (
-            <LoadingScreen />
+            <LoadingSkeleton rows={4} />
           ) : searched && results.length === 0 ? (
             <div className="text-center py-12 text-xs text-[var(--color-text-muted)]">No jobs found. Try a different search.</div>
           ) : results.length > 0 ? (

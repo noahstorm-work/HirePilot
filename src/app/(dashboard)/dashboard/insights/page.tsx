@@ -31,7 +31,7 @@ export default function InsightsPage() {
 
   const loadInsights = async () => {
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user) { setLoading(false); return }
 
     // Calculate week start for the current week
     const now = new Date()
@@ -81,7 +81,18 @@ export default function InsightsPage() {
   }
 
   if (loading) return <LoadingScreen />
-  if (!data) return null
+  if (!data) return (
+    <div className="space-y-6">
+      <SectionHeader title="Insights & Reports" description="Track your job search progress and get AI-powered recommendations" />
+      <div className="surface-card p-8 text-center">
+        <BarChart3 className="h-8 w-8 text-[var(--color-text-muted)] mx-auto mb-3" />
+        <p className="text-sm text-[var(--color-text-secondary)]">Unable to load insights. Please try again.</p>
+        <Button onClick={loadInsights} variant="outline" size="sm" className="mt-3 border-[var(--color-border-subtle)] text-[var(--color-text-secondary)]">
+          <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Retry
+        </Button>
+      </div>
+    </div>
+  )
 
   return (
     <div className="space-y-6">

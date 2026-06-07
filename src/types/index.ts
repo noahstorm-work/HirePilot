@@ -143,8 +143,9 @@ export interface Feedback {
   id: string
   user_id: string
   message: string
-  rating: number | null
-  page_url: string | null
+  rating: number
+  url: string | null
+  user_agent: string | null
   created_at: string
 }
 

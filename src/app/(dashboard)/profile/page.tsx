@@ -11,12 +11,16 @@ import dynamic from "next/dynamic"
 const RichTextEditor = dynamic(() => import("@/components/ui/rich-text-editor").then(m => ({ default: m.RichTextEditor })), { ssr: false, loading: () => <div className="h-32 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] animate-pulse" /> })
 import { DocumentUpload } from "@/components/ui/document-upload"
 import type { ExtractedMetadata } from "@/lib/document-parser"
+import { RoleAutocomplete } from "@/components/ui/role-autocomplete"
 import { User, Save, ExternalLink, X, Check, Lock, Download, Trash2, Loader2, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
 import type { UserProfile } from "@/types"
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -285,13 +289,17 @@ export default function ProfilePage() {
           </div>
           <div>
             <Label htmlFor="profile-seniority" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Seniority Level</Label>
-            <select id="profile-seniority" value={targetSeniority} onChange={(e) => { setTargetSeniority(e.target.value); scheduleAutoSave() }} className="w-full h-9 rounded-xl px-3 text-sm bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] focus:outline-none">
-              <option value="">Select level</option>
-              <option value="junior">Junior</option>
-              <option value="mid">Mid</option>
-              <option value="senior">Senior</option>
-              <option value="lead">Lead</option>
-            </select>
+            <Select value={targetSeniority} onValueChange={(v) => { setTargetSeniority(v); scheduleAutoSave() }}>
+              <SelectTrigger id="profile-seniority" className="h-9 text-sm">
+                <SelectValue placeholder="Select level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="junior">Junior</SelectItem>
+                <SelectItem value="mid">Mid</SelectItem>
+                <SelectItem value="senior">Senior</SelectItem>
+                <SelectItem value="lead">Lead</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <div>
@@ -399,40 +407,6 @@ export default function ProfilePage() {
           </Dialog>
         </div>
       </div>
-    </div>
-  )
-}
-
-function RoleAutocomplete({ value, onChange, placeholder, id }: { value: string; onChange: (v: string) => void; placeholder: string; id?: string }) {
-  const [suggestions, setSuggestions] = useState<string[]>([])
-  const [isOpen, setIsOpen] = useState(false)
-  const [query, setQuery] = useState(value)
-  const timerRef = useState<NodeJS.Timeout | null>(null)
-
-  useEffect(() => { setQuery(value) }, [value])
-
-  const handleChange = (val: string) => {
-    setQuery(val)
-    onChange(val)
-    if (timerRef[0]) clearTimeout(timerRef[0])
-    if (val.length < 1) { setSuggestions([]); return }
-    timerRef[0] = setTimeout(async () => {
-      const res = await fetch(`/api/autocomplete/roles?q=${encodeURIComponent(val)}`)
-      const json = await res.json()
-      if (json.success) { setSuggestions(json.data); setIsOpen(json.data.length > 0) }
-    }, 300)
-  }
-
-  return (
-    <div className="relative">
-      <Input id={id} value={query} onChange={(e) => handleChange(e.target.value)} onFocus={() => { if (suggestions.length > 0) setIsOpen(true) }} onBlur={() => setTimeout(() => setIsOpen(false), 200)} className="bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder={placeholder} />
-      {isOpen && suggestions.length > 0 && (
-        <div className="absolute z-50 w-full mt-1 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] shadow-lg overflow-hidden">
-          {suggestions.map((s, i) => (
-            <button key={`${s}-${i}`} onMouseDown={() => { setQuery(s); onChange(s); setIsOpen(false) }} className="w-full text-left px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]">{s}</button>
-          ))}
-        </div>
-      )}
     </div>
   )
 }

@@ -1,10 +1,9 @@
 import { withAuth, apiSuccess, apiError } from "@/lib/api-handler"
 
 export const GET = withAuth(async (_request, { supabase, user }) => {
-  const [profile, applications, aiResults, careerAnalyses, rejectionAnalyses, weeklyReports, savedJobs, cvVersions, skillProgress] = await Promise.all([
+  const [profile, applications, careerAnalyses, rejectionAnalyses, weeklyReports, savedJobs, cvVersions, skillProgress] = await Promise.all([
     supabase.from("user_profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase.from("applications").select("*").eq("user_id", user.id),
-    supabase.from("ai_results").select("*").eq("user_id", user.id),
     supabase.from("career_analyses").select("*").eq("user_id", user.id),
     supabase.from("rejection_analyses").select("*").eq("user_id", user.id),
     supabase.from("weekly_reports").select("*").eq("user_id", user.id),
@@ -12,6 +11,11 @@ export const GET = withAuth(async (_request, { supabase, user }) => {
     supabase.from("cv_versions").select("*").eq("user_id", user.id),
     supabase.from("skill_progress").select("*").eq("user_id", user.id),
   ])
+
+  const appIds = (applications.data || []).map((a: { id: string }) => a.id)
+  const aiResults = appIds.length > 0
+    ? await supabase.from("ai_results").select("*").in("application_id", appIds)
+    : { data: null, error: null }
 
   const errors = [profile, applications, aiResults, careerAnalyses, rejectionAnalyses, weeklyReports, savedJobs, cvVersions, skillProgress]
     .filter((r) => r.error)

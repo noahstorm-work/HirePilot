@@ -9,6 +9,9 @@ import { LoadingScreen } from "@/components/ui/loading-screen"
 import { Target, TrendingUp, AlertTriangle, CheckCircle2, Sparkles, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import type { CareerAnalysis, SkillsGap } from "@/types"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
 
 interface SkillProgress {
   skill_name: string
@@ -158,15 +161,16 @@ export default function SkillsGapPage() {
                         <p className="text-xs font-medium">{tech}</p>
                         <p className="text-[10px] text-[var(--color-text-muted)]">Commonly required</p>
                       </div>
-                      <select
-                        value={status}
-                        onChange={(e) => updateSkillStatus(tech, e.target.value)}
-                        className="px-2 py-1 rounded-lg text-[10px] bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] focus:outline-none"
-                      >
-                        <option value="identified">Missing</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="completed">Completed</option>
-                      </select>
+                      <Select value={status} onValueChange={(v) => updateSkillStatus(tech, v)}>
+                        <SelectTrigger className="h-6 px-2 py-1 text-[10px] w-auto min-w-[90px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="identified">Missing</SelectItem>
+                          <SelectItem value="in_progress">In Progress</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   )
                 })}
@@ -223,15 +227,16 @@ export default function SkillsGapPage() {
                             gap.severity === "medium" ? "bg-[var(--color-accent-amber)]/10 text-[var(--color-accent-amber)]" :
                             "bg-[var(--color-accent-emerald)]/10 text-[var(--color-accent-emerald)]"
                           }`}>{gap.severity || "medium"}</span>
-                          <select
-                            value={status}
-                            onChange={(e) => updateSkillStatus(skillName, e.target.value)}
-                            className="px-2 py-1 rounded-lg text-[10px] bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] focus:outline-none"
-                          >
-                            <option value="identified">Missing</option>
-                            <option value="in_progress">In Progress</option>
-                            <option value="completed">Completed</option>
-                          </select>
+                          <Select value={status} onValueChange={(v) => updateSkillStatus(skillName, v)}>
+                            <SelectTrigger className="h-6 px-2 py-1 text-[10px] w-auto min-w-[90px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="identified">Missing</SelectItem>
+                              <SelectItem value="in_progress">In Progress</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                       {gap.impact && <p className="text-[10px] text-[var(--color-text-muted)] ml-4">Impact: {gap.impact}</p>}

@@ -1,4 +1,4 @@
-import { withAuth, apiSuccess, apiError, validateBody } from "@/lib/api-handler"
+import { withAuth, apiSuccess, apiError, validateBody, checkRateLimit } from "@/lib/api-handler"
 import { generateInterviewPrep } from "@/lib/ai-service"
 import { z } from "zod"
 
@@ -12,6 +12,8 @@ const schema = z.object({
 })
 
 export const POST = withAuth(async (request, { supabase, user }) => {
+  const rl = checkRateLimit(`ai:${user.id}`, 10, 60_000)
+  if (rl) return rl
   const body = await request.json()
   const parsed = validateBody(schema, body)
   if (parsed.error) return parsed.error

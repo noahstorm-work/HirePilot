@@ -16,6 +16,9 @@ import { toast } from "sonner"
 import Link from "next/link"
 import type { Application, AiResult, RejectionAnalysis } from "@/types"
 import { APPLICATION_STATUSES } from "@/lib/constants"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
 
 export default function ApplicationDetailPage() {
   const params = useParams()
@@ -97,7 +100,7 @@ export default function ApplicationDetailPage() {
       const res = await fetch("/api/ai/rejection-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ applicationId: app.id, jobDescription: app.job_description || "", cvText: "" }),
+        body: JSON.stringify({ applicationId: app.id, jobDescription: app.job_description || "" }),
       })
       const json = await res.json()
       if (json.success) {
@@ -154,15 +157,16 @@ export default function ApplicationDetailPage() {
               </Button>
             </Link>
           )}
-          <select
-            value={app.status}
-            onChange={(e) => handleStatusChange(e.target.value)}
-            className="px-2.5 py-1.5 rounded-lg text-[11px] bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] focus:border-[var(--color-border-focus)]"
-          >
-            {APPLICATION_STATUSES.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
+          <Select value={app.status} onValueChange={handleStatusChange}>
+            <SelectTrigger className="h-8 px-2.5 py-1.5 text-[11px] w-auto min-w-[100px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {APPLICATION_STATUSES.map((s) => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {app.job_url && (
             <a href={app.job_url} target="_blank" rel="noopener noreferrer">
               <Button variant="outline" size="sm" className="border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] h-8 text-xs">

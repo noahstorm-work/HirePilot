@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest } from "next/server"
-import { apiSuccess, apiError } from "@/lib/api-handler"
+import { apiSuccess, apiError, checkRateLimit } from "@/lib/api-handler"
 import { z } from "zod"
 
 const schema = z.object({
@@ -14,6 +14,8 @@ const schema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const rl = checkRateLimit("error-log", 30, 60_000)
+    if (rl) return rl
     const supabase = await createClient()
 
     let userId = null

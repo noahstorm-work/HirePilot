@@ -1,6 +1,8 @@
-import { withAuth, apiSuccess, apiError } from "@/lib/api-handler"
+import { withAuth, apiSuccess, apiError, checkRateLimit } from "@/lib/api-handler"
 
 export const POST = withAuth(async (request, { supabase, user }) => {
+  const rl = checkRateLimit(`feedback:${user.id}`, 5, 60_000)
+  if (rl) return rl
   const body = await request.json()
   const { rating, message } = body
 

@@ -12,6 +12,7 @@ import dynamic from "next/dynamic"
 const RichTextEditor = dynamic(() => import("@/components/ui/rich-text-editor").then(m => ({ default: m.RichTextEditor })), { ssr: false, loading: () => <div className="h-32 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] animate-pulse" /> })
 import { DocumentUpload } from "@/components/ui/document-upload"
 import type { ExtractedMetadata } from "@/lib/document-parser"
+import { RoleAutocomplete } from "@/components/ui/role-autocomplete"
 import { Brain, Sparkles, Target, TrendingUp, BarChart3, ExternalLink } from "lucide-react"
 import { toast } from "sonner"
 import type { CareerAnalysis, Improvement, WeeklyPlan } from "@/types"
@@ -134,7 +135,7 @@ export default function CareerAnalysisPage() {
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1">
             <Label htmlFor="ca-target-role" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Target Role</Label>
-            <Input id="ca-target-role" value={targetRole} onChange={(e) => setTargetRole(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="e.g. Senior Frontend Engineer" />
+            <RoleAutocomplete id="ca-target-role" value={targetRole} onChange={setTargetRole} placeholder="e.g. Senior Frontend Engineer" />
           </div>
           <div className="flex items-end">
             <Button onClick={handleAnalyze} disabled={loading || !cvText.trim()} className="gradient-violet text-white border-0 px-6 h-9 text-sm font-semibold hover:opacity-90 shadow-glow group">

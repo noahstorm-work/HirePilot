@@ -13,6 +13,7 @@ const updateSchema = z.object({
   match_score: z.number().int().min(0).max(100).optional(),
   cv_version_id: z.string().uuid().optional(),
   notes: z.string().optional(),
+  application_source: z.string().optional(),
 })
 
 export const PATCH = withAuthParams<{ id: string }>(async (request, { supabase, user, params }) => {
