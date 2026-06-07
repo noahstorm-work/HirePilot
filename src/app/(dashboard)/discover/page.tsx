@@ -11,10 +11,22 @@ import { Search, MapPin, Briefcase, ExternalLink, Bookmark, BookmarkCheck, Trash
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete"
 import { PasteUrlDialog } from "@/components/discover/PasteUrlDialog"
 import { toast } from "sonner"
-import type { JobSearchResult } from "@/lib/jobs-api"
+import type { JobSearchResult } from "@/lib/jobs"
 import type { SavedJob } from "@/types"
 
 const SEARCH_STATE_KEY = "discover_search_state"
+
+const SOURCE_COLORS: Record<string, string> = {
+  adzuna: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  jooble: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  jsearch: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+}
+
+const SOURCE_LABELS: Record<string, string> = {
+  adzuna: "Adzuna",
+  jooble: "Jooble",
+  jsearch: "JSearch",
+}
 
 export default function DiscoverPage() {
   const [query, setQuery] = useState("")
@@ -28,6 +40,7 @@ export default function DiscoverPage() {
   const [total, setTotal] = useState(0)
   const [recentSearches, setRecentSearches] = useState<string[]>([])
   const [showRecent, setShowRecent] = useState(false)
+  const [activeSources, setActiveSources] = useState<string[]>([])
   const searchInputRef = useRef<HTMLInputElement>(null)
   const recentDropdownRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
@@ -78,6 +91,7 @@ export default function DiscoverPage() {
     try {
       const params = new URLSearchParams({ query: query.trim(), page: String(pageNum) })
       if (location) params.set("location", location)
+      if (activeSources.length > 0) params.set("sources", activeSources.join(","))
       const res = await fetch(`/api/jobs/search?${params}`)
       const json = await res.json()
       if (json.success) {
@@ -215,14 +229,40 @@ export default function DiscoverPage() {
             <div className="text-center py-12 text-xs text-[var(--color-text-muted)]">No jobs found. Try a different search.</div>
           ) : results.length > 0 ? (
             <>
-              <p className="text-[10px] text-[var(--color-text-muted)]">{total.toLocaleString()} jobs found</p>
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] text-[var(--color-text-muted)]">{total.toLocaleString()} jobs found</p>
+                <div className="flex items-center gap-1.5">
+                  {(["adzuna", "jooble", "jsearch"] as const).map((source) => (
+                    <button
+                      key={source}
+                      onClick={() => {
+                        setActiveSources((prev) =>
+                          prev.includes(source) ? prev.filter((s) => s !== source) : [...prev, source]
+                        )
+                      }}
+                      className={`px-2 py-0.5 rounded-full text-[10px] border transition-all ${
+                        activeSources.length === 0 || activeSources.includes(source)
+                          ? SOURCE_COLORS[source]
+                          : "bg-transparent text-[var(--color-text-muted)] border-[var(--color-border-subtle)] opacity-40"
+                      }`}
+                    >
+                      {SOURCE_LABELS[source]}
+                    </button>
+                  ))}
+                </div>
+              </div>
               {results.map((job, i) => {
                 const isSaved = savedJobs.some((s) => s.external_id === job.external_id)
                 return (
                   <div key={`${job.external_id}-${i}`} className="group p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-border-default)] transition-default">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] truncate">{job.role_title}</h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-semibold font-[family-name:var(--font-display)] truncate">{job.role_title}</h3>
+                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium border shrink-0 ${SOURCE_COLORS[job.source]}`}>
+                            {SOURCE_LABELS[job.source]}
+                          </span>
+                        </div>
                         <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{job.company}</p>
                         <div className="flex items-center gap-3 mt-1.5 text-[10px] text-[var(--color-text-muted)]">
                           <span className="flex items-center gap-1"><MapPin className="h-2.5 w-2.5" />{job.location}</span>

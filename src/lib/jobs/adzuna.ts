@@ -1,16 +1,4 @@
-export interface JobSearchResult {
-  external_id: string
-  company: string
-  role_title: string
-  description: string
-  url: string
-  salary_min: number | null
-  salary_max: number | null
-  salary_currency: string
-  location: string
-  remote_type: string | null
-  source: "adzuna"
-}
+import type { JobSearchResult, JobSearchResponse } from "./types"
 
 interface AdzunaResponse {
   results: Array<{
@@ -33,12 +21,12 @@ export async function searchAdzuna(
   query: string,
   location?: string,
   page = 1,
-): Promise<{ results: JobSearchResult[]; total: number }> {
+): Promise<JobSearchResponse> {
   const appId = process.env.ADZUNA_APP_ID
   const apiKey = process.env.ADZUNA_API_KEY
 
   if (!appId || !apiKey) {
-    throw new Error("Adzuna API credentials not configured")
+    return { results: [], total: 0, source: "adzuna" }
   }
 
   const params = new URLSearchParams({
@@ -58,7 +46,8 @@ export async function searchAdzuna(
   })
 
   if (!res.ok) {
-    throw new Error(`Adzuna API error: ${res.status} ${res.statusText}`)
+    console.error(`Adzuna API error: ${res.status}`)
+    return { results: [], total: 0, source: "adzuna" }
   }
 
   const data: AdzunaResponse = await res.json()
@@ -77,5 +66,5 @@ export async function searchAdzuna(
     source: "adzuna" as const,
   }))
 
-  return { results, total: data.count }
+  return { results, total: data.count, source: "adzuna" }
 }
