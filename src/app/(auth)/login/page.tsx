@@ -71,10 +71,11 @@ export default function LoginPage() {
         <div className="p-6 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-card)]">
           <form onSubmit={handleLogin} className="space-y-3.5">
             <div>
-              <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-1.5 block">Email</Label>
+              <Label htmlFor="login-email" className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-1.5 block">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
                 <Input
+                  id="login-email"
                   type="email"
                   placeholder="you@example.com"
                   value={email}
@@ -85,10 +86,11 @@ export default function LoginPage() {
               </div>
             </div>
             <div>
-              <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-1.5 block">Password</Label>
+              <Label htmlFor="login-password" className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-1.5 block">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
                 <Input
+                  id="login-password"
                   type="password"
                   placeholder="Enter your password"
                   value={password}

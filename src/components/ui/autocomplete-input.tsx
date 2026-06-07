@@ -9,6 +9,7 @@ interface AutocompleteInputProps {
   placeholder?: string
   className?: string
   icon?: React.ReactNode
+  id?: string
   fetchSuggestions: (q: string) => Promise<string[]>
   popularSuggestions?: string[]
 }
@@ -19,6 +20,7 @@ export function AutocompleteInput({
   placeholder,
   className = "",
   icon,
+  id,
   fetchSuggestions,
   popularSuggestions = [],
 }: AutocompleteInputProps) {
@@ -122,6 +124,7 @@ export function AutocompleteInput({
         )}
         <input
           ref={inputRef}
+          id={id}
           type="text"
           value={query}
           onChange={handleInputChange}
@@ -137,6 +140,7 @@ export function AutocompleteInput({
         {query && (
           <button
             onClick={handleClear}
+            aria-label="Clear input"
             className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors"
           >
             <X className="h-3.5 w-3.5" />

@@ -20,7 +20,7 @@
   --color-text-primary: #f4f4f5;
   --color-text-secondary: #a1a1aa;
   --color-text-tertiary: #71717a;
-  --color-text-muted: #52525b;
+  --color-text-muted: #71717a;
   --color-text-inverse: #09090b;
 
   /* ── Accent: Violet → Blue gradient system ── */
@@ -500,4 +500,13 @@
   box-shadow: var(--shadow-xl), var(--shadow-glow);
   overflow: hidden;
   animation: scaleIn var(--duration-normal) var(--ease-spring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

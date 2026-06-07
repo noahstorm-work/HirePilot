@@ -250,6 +250,7 @@ export default function DiscoverPage() {
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleClearRecent(term) }}
+                      aria-label={`Remove ${term} from recent searches`}
                       className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)]"
                     >
                       <X className="h-3 w-3" />
@@ -338,7 +339,7 @@ export default function DiscoverPage() {
                         <Button variant="ghost" size="sm" onClick={() => handleQuickApply(job)} className="h-7 px-2 text-[10px] font-medium text-[var(--color-accent-violet)] hover:text-white hover:bg-[var(--color-accent-violet)]/20 gap-1">
                           <Send className="h-3 w-3" /> Apply
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleSave(job)} disabled={isSaved} className="h-7 w-7 p-0 text-[var(--color-text-muted)] hover:text-[var(--color-accent-violet)]">
+                        <Button variant="ghost" size="sm" onClick={() => handleSave(job)} disabled={isSaved} aria-label={isSaved ? "Saved" : "Save job"} className="h-7 w-7 p-0 text-[var(--color-text-muted)] hover:text-[var(--color-accent-violet)]">
                           {isSaved ? <BookmarkCheck className="h-3.5 w-3.5 text-[var(--color-accent-violet)]" /> : <Bookmark className="h-3.5 w-3.5" />}
                         </Button>
                       </div>
@@ -381,7 +382,7 @@ export default function DiscoverPage() {
                         <p className="text-[11px] font-medium text-[var(--color-text-primary)] truncate">{saved.role_title}</p>
                         <p className="text-[10px] text-[var(--color-text-muted)] truncate">{saved.company}</p>
                       </div>
-                      <button onClick={() => handleRemoveSaved(saved.id)} className="shrink-0 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                      <button onClick={() => handleRemoveSaved(saved.id)} aria-label={`Remove ${saved.role_title} from saved`} className="shrink-0 opacity-0 group-hover/item:opacity-100 transition-opacity">
                         <Trash2 className="h-2.5 w-2.5 text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)]" />
                       </button>
                     </div>

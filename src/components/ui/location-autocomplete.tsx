@@ -159,6 +159,7 @@ export function LocationAutocomplete({
         {query && (
           <button
             onClick={handleClear}
+            aria-label="Clear location"
             className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors"
           >
             <X className="h-3.5 w-3.5" />

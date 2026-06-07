@@ -119,13 +119,13 @@ export default function CVVersionsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <button onClick={() => setViewVersion(version)} className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-accent-blue)] hover:bg-[var(--color-bg-hover)] transition-colors" title="View CV">
+                  <button onClick={() => setViewVersion(version)} aria-label="View CV" className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-accent-blue)] hover:bg-[var(--color-bg-hover)] transition-colors">
                     <Eye className="h-3.5 w-3.5" />
                   </button>
-                  <button onClick={() => handleRestore(version)} disabled={restoring === version.id} className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-accent-emerald)] hover:bg-[var(--color-bg-hover)] transition-colors disabled:opacity-50" title="Restore to profile">
+                  <button onClick={() => handleRestore(version)} disabled={restoring === version.id} aria-label="Restore to profile" className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-accent-emerald)] hover:bg-[var(--color-bg-hover)] transition-colors disabled:opacity-50">
                     {restoring === version.id ? <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-accent-emerald)] border-t-transparent" /> : <RotateCcw className="h-3.5 w-3.5" />}
                   </button>
-                  <button onClick={() => handleDelete(version.id)} className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)] hover:bg-[var(--color-bg-hover)] transition-colors" title="Delete version">
+                  <button onClick={() => handleDelete(version.id)} aria-label="Delete version" className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)] hover:bg-[var(--color-bg-hover)] transition-colors">
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>

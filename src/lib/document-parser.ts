@@ -1,5 +1,3 @@
-import * as mammoth from "mammoth"
-
 export interface ExtractedMetadata {
   full_name?: string
   linkedin_url?: string
@@ -84,6 +82,7 @@ export async function parsePDF(file: File): Promise<string> {
 
 export async function parseDOCX(file: File): Promise<string> {
   const arrayBuffer = await file.arrayBuffer()
+  const mammoth = await import("mammoth")
   const result = await mammoth.extractRawText({ arrayBuffer })
   return result.value
 }

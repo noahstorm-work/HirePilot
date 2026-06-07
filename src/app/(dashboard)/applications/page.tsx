@@ -143,20 +143,20 @@ export default function ApplicationsPage() {
               </DialogHeader>
               <div className="space-y-3 mt-3">
                 <div>
-                  <Label className="text-[11px] text-[var(--color-text-muted)] mb-1 block">Company *</Label>
-                  <CompanyAutocomplete value={newApp.company} onChange={(v) => setNewApp({ ...newApp, company: v })} placeholder="Acme Inc" />
+                  <Label htmlFor="new-app-company" className="text-[11px] text-[var(--color-text-muted)] mb-1 block">Company *</Label>
+                  <CompanyAutocomplete id="new-app-company" value={newApp.company} onChange={(v) => setNewApp({ ...newApp, company: v })} placeholder="Acme Inc" />
                 </div>
                 <div>
-                  <Label className="text-[11px] text-[var(--color-text-muted)] mb-1 block">Role *</Label>
-                  <RoleAutocomplete value={newApp.role_title} onChange={(v) => setNewApp({ ...newApp, role_title: v })} placeholder="Senior Engineer" />
+                  <Label htmlFor="new-app-role" className="text-[11px] text-[var(--color-text-muted)] mb-1 block">Role *</Label>
+                  <RoleAutocomplete id="new-app-role" value={newApp.role_title} onChange={(v) => setNewApp({ ...newApp, role_title: v })} placeholder="Senior Engineer" />
                 </div>
                 <div>
-                  <Label className="text-[11px] text-[var(--color-text-muted)] mb-1 block">Job URL</Label>
-                  <Input value={newApp.job_url} onChange={(e) => setNewApp({ ...newApp, job_url: e.target.value })} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://..." />
+                  <Label htmlFor="new-app-url" className="text-[11px] text-[var(--color-text-muted)] mb-1 block">Job URL</Label>
+                  <Input id="new-app-url" value={newApp.job_url} onChange={(e) => setNewApp({ ...newApp, job_url: e.target.value })} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://..." />
                 </div>
                 <div>
-                  <Label className="text-[11px] text-[var(--color-text-muted)] mb-1 block">Notes</Label>
-                  <Textarea value={newApp.notes} onChange={(e) => setNewApp({ ...newApp, notes: e.target.value })} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] min-h-[60px] text-sm" placeholder="Any notes..." />
+                  <Label htmlFor="new-app-notes" className="text-[11px] text-[var(--color-text-muted)] mb-1 block">Notes</Label>
+                  <Textarea id="new-app-notes" value={newApp.notes} onChange={(e) => setNewApp({ ...newApp, notes: e.target.value })} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] min-h-[60px] text-sm" placeholder="Any notes..." />
                 </div>
                 <Button onClick={handleCreate} disabled={creating || !newApp.company || !newApp.role_title} className="w-full gradient-violet text-white border-0 hover:opacity-90 h-9 text-sm">
                   {creating ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : "Create"}
@@ -237,6 +237,7 @@ export default function ApplicationsPage() {
                             )}
                             <button
                               onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(app) }}
+                              aria-label={`Delete ${app.role_title} application`}
                               className="p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)] transition-colors opacity-0 group-hover:opacity-100"
                             >
                               <Trash2 className="h-2.5 w-2.5" />
@@ -277,6 +278,7 @@ export default function ApplicationsPage() {
                     <span className="text-[10px] text-[var(--color-text-muted)]">{new Date(app.created_at).toLocaleDateString()}</span>
                     <button
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(app) }}
+                      aria-label={`Delete ${app.role_title} application`}
                       className="p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)] transition-colors opacity-0 group-hover:opacity-100"
                     >
                       <Trash2 className="h-3 w-3" />

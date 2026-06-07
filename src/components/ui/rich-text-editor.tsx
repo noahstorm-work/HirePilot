@@ -82,15 +82,18 @@ export function RichTextEditor({
   const ToolbarButton = ({
     onClick,
     isActive = false,
+    "aria-label": ariaLabel,
     children,
   }: {
     onClick: () => void
     isActive?: boolean
+    "aria-label"?: string
     children: React.ReactNode
   }) => (
     <button
       type="button"
       onClick={onClick}
+      aria-label={ariaLabel}
       className={`p-1.5 rounded-lg transition-colors ${
         isActive
           ? "bg-violet-500/20 text-violet-400"
@@ -108,12 +111,14 @@ export function RichTextEditor({
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           isActive={editor.isActive("bold")}
+          aria-label="Bold"
         >
           <Bold className="h-3.5 w-3.5" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleItalic().run()}
           isActive={editor.isActive("italic")}
+          aria-label="Italic"
         >
           <Italic className="h-3.5 w-3.5" />
         </ToolbarButton>
@@ -123,6 +128,7 @@ export function RichTextEditor({
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           isActive={editor.isActive("heading", { level: 2 })}
+          aria-label="Heading"
         >
           <Heading2 className="h-3.5 w-3.5" />
         </ToolbarButton>
@@ -132,22 +138,24 @@ export function RichTextEditor({
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           isActive={editor.isActive("bulletList")}
+          aria-label="Bullet list"
         >
           <List className="h-3.5 w-3.5" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           isActive={editor.isActive("orderedList")}
+          aria-label="Numbered list"
         >
           <ListOrdered className="h-3.5 w-3.5" />
         </ToolbarButton>
 
         <div className="flex-1" />
 
-        <ToolbarButton onClick={() => editor.chain().focus().undo().run()}>
+        <ToolbarButton onClick={() => editor.chain().focus().undo().run()} aria-label="Undo">
           <Undo className="h-3.5 w-3.5" />
         </ToolbarButton>
-        <ToolbarButton onClick={() => editor.chain().focus().redo().run()}>
+        <ToolbarButton onClick={() => editor.chain().focus().redo().run()} aria-label="Redo">
           <Redo className="h-3.5 w-3.5" />
         </ToolbarButton>
       </div>

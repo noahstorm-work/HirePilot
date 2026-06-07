@@ -43,6 +43,7 @@ export function CommandPalette() {
   const [query, setQuery] = useState("")
   const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
   const filtered = commands.filter(
@@ -81,6 +82,31 @@ export function CommandPalette() {
 
   useEffect(() => { setSelectedIndex(0) }, [query])
 
+  // Focus trap
+  useEffect(() => {
+    if (!open || !dialogRef.current) return
+    const dialog = dialogRef.current
+    const focusable = dialog.querySelectorAll<HTMLElement>(
+      'input, button, [tabindex]:not([tabindex="-1"])'
+    )
+    if (focusable.length === 0) return
+
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+
+    function handleTrap(e: KeyboardEvent) {
+      if (e.key !== "Tab") return
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus() }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus() }
+      }
+    }
+
+    dialog.addEventListener("keydown", handleTrap)
+    return () => dialog.removeEventListener("keydown", handleTrap)
+  }, [open])
+
   const handleSelect = useCallback((href: string) => {
     setOpen(false)
     router.push(href)
@@ -103,10 +129,17 @@ export function CommandPalette() {
   let globalIndex = -1
 
   return (
-    <div className="command-overlay" onClick={() => setOpen(false)}>
-      <div className="command-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="command-overlay" onClick={() => setOpen(false)} aria-hidden="true">
+      <div
+        ref={dialogRef}
+        className="command-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command palette"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--color-border-subtle)]">
-          <Search className="h-4 w-4 text-[var(--color-text-muted)] shrink-0" />
+          <Search className="h-4 w-4 text-[var(--color-text-muted)] shrink-0" aria-hidden="true" />
           <input
             ref={inputRef}
             type="text"
@@ -114,19 +147,20 @@ export function CommandPalette() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search pages, actions..."
+            aria-label="Search pages and actions"
             className="flex-1 bg-transparent text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] outline-none"
           />
           <kbd className="text-[10px] text-[var(--color-text-muted)] bg-[var(--color-bg-elevated)] px-1.5 py-0.5 rounded border border-[var(--color-border-subtle)]">ESC</kbd>
         </div>
 
-        <div className="max-h-[320px] overflow-y-auto p-1.5">
+        <div className="max-h-[320px] overflow-y-auto p-1.5" role="listbox" aria-label="Search results">
           {Object.entries(grouped).length === 0 ? (
             <div className="py-8 text-center">
               <p className="text-sm text-[var(--color-text-muted)]">No results found</p>
             </div>
           ) : (
             Object.entries(grouped).map(([section, items]) => (
-              <div key={section}>
+              <div key={section} role="group" aria-label={section}>
                 <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)]">{section}</p>
                 {items.map((cmd) => {
                   globalIndex++
@@ -134,13 +168,15 @@ export function CommandPalette() {
                   return (
                     <button
                       key={cmd.id}
+                      role="option"
+                      aria-selected={isSelected}
                       onClick={() => handleSelect(cmd.href)}
                       onMouseEnter={() => setSelectedIndex(globalIndex)}
                       className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-[10px] text-left transition-colors ${
                         isSelected ? "bg-[var(--color-accent-violet)]/10 text-[var(--color-text-primary)]" : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
                       }`}
                     >
-                      <cmd.icon className={`h-4 w-4 shrink-0 ${isSelected ? "text-[var(--color-accent-violet)]" : "text-[var(--color-text-muted)]"}`} />
+                      <cmd.icon className={`h-4 w-4 shrink-0 ${isSelected ? "text-[var(--color-accent-violet)]" : "text-[var(--color-text-muted)]"}`} aria-hidden="true" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{cmd.label}</p>
                         {cmd.description && <p className="text-xs text-[var(--color-text-muted)] truncate">{cmd.description}</p>}
@@ -148,7 +184,7 @@ export function CommandPalette() {
                       {cmd.shortcut && (
                         <kbd className="text-[10px] text-[var(--color-text-muted)] bg-[var(--color-bg-elevated)] px-1.5 py-0.5 rounded border border-[var(--color-border-subtle)]">{cmd.shortcut}</kbd>
                       )}
-                      {isSelected && <ArrowRight className="h-3 w-3 text-[var(--color-accent-violet)]" />}
+                      {isSelected && <ArrowRight className="h-3 w-3 text-[var(--color-accent-violet)]" aria-hidden="true" />}
                     </button>
                   )
                 })}
@@ -157,7 +193,7 @@ export function CommandPalette() {
           )}
         </div>
 
-        <div className="flex items-center gap-4 px-4 py-2.5 border-t border-[var(--color-border-subtle)] text-[10px] text-[var(--color-text-muted)]">
+        <div className="flex items-center gap-4 px-4 py-2.5 border-t border-[var(--color-border-subtle)] text-[10px] text-[var(--color-text-muted)]" aria-hidden="true">
           <span className="flex items-center gap-1">
             <kbd className="bg-[var(--color-bg-elevated)] px-1 py-0.5 rounded border border-[var(--color-border-subtle)]">↑↓</kbd> Navigate
           </span>

@@ -12,6 +12,7 @@ import {
 import { Link as LinkIcon } from "lucide-react"
 import { toast } from "sonner"
 import { triggerAnalysis } from "@/lib/trigger-analysis"
+import type { JobSearchResult } from "@/lib/jobs/types"
 
 export function PasteUrlDialog() {
   const [open, setOpen] = useState(false)
@@ -19,7 +20,7 @@ export function PasteUrlDialog() {
   const [company, setCompany] = useState("")
   const [roleTitle, setRoleTitle] = useState("")
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<Partial<JobSearchResult> | null>(null)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,17 +86,17 @@ export function PasteUrlDialog() {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label className="text-xs text-[var(--color-text-muted)]">Job URL</Label>
-            <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://company.com/jobs/..." required className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]" />
+            <Label htmlFor="paste-url" className="text-xs text-[var(--color-text-muted)]">Job URL</Label>
+            <Input id="paste-url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://company.com/jobs/..." required className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label className="text-xs text-[var(--color-text-muted)]">Company (optional)</Label>
-              <Input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Acme Corp" className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]" />
+              <Label htmlFor="paste-company" className="text-xs text-[var(--color-text-muted)]">Company (optional)</Label>
+              <Input id="paste-company" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Acme Corp" className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]" />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs text-[var(--color-text-muted)]">Role Title (optional)</Label>
-              <Input value={roleTitle} onChange={(e) => setRoleTitle(e.target.value)} placeholder="Senior Engineer" className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]" />
+              <Label htmlFor="paste-role" className="text-xs text-[var(--color-text-muted)]">Role Title (optional)</Label>
+              <Input id="paste-role" value={roleTitle} onChange={(e) => setRoleTitle(e.target.value)} placeholder="Senior Engineer" className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]" />
             </div>
           </div>
           <Button type="submit" className="w-full gradient-violet text-white border-0 hover:opacity-90" disabled={loading}>

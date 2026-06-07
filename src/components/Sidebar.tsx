@@ -108,6 +108,7 @@ export function Sidebar() {
       )}
       <button
         onClick={handleSignOut}
+        aria-label="Sign out"
         className={`flex items-center gap-2.5 w-full px-3 py-2 rounded-[10px] text-[13px] text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] transition-colors ${collapsed ? "justify-center" : ""}`}
       >
         <LogOut className="h-4 w-4" />
@@ -141,6 +142,7 @@ export function Sidebar() {
       {/* Mobile toggle */}
       <button
         onClick={() => setMobileOpen(true)}
+        aria-label="Open menu"
         className={`fixed top-4 left-4 z-30 md:hidden p-2.5 rounded-[10px] bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] transition-all ${mobileOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       >
         <Menu className="h-5 w-5" />
@@ -153,7 +155,7 @@ export function Sidebar() {
           <div className="absolute left-0 top-0 bottom-0 w-[260px] bg-[var(--color-bg-primary)] border-r border-[var(--color-border-subtle)] flex flex-col animate-slide-in-left">
             <div className="flex items-center justify-between px-3 py-5">
               <Logo />
-              <button onClick={() => setMobileOpen(false)} className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] transition-colors">
+              <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -172,6 +174,7 @@ export function Sidebar() {
         <SidebarContent />
         <button
           onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:border-[var(--color-border-default)] transition-all z-10"
         >
           {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}

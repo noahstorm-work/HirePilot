@@ -75,10 +75,11 @@ export default function RegisterPage() {
         <div className="p-6 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-card)]">
           <form onSubmit={handleRegister} className="space-y-3.5">
             <div>
-              <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-1.5 block">Full Name</Label>
+              <Label htmlFor="register-name" className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-1.5 block">Full Name</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
                 <Input
+                  id="register-name"
                   type="text"
                   placeholder="John Doe"
                   value={fullName}
@@ -89,10 +90,11 @@ export default function RegisterPage() {
               </div>
             </div>
             <div>
-              <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-1.5 block">Email</Label>
+              <Label htmlFor="register-email" className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-1.5 block">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
                 <Input
+                  id="register-email"
                   type="email"
                   placeholder="you@example.com"
                   value={email}
@@ -103,10 +105,11 @@ export default function RegisterPage() {
               </div>
             </div>
             <div>
-              <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-1.5 block">Password</Label>
+              <Label htmlFor="register-password" className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-1.5 block">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
                 <Input
+                  id="register-password"
                   type="password"
                   placeholder="8+ characters"
                   value={password}

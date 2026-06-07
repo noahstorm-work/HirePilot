@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { RichTextEditor } from "@/components/ui/rich-text-editor"
+import dynamic from "next/dynamic"
+const RichTextEditor = dynamic(() => import("@/components/ui/rich-text-editor").then(m => ({ default: m.RichTextEditor })), { ssr: false, loading: () => <div className="h-32 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] animate-pulse" /> })
 import { DocumentUpload } from "@/components/ui/document-upload"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -94,12 +95,12 @@ export default function InterviewCoachPage() {
       <div className="surface-card p-5 space-y-3.5">
         <div className="grid sm:grid-cols-3 gap-3">
           <div>
-            <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Role *</Label>
-            <RoleAutocomplete value={role} onChange={setRole} placeholder="e.g. Senior Frontend Engineer" />
+            <Label htmlFor="ic-role" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Role *</Label>
+            <RoleAutocomplete id="ic-role" value={role} onChange={setRole} placeholder="e.g. Senior Frontend Engineer" />
           </div>
           <div>
-            <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Company</Label>
-            <CompanyAutocomplete value={company} onChange={setCompany} placeholder="e.g. Google" />
+            <Label htmlFor="ic-company" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Company</Label>
+            <CompanyAutocomplete id="ic-company" value={company} onChange={setCompany} placeholder="e.g. Google" />
           </div>
           <div className="flex items-end">
             <Button onClick={handleGenerate} disabled={loading || !role.trim()} className="w-full gradient-violet text-white border-0 hover:opacity-90 shadow-glow h-9 text-sm">

@@ -25,4 +25,4 @@ CREATE POLICY "Anyone can read jobs"
 
 CREATE POLICY "Authenticated users can insert jobs"
   ON jobs FOR INSERT
-  WITH CHECK (auth.role() = 'authenticated');
+  WITH CHECK (auth.uid() IS NOT NULL);

@@ -9,6 +9,7 @@ interface CompanyAutocompleteProps {
   onChange: (value: string) => void
   placeholder?: string
   className?: string
+  id?: string
 }
 
 export function CompanyAutocomplete({
@@ -16,6 +17,7 @@ export function CompanyAutocomplete({
   onChange,
   placeholder = "Company name",
   className,
+  id,
 }: CompanyAutocompleteProps) {
   const fetchSuggestions = useCallback(async (q: string) => {
     const res = await fetch(`/api/autocomplete/companies?q=${encodeURIComponent(q)}`)
@@ -29,6 +31,7 @@ export function CompanyAutocomplete({
       onChange={onChange}
       placeholder={placeholder}
       className={className}
+      id={id}
       icon={<Building2 className="h-3.5 w-3.5" />}
       fetchSuggestions={fetchSuggestions}
     />

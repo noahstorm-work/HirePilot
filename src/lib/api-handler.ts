@@ -108,7 +108,7 @@ export function withAuth(
     } catch (err) {
       console.error("[withAuth ERROR]", extractSource(request.url), err)
       await logServerError(err, request, extractSource(request.url))
-      return apiError(err instanceof Error ? err.message : "Internal server error", 500)
+      return apiError("Internal server error", 500)
     }
   }
 }
@@ -124,7 +124,7 @@ export function withAuthParams<TParams extends Record<string, string>>(
     } catch (err) {
       console.error("[withAuthParams ERROR]", extractSource(request.url), err)
       await logServerError(err, request, extractSource(request.url))
-      return apiError(err instanceof Error ? err.message : "Internal server error", 500)
+      return apiError("Internal server error", 500)
     }
   }
 }

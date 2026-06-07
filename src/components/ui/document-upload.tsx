@@ -67,7 +67,7 @@ export function DocumentUpload({ onTextExtracted, className, label = "Upload Doc
           {parsing ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--color-text-muted)] shrink-0" />
           ) : (
-            <button onClick={clearFile} className="text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)] transition-colors shrink-0">
+            <button onClick={clearFile} aria-label="Remove file" className="text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)] transition-colors shrink-0">
               <X className="h-3.5 w-3.5" />
             </button>
           )}

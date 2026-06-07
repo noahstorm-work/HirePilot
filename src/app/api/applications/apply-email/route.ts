@@ -28,7 +28,7 @@ export const POST = withAuth(async (request, { supabase, user }) => {
 
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("full_name, cv_text, email")
+    .select("full_name, cv_text")
     .eq("id", user.id)
     .maybeSingle()
 
@@ -41,7 +41,7 @@ export const POST = withAuth(async (request, { supabase, user }) => {
     .maybeSingle()
 
   const candidateName = profile.full_name || "Applicant"
-  const candidateEmail = profile.email || user.email || ""
+  const candidateEmail = user.email || ""
   const coverLetter = aiResult?.cover_letter || `Dear Hiring Manager,
 
 I am writing to express my strong interest in the ${parsed.data.role_title} position at ${parsed.data.company}. With my background and skills, I am confident I would be a valuable addition to your team.
