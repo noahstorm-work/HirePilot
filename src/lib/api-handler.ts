@@ -67,7 +67,11 @@ export function validateBody<T>(schema: ZodSchema<T>, body: unknown): { data: T;
 
 export async function logServerError(err: unknown, request: Request, source: string) {
   try {
-    const supabase = await createClient()
+    const { createClient } = await import("@supabase/supabase-js")
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!url || !key) return
+    const supabase = createClient(url, key)
     await supabase.from("error_logs").insert({
       level: "error",
       message: err instanceof Error ? err.message : String(err),
@@ -102,6 +106,7 @@ export function withAuth(
     try {
       return await handler(request, { supabase, user })
     } catch (err) {
+      console.error("[withAuth ERROR]", extractSource(request.url), err)
       await logServerError(err, request, extractSource(request.url))
       return apiError(err instanceof Error ? err.message : "Internal server error", 500)
     }
@@ -117,6 +122,7 @@ export function withAuthParams<TParams extends Record<string, string>>(
     try {
       return await handler(request, { supabase, user, params: await params })
     } catch (err) {
+      console.error("[withAuthParams ERROR]", extractSource(request.url), err)
       await logServerError(err, request, extractSource(request.url))
       return apiError(err instanceof Error ? err.message : "Internal server error", 500)
     }
