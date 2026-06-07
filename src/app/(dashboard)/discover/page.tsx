@@ -7,12 +7,13 @@ import { Input } from "@/components/ui/input"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
-import { Search, MapPin, Briefcase, ExternalLink, Bookmark, BookmarkCheck, Trash2, Plus, Clock, X, Link as LinkIcon, ChevronDown } from "lucide-react"
+import { Search, MapPin, Briefcase, ExternalLink, Bookmark, BookmarkCheck, Trash2, Plus, Clock, X, Link as LinkIcon, ChevronDown, Send } from "lucide-react"
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete"
 import { PasteUrlDialog } from "@/components/discover/PasteUrlDialog"
 import { toast } from "sonner"
 import type { JobSearchResult } from "@/lib/jobs"
 import { formatSalary } from "@/lib/jobs"
+import { triggerAnalysis } from "@/lib/trigger-analysis"
 import type { SavedJob } from "@/types"
 
 const SEARCH_STATE_KEY = "discover_search_state"
@@ -157,9 +158,39 @@ export default function DiscoverPage() {
     const json = await res.json()
     if (json.success) {
       setSavedJobs((prev) => prev.filter((s) => s.id !== saved.id))
-      toast.success("Added to applications")
+      if (json.data?.id && saved.description) {
+        triggerAnalysis(json.data.id, saved.description, saved.company, saved.role_title)
+      }
+      toast.success("Added to applications — analysis running")
     } else {
       toast.error("Failed to add to applications")
+    }
+  }
+
+  const handleQuickApply = async (job: JobSearchResult) => {
+    const salary = job.salary_min ? `${job.salary_currency}${job.salary_min.toLocaleString()}${job.salary_max ? ` - ${job.salary_max.toLocaleString()}` : ""}` : null
+    const res = await fetch("/api/applications/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        company: job.company,
+        role_title: job.role_title,
+        job_url: job.url,
+        job_description: job.description,
+        application_source: job.source,
+        salary_range: salary,
+        location: job.location,
+        status: "Applied",
+      }),
+    })
+    const json = await res.json()
+    if (json.success) {
+      toast.success(`Applied to ${job.company} — analysis running`)
+      if (json.data?.id) {
+        triggerAnalysis(json.data.id, job.description, job.company, job.role_title)
+      }
+    } else {
+      toast.error(json.error || "Failed to apply")
     }
   }
 
@@ -279,6 +310,9 @@ export default function DiscoverPage() {
                         <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5 line-clamp-2">{job.description.slice(0, 180)}...</p>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.preventDefault()}>
+                        <Button variant="ghost" size="sm" onClick={() => handleQuickApply(job)} className="h-7 px-2 text-[10px] font-medium text-[var(--color-accent-violet)] hover:text-white hover:bg-[var(--color-accent-violet)]/20 gap-1">
+                          <Send className="h-3 w-3" /> Apply
+                        </Button>
                         <Button variant="ghost" size="sm" onClick={() => handleSave(job)} disabled={isSaved} className="h-7 w-7 p-0 text-[var(--color-text-muted)] hover:text-[var(--color-accent-violet)]">
                           {isSaved ? <BookmarkCheck className="h-3.5 w-3.5 text-[var(--color-accent-violet)]" /> : <Bookmark className="h-3.5 w-3.5" />}
                         </Button>

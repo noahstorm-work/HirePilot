@@ -10,12 +10,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
-import { Briefcase, Plus, ChevronRight } from "lucide-react"
+import { Briefcase, Plus, ChevronRight, Send } from "lucide-react"
 import { CompanyAutocomplete } from "@/components/ui/company-autocomplete"
 import { RoleAutocomplete } from "@/components/ui/role-autocomplete"
 import { toast } from "sonner"
 import Link from "next/link"
 import { APPLICATION_STATUSES, STATUS_COLORS } from "@/lib/constants"
+import { triggerAnalysis } from "@/lib/trigger-analysis"
 
 interface AppItem {
   id: string; company: string; role_title: string; job_url: string | null;
@@ -63,18 +64,38 @@ export default function ApplicationsPage() {
   const handleCreate = async () => {
     if (!newApp.company || !newApp.role_title) return
     setCreating(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    const { data, error } = await supabase.from("applications").insert({
-      user_id: user.id, company: newApp.company, role_title: newApp.role_title,
-      job_url: newApp.job_url || null, notes: newApp.notes || null, status: "Saved",
-    }).select().single()
-    if (error) { toast.error("Failed to create application"); setCreating(false); return }
-    if (data) setApplications((prev) => [data as AppItem, ...prev])
+    const res = await fetch("/api/applications/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        company: newApp.company,
+        role_title: newApp.role_title,
+        job_url: newApp.job_url || undefined,
+        notes: newApp.notes || undefined,
+        status: "Saved",
+      }),
+    })
+    const json = await res.json()
+    if (!json.success) { toast.error("Failed to create application"); setCreating(false); return }
+    if (json.data) {
+      setApplications((prev) => [json.data as AppItem, ...prev])
+      if (json.data.id) {
+        const desc = newApp.notes || ""
+        if (desc) triggerAnalysis(json.data.id, desc, newApp.company, newApp.role_title)
+      }
+    }
     setNewApp({ company: "", role_title: "", job_url: "", notes: "" })
     setDialogOpen(false)
     setCreating(false)
     toast.success("Application created")
+  }
+
+  const handleMarkApplied = async (app: AppItem) => {
+    const { error } = await supabase.from("applications").update({ status: "Applied" }).eq("id", app.id)
+    if (!error) {
+      setApplications((prev) => prev.map((a) => a.id === app.id ? { ...a, status: "Applied" } : a))
+      toast.success("Marked as applied")
+    }
   }
 
   if (loading) return <LoadingScreen />
@@ -194,7 +215,17 @@ export default function ApplicationsPage() {
                         </div>
                         <div className="flex items-center justify-between mt-2 pt-2 border-t border-[var(--color-border-subtle)]">
                           <span className="text-[9px] text-[var(--color-text-muted)]">{new Date(app.created_at).toLocaleDateString()}</span>
-                          <ChevronRight className="h-2.5 w-2.5 text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <div className="flex items-center gap-1.5">
+                            {col.key === "Saved" && (
+                              <button
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleMarkApplied(app) }}
+                                className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium text-[var(--color-accent-violet)] hover:bg-[var(--color-accent-violet)]/10 transition-colors opacity-0 group-hover:opacity-100"
+                              >
+                                <Send className="h-2.5 w-2.5" /> Apply
+                              </button>
+                            )}
+                            <ChevronRight className="h-2.5 w-2.5 text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
                         </div>
                       </div>
                     </Link>

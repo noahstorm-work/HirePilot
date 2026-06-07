@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { Link as LinkIcon } from "lucide-react"
 import { toast } from "sonner"
+import { triggerAnalysis } from "@/lib/trigger-analysis"
 
 export function PasteUrlDialog() {
   const [open, setOpen] = useState(false)
@@ -60,7 +61,10 @@ export function PasteUrlDialog() {
       setRoleTitle("")
       setResult(null)
       router.refresh()
-      toast.success("Job imported as application")
+      if (json.data?.id && result.description) {
+        triggerAnalysis(json.data.id, result.description, result.company || company || "Unknown", result.role_title || roleTitle || "Unknown Role")
+      }
+      toast.success("Job imported — analysis running")
     } else {
       toast.error(json.error || "Failed to save")
     }
