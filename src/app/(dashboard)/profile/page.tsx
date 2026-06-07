@@ -11,9 +11,12 @@ import dynamic from "next/dynamic"
 const RichTextEditor = dynamic(() => import("@/components/ui/rich-text-editor").then(m => ({ default: m.RichTextEditor })), { ssr: false, loading: () => <div className="h-32 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] animate-pulse" /> })
 import { DocumentUpload } from "@/components/ui/document-upload"
 import type { ExtractedMetadata } from "@/lib/document-parser"
-import { User, Save, ExternalLink, X, Check } from "lucide-react"
+import { User, Save, ExternalLink, X, Check, Lock, Download, Trash2, Loader2, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
 import type { UserProfile } from "@/types"
+import {
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+} from "@/components/ui/dialog"
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -30,6 +33,13 @@ export default function ProfilePage() {
   const [targetSeniority, setTargetSeniority] = useState("")
   const [skills, setSkills] = useState<string[]>([])
   const [skillInput, setSkillInput] = useState("")
+  const [userEmail, setUserEmail] = useState("")
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [changingPassword, setChangingPassword] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState("")
   const supabase = createClient()
   const isDirty = useRef(false)
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -81,6 +91,7 @@ export default function ProfilePage() {
   const loadProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
+    setUserEmail(user.email || "")
     const { data } = await supabase.from("user_profiles").select("*").eq("id", user.id).maybeSingle()
     if (data) {
       setProfile(data)
@@ -95,6 +106,79 @@ export default function ProfilePage() {
       setSkills(data.skills || [])
     }
     setLoading(false)
+  }
+
+  const handleChangePassword = async () => {
+    if (!newPassword.trim()) return
+    setChangingPassword(true)
+    try {
+      const res = await fetch("/api/account/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newPassword }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        toast.success("Password updated")
+        setCurrentPassword("")
+        setNewPassword("")
+      } else {
+        toast.error(json.error || "Failed to update password")
+      }
+    } catch {
+      toast.error("Failed to update password")
+    }
+    setChangingPassword(false)
+  }
+
+  const handleExportData = async () => {
+    setExporting(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+      const res = await fetch("/api/account/export", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const json = await res.json()
+      if (json.success) {
+        const blob = new Blob([JSON.stringify(json.data, null, 2)], { type: "application/json" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = `hirepilot-export-${new Date().toISOString().split("T")[0]}.json`
+        a.click()
+        URL.revokeObjectURL(url)
+        toast.success("Data exported")
+      } else {
+        toast.error(json.error || "Export failed")
+      }
+    } catch {
+      toast.error("Export failed")
+    }
+    setExporting(false)
+  }
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+      const res = await fetch("/api/account", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const json = await res.json()
+      if (json.success) {
+        toast.success("Account deleted")
+        await supabase.auth.signOut()
+        window.location.href = "/"
+      } else {
+        toast.error(json.error || "Failed to delete account")
+      }
+    } catch {
+      toast.error("Failed to delete account")
+    }
+    setDeleting(false)
   }
 
   const handleSave = async () => {
@@ -244,6 +328,76 @@ export default function ProfilePage() {
             </>
           )}
         </Button>
+      </div>
+
+      {/* Account */}
+      <div className="surface-card p-5 space-y-3.5">
+        <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] block">Account</Label>
+        <div>
+          <Label className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Email</Label>
+          <Input value={userEmail} disabled className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-tertiary)] h-9 text-sm opacity-60" />
+        </div>
+        <div>
+          <Label htmlFor="profile-new-password" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Change Password</Label>
+          <div className="flex gap-2">
+            <Input id="profile-new-password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="flex-1 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="New password (8+ chars)" minLength={8} />
+            <Button onClick={handleChangePassword} disabled={changingPassword || newPassword.length < 8} variant="outline" size="sm" className="h-9 px-3 border-[var(--color-border-subtle)] text-[var(--color-text-secondary)]">
+              {changingPassword ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Lock className="h-3.5 w-3.5" />}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Data Export */}
+      <div className="surface-card p-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] block">Export Your Data</Label>
+            <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5">Download all your profile, applications, and AI results as JSON</p>
+          </div>
+          <Button onClick={handleExportData} disabled={exporting} variant="outline" size="sm" className="h-9 px-3 border-[var(--color-border-subtle)] text-[var(--color-text-secondary)]">
+            {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Download className="h-3.5 w-3.5 mr-1.5" />}
+            Export
+          </Button>
+        </div>
+      </div>
+
+      {/* Danger Zone */}
+      <div className="surface-card p-5 border border-[var(--color-accent-rose)]/20">
+        <div className="flex items-center justify-between">
+          <div>
+            <Label className="text-[11px] font-medium text-[var(--color-accent-rose)] block">Delete Account</Label>
+            <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5">Permanently delete your account and all data. This cannot be undone.</p>
+          </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9 px-3 border-[var(--color-accent-rose)]/30 text-[var(--color-accent-rose)] hover:bg-[var(--color-accent-rose)]/10">
+                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                Delete
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-[var(--color-bg-card)] border-[var(--color-border-subtle)]">
+              <DialogHeader>
+                <DialogTitle className="font-[family-name:var(--font-display)] text-sm text-[var(--color-accent-rose)]">Delete Account</DialogTitle>
+                <DialogDescription className="sr-only">Confirm account deletion</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-3">
+                <div className="flex items-start gap-2.5 p-3 rounded-lg bg-[var(--color-accent-rose)]/10 border border-[var(--color-accent-rose)]/20">
+                  <AlertTriangle className="h-4 w-4 text-[var(--color-accent-rose)] shrink-0 mt-0.5" />
+                  <p className="text-xs text-[var(--color-text-secondary)]">This will permanently delete your account, profile, all applications, AI results, and saved jobs. This action is irreversible.</p>
+                </div>
+                <div>
+                  <Label htmlFor="delete-confirm" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Type <span className="font-medium text-[var(--color-accent-rose)]">DELETE</span> to confirm</Label>
+                  <Input id="delete-confirm" value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-accent-rose)] h-9 text-sm" placeholder="DELETE" />
+                </div>
+                <Button onClick={handleDeleteAccount} disabled={deleting || deleteConfirm !== "DELETE"} className="w-full bg-[var(--color-accent-rose)] text-white border-0 hover:opacity-90 h-9 text-sm">
+                  {deleting ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Trash2 className="h-3.5 w-3.5 mr-1.5" />}
+                  {deleting ? "Deleting..." : "Permanently Delete Account"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
     </div>
   )
