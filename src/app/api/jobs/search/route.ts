@@ -12,7 +12,7 @@ export const GET = withAuth(async (request, { supabase, user }) => {
   const { searchParams } = new URL(request.url)
   const parsed = schema.safeParse({
     query: searchParams.get("query"),
-    location: searchParams.get("location"),
+    location: searchParams.get("location") || undefined,
     page: searchParams.get("page") ?? 1,
   })
   if (!parsed.success) return apiError(parsed.error.errors[0].message, 400)
