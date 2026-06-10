@@ -1,6 +1,8 @@
-import { withAuth, apiSuccess, apiError } from "@/lib/api-handler"
+import { withAuth, apiSuccess, apiError, checkRateLimit } from "@/lib/api-handler"
 
 export const GET = withAuth(async (_request, { supabase, user }) => {
+  const rl = checkRateLimit(`export:${user.id}`, 3, 60_000)
+  if (rl) return rl
   const [profile, applications, careerAnalyses, rejectionAnalyses, weeklyReports, savedJobs, cvVersions, skillProgress] = await Promise.all([
     supabase.from("user_profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase.from("applications").select("*").eq("user_id", user.id),

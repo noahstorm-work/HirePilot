@@ -20,9 +20,11 @@ export function CompanyAutocomplete({
   id,
 }: CompanyAutocompleteProps) {
   const fetchSuggestions = useCallback(async (q: string) => {
-    const res = await fetch(`/api/autocomplete/companies?q=${encodeURIComponent(q)}`)
-    const json = await res.json()
-    return json.success ? json.data : []
+    try {
+      const res = await fetch(`/api/autocomplete/companies?q=${encodeURIComponent(q)}`)
+      const json = await res.json()
+      return json.success ? json.data : []
+    } catch { return [] }
   }, [])
 
   return (

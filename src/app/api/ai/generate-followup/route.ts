@@ -32,6 +32,15 @@ export const POST = withAuth(async (request, { supabase, user }) => {
   const roleTitle = parsed.data.roleTitle || parsed.data.role_title!
   const daysSince = parsed.data.daysSince ?? parsed.data.days_since!
 
+  const { data: ownership } = await supabase
+    .from("applications")
+    .select("id")
+    .eq("id", applicationId)
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  if (!ownership) return apiError("Application not found", 404)
+
   const result = await generateFollowup({ company: parsed.data.company, roleTitle, daysSince })
 
   const emailBody = `Subject: ${result.subject}\n\n${result.body}`

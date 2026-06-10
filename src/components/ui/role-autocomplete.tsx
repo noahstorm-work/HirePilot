@@ -4,6 +4,15 @@ import { useCallback } from "react"
 import { AutocompleteInput } from "./autocomplete-input"
 import { Briefcase } from "lucide-react"
 
+const POPULAR_ROLES = [
+  "Software Engineer",
+  "Frontend Engineer",
+  "Backend Engineer",
+  "Full Stack Developer",
+  "Product Manager",
+  "Data Scientist",
+]
+
 interface RoleAutocompleteProps {
   value: string
   onChange: (value: string) => void
@@ -20,19 +29,12 @@ export function RoleAutocomplete({
   id,
 }: RoleAutocompleteProps) {
   const fetchSuggestions = useCallback(async (q: string) => {
-    const res = await fetch(`/api/autocomplete/roles?q=${encodeURIComponent(q)}`)
-    const json = await res.json()
-    return json.success ? json.data : []
+    try {
+      const res = await fetch(`/api/autocomplete/roles?q=${encodeURIComponent(q)}`)
+      const json = await res.json()
+      return json.success ? json.data : []
+    } catch { return [] }
   }, [])
-
-  const popularRoles = [
-    "Software Engineer",
-    "Frontend Engineer",
-    "Backend Engineer",
-    "Full Stack Developer",
-    "Product Manager",
-    "Data Scientist",
-  ]
 
   return (
     <AutocompleteInput
@@ -43,7 +45,7 @@ export function RoleAutocomplete({
       id={id}
       icon={<Briefcase className="h-3.5 w-3.5" />}
       fetchSuggestions={fetchSuggestions}
-      popularSuggestions={popularRoles}
+      popularSuggestions={POPULAR_ROLES}
     />
   )
 }

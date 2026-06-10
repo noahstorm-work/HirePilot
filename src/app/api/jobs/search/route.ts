@@ -10,7 +10,7 @@ const schema = z.object({
   sources: z.string().optional(),
 })
 
-export const GET = withAuth(async (request) => {
+export const GET = withAuth(async (request, { user }) => {
   const url = new URL(request.url)
   const rl = checkRateLimit(`search:${user.id}`, 20, 60_000)
   if (rl) return rl

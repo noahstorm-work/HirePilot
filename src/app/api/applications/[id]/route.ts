@@ -1,4 +1,4 @@
-import { withAuthParams, apiSuccess, apiError, validateBody } from "@/lib/api-handler"
+import { withAuthParams, apiSuccess, apiError, validateBody, checkRateLimit } from "@/lib/api-handler"
 import { z } from "zod"
 
 const updateSchema = z.object({
@@ -17,6 +17,8 @@ const updateSchema = z.object({
 })
 
 export const PATCH = withAuthParams<{ id: string }>(async (request, { supabase, user, params }) => {
+  const rl = checkRateLimit(`app:patch:${user.id}`, 30, 60_000)
+  if (rl) return rl
   const body = await request.json()
   const parsed = validateBody(updateSchema, body)
   if (parsed.error) return parsed.error
@@ -34,6 +36,8 @@ export const PATCH = withAuthParams<{ id: string }>(async (request, { supabase, 
 })
 
 export const GET = withAuthParams<{ id: string }>(async (request, { supabase, user, params }) => {
+  const rl = checkRateLimit(`app:get:${user.id}`, 60, 60_000)
+  if (rl) return rl
   const { data: application, error } = await supabase
     .from("applications")
     .select("*")
@@ -56,6 +60,8 @@ export const GET = withAuthParams<{ id: string }>(async (request, { supabase, us
 })
 
 export const DELETE = withAuthParams<{ id: string }>(async (request, { supabase, user, params }) => {
+  const rl = checkRateLimit(`app:delete:${user.id}`, 20, 60_000)
+  if (rl) return rl
   const { error } = await supabase
     .from("applications")
     .delete()

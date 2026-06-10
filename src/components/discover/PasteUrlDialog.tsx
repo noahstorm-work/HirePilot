@@ -43,31 +43,35 @@ export function PasteUrlDialog() {
 
   const handleSaveAsApplication = async () => {
     if (!result) return
-    const res = await fetch("/api/applications/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        company: result.company || company || "Unknown",
-        role_title: result.role_title || roleTitle || "Unknown Role",
-        job_url: url,
-        job_description: result.description || "",
-        application_source: "url",
-      }),
-    })
-    const json = await res.json()
-    if (json.success) {
-      setOpen(false)
-      setUrl("")
-      setCompany("")
-      setRoleTitle("")
-      setResult(null)
-      router.refresh()
-      if (json.data?.id && result.description) {
-        triggerAnalysis(json.data.id, result.description, result.company || company || "Unknown", result.role_title || roleTitle || "Unknown Role")
+    try {
+      const res = await fetch("/api/applications/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          company: result.company || company || "Unknown",
+          role_title: result.role_title || roleTitle || "Unknown Role",
+          job_url: url,
+          job_description: result.description || "",
+          application_source: "url",
+        }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        setOpen(false)
+        setUrl("")
+        setCompany("")
+        setRoleTitle("")
+        setResult(null)
+        router.refresh()
+        if (json.data?.id && result.description) {
+          triggerAnalysis(json.data.id, result.description, result.company || company || "Unknown", result.role_title || roleTitle || "Unknown Role")
+        }
+        toast.success("Job imported — analysis running")
+      } else {
+        toast.error(json.error || "Failed to save")
       }
-      toast.success("Job imported — analysis running")
-    } else {
-      toast.error(json.error || "Failed to save")
+    } catch {
+      toast.error("Failed to save application")
     }
   }
 

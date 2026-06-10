@@ -197,20 +197,101 @@ export interface RejectionImprovement {
   priority: "low" | "medium" | "high"
 }
 
+export interface SalaryRange {
+  min: number
+  max: number
+  currency: string
+}
+
 export interface WeeklyReport {
   id: string
   user_id: string
   week_start: string
   skills_in_demand: string[]
   market_trends: string[]
-  salary_ranges: { min: number; max: number; currency: string } | null
+  salary_ranges: SalaryRange | null
   user_weaknesses: string[]
   recommendations: string[]
   created_at: string
 }
 
-export interface ApiResponse<T = unknown> {
-  success: boolean
-  data: T | null
-  error: string | null
+export interface WeeklyReportResult {
+  skills_in_demand: string[]
+  market_trends: string[]
+  salary_ranges: SalaryRange | null
+  user_weaknesses: string[]
+  recommendations: string[]
+}
+
+export interface CareerAnalysisResult {
+  interview_readiness_score: number
+  cv_score: number
+  linkedin_score: number | null
+  github_score: number | null
+  portfolio_score: number | null
+  market_competitiveness_score: number
+  recruiter_appeal_score: number
+  interview_probability: number
+  skills_gap_analysis: SkillsGap[]
+  missing_keywords: string[]
+  missing_technologies: string[]
+  missing_experience_areas: string[]
+  top_improvements: Improvement[]
+  target_score: number
+  thirty_day_plan: WeeklyPlan[]
+}
+
+export interface JobAnalyzeResult {
+  match_score: number
+  strengths: string[]
+  missing_skills: string[]
+  cv_suggestions: string[]
+  cover_letter: string
+  interview_probability: number
+}
+
+export interface CvImproveResult {
+  improved_cv_sections: {
+    summary: string
+    experience: string[]
+    skills: string[]
+    achievements: string[]
+  }
+  keyword_additions: string[]
+  sections_to_remove: string[]
+  estimated_match_improvement: string
+}
+
+export interface InterviewCoachResult {
+  technical_questions: Array<{
+    question: string
+    expected_areas: string[]
+    sample_answer: string
+  }>
+  behavioral_questions: Array<{
+    type: string
+    question: string
+    situation: string
+    task: string
+    action: string
+    result: string
+  }>
+  company_preparation: {
+    common_interview_format: string
+    key_areas_to_review: string[]
+    questions_to_ask: string[]
+  }
+}
+
+export interface RejectionAnalysisResult {
+  likely_reasons: string[]
+  skills_gaps: string[]
+  cv_weaknesses: string[]
+  market_competition_note: string
+  improvement_plan: RejectionImprovement[]
+}
+
+export interface FollowupResult {
+  subject: string
+  body: string
 }

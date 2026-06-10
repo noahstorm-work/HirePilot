@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { withAuth, apiSuccess, apiError, checkRateLimit } from "@/lib/api-handler"
 

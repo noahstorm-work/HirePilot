@@ -1,4 +1,4 @@
-import { withAuth, apiSuccess, apiError } from "@/lib/api-handler"
+import { withAuth, apiSuccess, apiError, checkRateLimit } from "@/lib/api-handler"
 
 const COMMON_ROLES = [
   "Software Engineer", "Senior Software Engineer", "Staff Software Engineer",
@@ -18,6 +18,8 @@ const COMMON_ROLES = [
 ]
 
 export const GET = withAuth(async (request, { supabase, user }) => {
+  const rl = checkRateLimit(`ac:role:${user.id}`, 30, 60_000)
+  if (rl) return rl
   const { searchParams } = new URL(request.url)
   const q = searchParams.get("q")
 
