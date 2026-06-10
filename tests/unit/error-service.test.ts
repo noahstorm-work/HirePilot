@@ -1,8 +1,7 @@
-import { describe, it, expect, vi } from "vitest"
-import { ErrorService } from "@/lib/error-service"
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
+import { logError } from "@/lib/error-service"
 
-describe("ErrorService", () => {
-  // Mock the fetch API for testing
+describe("logError", () => {
   const mockFetch = vi.fn()
 
   beforeEach(() => {
@@ -10,7 +9,7 @@ describe("ErrorService", () => {
     global.fetch = mockFetch
     mockFetch.mockResolvedValue(new Response(JSON.stringify({ success: true }), {
       status: 200,
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     }))
   })
 
@@ -18,50 +17,26 @@ describe("ErrorService", () => {
     vi.resetAllMocks()
   })
 
-  it("should log an error via fetch", async () => {
-    const testError = new Error("Test error message")
-    const context = { test: "context" }
-
-    await ErrorService.logError(testError, context)
+  it("sends error to /api/error-log", async () => {
+    await logError("Test error message", "Error stack", "test-context")
 
     expect(mockFetch).toHaveBeenCalledWith(
       "/api/error-log",
       expect.objectContaining({
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: expect.stringContaining("Test error message")
+        body: expect.stringContaining("Test error message"),
       })
     )
   })
 
-  it("should log a warning via fetch", async () => {
-    const testMessage = "Test warning message"
-    const context = { test: "context" }
-
-    await ErrorService.logWarning(testMessage, context)
+  it("sends message without stack", async () => {
+    await logError("Simple error")
 
     expect(mockFetch).toHaveBeenCalledWith(
       "/api/error-log",
       expect.objectContaining({
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: expect.stringContaining("Test warning message")
-      })
-    )
-  })
-
-  it("should log info via fetch", async () => {
-    const testMessage = "Test info message"
-    const context = { test: "context" }
-
-    await ErrorService.logInfo(testMessage, context)
-
-    expect(mockFetch).toHaveBeenCalledWith(
-      "/api/error-log",
-      expect.objectContaining({
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: expect.stringContaining("Test info message")
+        body: expect.stringContaining("Simple error"),
       })
     )
   })

@@ -9,9 +9,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ArrowRight, Mail, Lock, Zap } from "lucide-react"
 
-const DEMO_EMAIL = process.env.NEXT_PUBLIC_DEMO_EMAIL || "demo@hirepilot.app"
-const DEMO_PASSWORD = process.env.NEXT_PUBLIC_DEMO_PASSWORD || "Demo123456!"
-
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -36,16 +33,29 @@ export default function LoginPage() {
   const handleDemoLogin = async () => {
     setLoading(true)
     setError("")
-    const { error } = await supabase.auth.signInWithPassword({
-      email: DEMO_EMAIL,
-      password: DEMO_PASSWORD,
-    })
-    if (error) {
-      setError(error.message)
+    try {
+      const res = await fetch("/api/auth/demo-credentials")
+      const json = await res.json()
+      if (!json.success || !json.data) {
+        setError(json.error || "Demo account unavailable")
+        setLoading(false)
+        return
+      }
+      const { email: demoEmail, password: demoPassword } = json.data
+      const { error } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: demoPassword,
+      })
+      if (error) {
+        setError(error.message)
+        setLoading(false)
+        return
+      }
+      router.push("/dashboard")
+    } catch {
+      setError("Failed to load demo credentials")
       setLoading(false)
-      return
     }
-    router.push("/dashboard")
   }
 
   return (
@@ -80,7 +90,7 @@ export default function LoginPage() {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-focus)] h-10 text-sm"
+                  className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-border-focus)] h-10 text-sm"
                   required
                 />
               </div>
@@ -100,7 +110,7 @@ export default function LoginPage() {
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-focus)] h-10 text-sm"
+                  className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-border-focus)] h-10 text-sm"
                   required
                 />
               </div>

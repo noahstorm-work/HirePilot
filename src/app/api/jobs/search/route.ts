@@ -1,4 +1,4 @@
-import { withAuth, apiSuccess, apiError } from "@/lib/api-handler"
+import { withAuth, apiSuccess, apiError, checkRateLimit } from "@/lib/api-handler"
 import { searchJobs } from "@/lib/jobs"
 import { z } from "zod"
 import type { JobSource } from "@/lib/jobs"
@@ -11,7 +11,10 @@ const schema = z.object({
 })
 
 export const GET = withAuth(async (request) => {
-  const { searchParams } = new URL(request.url)
+  const url = new URL(request.url)
+  const rl = checkRateLimit(`search:${user.id}`, 20, 60_000)
+  if (rl) return rl
+  const { searchParams } = url
   const parsed = schema.safeParse({
     query: searchParams.get("query"),
     location: searchParams.get("location") || undefined,

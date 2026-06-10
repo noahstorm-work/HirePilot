@@ -1,4 +1,4 @@
-import { withAuth, apiSuccess, apiError } from "@/lib/api-handler"
+import { withAuth, apiSuccess, apiError, checkRateLimit } from "@/lib/api-handler"
 
 interface PhotonFeature {
   geometry: { coordinates: [number, number] }
@@ -13,7 +13,9 @@ interface PhotonFeature {
   }
 }
 
-export const GET = withAuth(async (request) => {
+export const GET = withAuth(async (request, { user }) => {
+  const rl = checkRateLimit(`loc:${user.id}`, 30, 60_000)
+  if (rl) return rl
   const { searchParams } = new URL(request.url)
   const q = searchParams.get("q")
 

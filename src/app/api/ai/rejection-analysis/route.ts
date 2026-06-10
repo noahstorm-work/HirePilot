@@ -7,7 +7,6 @@ const schema = z.object({
   jobDescription: z.string().min(10),
   cvText: z.string().optional(),
   company: z.string().optional(),
-  role: z.string().optional(),
   rejectionStage: z.string().optional(),
 })
 

@@ -112,15 +112,15 @@ export default function CareerAnalysisPage() {
         <div className="grid sm:grid-cols-3 gap-3">
           <div>
             <Label htmlFor="ca-linkedin" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">LinkedIn URL</Label>
-            <Input id="ca-linkedin" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://linkedin.com/in/..." />
+            <Input id="ca-linkedin" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus-visible:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://linkedin.com/in/..." />
           </div>
           <div>
             <Label htmlFor="ca-github" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">GitHub URL</Label>
-            <Input id="ca-github" value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://github.com/..." />
+            <Input id="ca-github" value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus-visible:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://github.com/..." />
           </div>
           <div>
             <Label htmlFor="ca-portfolio" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Portfolio URL</Label>
-            <Input id="ca-portfolio" value={portfolioUrl} onChange={(e) => setPortfolioUrl(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://..." />
+            <Input id="ca-portfolio" value={portfolioUrl} onChange={(e) => setPortfolioUrl(e.target.value)} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus-visible:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://..." />
           </div>
         </div>
         <div>

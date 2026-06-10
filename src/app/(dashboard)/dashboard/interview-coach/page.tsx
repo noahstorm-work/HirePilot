@@ -121,9 +121,9 @@ export default function InterviewCoachPage() {
 
       {result && (
         <div className="animate-fade-in">
-          <div className="flex gap-1 p-0.5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] mb-5 overflow-x-auto w-full">
+          <div className="flex gap-1 p-0.5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] mb-5 overflow-x-auto w-full" role="tablist">
             {tabs.map((tab) => (
-              <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all ${activeTab === tab.key ? "bg-[var(--color-accent-violet)]/10 text-[var(--color-accent-violet)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"}`}>
+              <button key={tab.key} onClick={() => setActiveTab(tab.key)} role="tab" aria-selected={activeTab === tab.key} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all ${activeTab === tab.key ? "bg-[var(--color-accent-violet)]/10 text-[var(--color-accent-violet)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"}`}>
                 <tab.icon className="h-3 w-3" /> {tab.label}
               </button>
             ))}

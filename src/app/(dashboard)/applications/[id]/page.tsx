@@ -57,7 +57,7 @@ export default function ApplicationDetailPage() {
       const res = await fetch("/api/ai/analyze-job", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ application_id: app.id, job_description: app.job_description || app.notes || "", company: app.company, role: app.role_title }),
+        body: JSON.stringify({ application_id: app.id, job_description: app.job_description || app.notes || "", company: app.company, role_title: app.role_title }),
       })
       const json = await res.json()
       if (json.success) { setAiResult(json.data); toast.success("Analysis complete") }
@@ -214,9 +214,9 @@ export default function ApplicationDetailPage() {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 p-0.5 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] overflow-x-auto w-full">
+            <div className="flex gap-1 p-0.5 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] overflow-x-auto w-full" role="tablist">
               {tabs.map((tab) => (
-                <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium whitespace-nowrap transition-all ${activeTab === tab.key ? "bg-[var(--color-accent-violet)]/10 text-[var(--color-accent-violet)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"}`}>
+                <button key={tab.key} onClick={() => setActiveTab(tab.key)} role="tab" aria-selected={activeTab === tab.key} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium whitespace-nowrap transition-all ${activeTab === tab.key ? "bg-[var(--color-accent-violet)]/10 text-[var(--color-accent-violet)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"}`}>
                   <tab.icon className="h-3 w-3" /> {tab.label}
                 </button>
               ))}

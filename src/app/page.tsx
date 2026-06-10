@@ -23,8 +23,27 @@ const steps = [
 ]
 
 export default function LandingPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "HirePilot AI",
+    applicationCategory: "CareerApplication",
+    operatingSystem: "Web",
+    description: "AI-powered career operating system. Analyze your CV, match jobs, and land more interviews.",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+  }
+
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] overflow-hidden">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] overflow-hidden">
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass-strong border-b border-[var(--color-border-subtle)]">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
@@ -264,5 +283,6 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
+    </>
   )
 }

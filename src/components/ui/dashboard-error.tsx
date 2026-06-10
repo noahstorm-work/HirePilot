@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { AlertTriangle } from "lucide-react"
 import { logError } from "@/lib/error-service"
 
-export default function GlobalError({
+export default function DashboardError({
   error,
   reset,
 }: {
@@ -13,16 +13,16 @@ export default function GlobalError({
   reset: () => void
 }) {
   useEffect(() => {
-    logError(error.message, error.stack, "global-error-boundary")
+    logError(error.message, error.stack, "dashboard-error-boundary")
   }, [error])
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)] flex items-center justify-center px-5">
+    <div className="flex items-center justify-center min-h-[40vh] px-5">
       <div className="text-center max-w-sm">
         <div className="inline-flex p-3 rounded-2xl bg-[var(--color-accent-rose)]/10 mb-4">
           <AlertTriangle className="h-6 w-6 text-[var(--color-accent-rose)]" />
         </div>
-        <h1 className="text-lg font-semibold font-[family-name:var(--font-display)] mb-2">Something went wrong</h1>
+        <h2 className="text-lg font-semibold font-[family-name:var(--font-display)] mb-2">Something went wrong</h2>
         <p className="text-sm text-[var(--color-text-muted)] mb-6">
           An unexpected error occurred. Please try again.
         </p>

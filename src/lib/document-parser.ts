@@ -44,11 +44,9 @@ export function extractMetadata(text: string): ExtractedMetadata {
   }
 
   // Skills — find skills section and extract items
-  const skillSectionMatch = text.match(new RegExp(SKILLS_HEADERS.source + "[\\s\\S]*?(?=\\n\\s*[A-Z]|$)", "im"))
+  const skillSectionMatch = text.match(new RegExp(SKILLS_HEADERS.source + "\\s*([\\s\\S]*)", "im"))
   if (skillSectionMatch) {
-    const section = skillSectionMatch[0]
-    const headerLine = section.split("\n")[0]
-    const afterHeader = section.slice(headerLine.length)
+    const afterHeader = skillSectionMatch[1]
     const items = afterHeader
       .split(/[,|\n•\-*]+/)
       .map((s) => s.trim())

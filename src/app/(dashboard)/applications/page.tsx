@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
-import { Briefcase, Plus, ChevronRight, Send, Trash2 } from "lucide-react"
+import { Briefcase, Plus, ChevronRight, Send, Trash2, Link as LinkIcon, Loader2 } from "lucide-react"
 import { CompanyAutocomplete } from "@/components/ui/company-autocomplete"
 import { RoleAutocomplete } from "@/components/ui/role-autocomplete"
 import { toast } from "sonner"
@@ -33,6 +33,8 @@ export default function ApplicationsPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [newApp, setNewApp] = useState({ company: "", role_title: "", job_url: "", notes: "" })
   const [creating, setCreating] = useState(false)
+  const [fetchUrl, setFetchUrl] = useState("")
+  const [fetchingUrl, setFetchingUrl] = useState(false)
   const [filterStatus, setFilterStatus] = useState<string>(() => {
     if (typeof window !== "undefined") return localStorage.getItem(`${APPS_STORAGE_KEY}_filter`) || "All"
     return "All"
@@ -85,9 +87,39 @@ export default function ApplicationsPage() {
       }
     }
     setNewApp({ company: "", role_title: "", job_url: "", notes: "" })
+    setFetchUrl("")
     setDialogOpen(false)
     setCreating(false)
     toast.success("Application created")
+  }
+
+  const handleFetchUrl = async () => {
+    if (!fetchUrl.trim()) return
+    setFetchingUrl(true)
+    try {
+      const res = await fetch("/api/jobs/paste-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: fetchUrl }),
+      })
+      const json = await res.json()
+      if (json.success && json.data) {
+        const d = json.data
+        setNewApp((prev) => ({
+          ...prev,
+          job_url: fetchUrl,
+          role_title: prev.role_title || d.role_title || "",
+          company: prev.company || d.company || "",
+          notes: prev.notes || d.description || "",
+        }))
+        toast.success("Job details fetched")
+      } else {
+        toast.error(json.error || "Failed to fetch job details")
+      }
+    } catch {
+      toast.error("Failed to fetch job details")
+    }
+    setFetchingUrl(false)
   }
 
   const handleMarkApplied = async (app: AppItem) => {
@@ -123,10 +155,10 @@ export default function ApplicationsPage() {
         />
         <div className="flex items-center gap-2">
           <div className="flex gap-1 p-0.5 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
-            <button onClick={() => setViewMode("kanban")} className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${viewMode === "kanban" ? "bg-[var(--color-bg-card)] text-[var(--color-text-primary)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"}`}>
+            <button onClick={() => setViewMode("kanban")} aria-pressed={viewMode === "kanban"} className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${viewMode === "kanban" ? "bg-[var(--color-bg-card)] text-[var(--color-text-primary)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"}`}>
               Board
             </button>
-            <button onClick={() => setViewMode("list")} className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${viewMode === "list" ? "bg-[var(--color-bg-card)] text-[var(--color-text-primary)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"}`}>
+            <button onClick={() => setViewMode("list")} aria-pressed={viewMode === "list"} className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${viewMode === "list" ? "bg-[var(--color-bg-card)] text-[var(--color-text-primary)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"}`}>
               List
             </button>
           </div>
@@ -142,6 +174,23 @@ export default function ApplicationsPage() {
                 <DialogDescription className="sr-only">Create a new job application</DialogDescription>
               </DialogHeader>
               <div className="space-y-3 mt-3">
+                <div className="p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] space-y-2">
+                  <Label className="text-[10px] text-[var(--color-text-muted)] flex items-center gap-1">
+                    <LinkIcon className="h-3 w-3" /> Fetch from URL (optional)
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={fetchUrl}
+                      onChange={(e) => setFetchUrl(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleFetchUrl()}
+                      className="flex-1 bg-[var(--color-bg-card)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] h-8 text-xs"
+                      placeholder="Paste job URL to auto-fill fields..."
+                    />
+                    <Button onClick={handleFetchUrl} disabled={fetchingUrl || !fetchUrl.trim()} size="sm" variant="outline" className="h-8 px-3 border-[var(--color-border-subtle)] text-[var(--color-text-secondary)]">
+                      {fetchingUrl ? <Loader2 className="h-3 w-3 animate-spin" /> : "Fetch"}
+                    </Button>
+                  </div>
+                </div>
                 <div>
                   <Label htmlFor="new-app-company" className="text-[11px] text-[var(--color-text-muted)] mb-1 block">Company *</Label>
                   <CompanyAutocomplete id="new-app-company" value={newApp.company} onChange={(v) => setNewApp({ ...newApp, company: v })} placeholder="Acme Inc" />
@@ -152,11 +201,11 @@ export default function ApplicationsPage() {
                 </div>
                 <div>
                   <Label htmlFor="new-app-url" className="text-[11px] text-[var(--color-text-muted)] mb-1 block">Job URL</Label>
-                  <Input id="new-app-url" value={newApp.job_url} onChange={(e) => setNewApp({ ...newApp, job_url: e.target.value })} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://..." />
+                  <Input id="new-app-url" value={newApp.job_url} onChange={(e) => setNewApp({ ...newApp, job_url: e.target.value })} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus-visible:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://..." />
                 </div>
                 <div>
                   <Label htmlFor="new-app-notes" className="text-[11px] text-[var(--color-text-muted)] mb-1 block">Notes</Label>
-                  <Textarea id="new-app-notes" value={newApp.notes} onChange={(e) => setNewApp({ ...newApp, notes: e.target.value })} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] min-h-[60px] text-sm" placeholder="Any notes..." />
+                  <Textarea id="new-app-notes" value={newApp.notes} onChange={(e) => setNewApp({ ...newApp, notes: e.target.value })} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus-visible:border-[var(--color-border-focus)] min-h-[60px] text-sm" placeholder="Any notes..." />
                 </div>
                 <Button onClick={handleCreate} disabled={creating || !newApp.company || !newApp.role_title} className="w-full gradient-violet text-white border-0 hover:opacity-90 h-9 text-sm">
                   {creating ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : "Create"}

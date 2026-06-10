@@ -1,4 +1,4 @@
-import { withAuth, apiSuccess, apiError, validateBody } from "@/lib/api-handler"
+import { withAuth, apiSuccess, apiError, validateBody, checkRateLimit } from "@/lib/api-handler"
 import { z } from "zod"
 import { Resend } from "resend"
 
@@ -19,6 +19,8 @@ function extractEmails(text: string): string[] {
 export { extractEmails }
 
 export const POST = withAuth(async (request, { supabase, user }) => {
+  const rl = checkRateLimit(`email:${user.id}`, 5, 60_000)
+  if (rl) return rl
   const body = await request.json()
   const parsed = validateBody(schema, body)
   if (parsed.error) return parsed.error

@@ -11,6 +11,7 @@ import { Search, MapPin, Briefcase, ExternalLink, Bookmark, BookmarkCheck, Trash
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete"
 import { PasteUrlDialog } from "@/components/discover/PasteUrlDialog"
 import { toast } from "sonner"
+import { logError } from "@/lib/error-service"
 import type { JobSearchResult } from "@/lib/jobs"
 import { formatSalary } from "@/lib/jobs"
 import { triggerAnalysis } from "@/lib/trigger-analysis"
@@ -100,7 +101,7 @@ export default function DiscoverPage() {
         setTotal(json.data.total || 0)
         setResults((prev) => pageNum === 1 ? json.data.results : [...prev, ...json.data.results])
       }
-    } catch (err) { console.error("Job search error:", err) }
+    } catch (err) { logError("Job search failed", err instanceof Error ? err.message : String(err), "discover-search") }
     setLoading(false)
     setLoadingMore(false)
   }
@@ -234,7 +235,7 @@ export default function DiscoverPage() {
               onChange={(e) => { setQuery(e.target.value); setShowRecent(false) }}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               onFocus={() => { if (!query && recentSearches.length > 0) setShowRecent(true) }}
-              className="pl-9 bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-focus)] h-10 text-sm"
+              className="pl-9 bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-border-focus)] h-10 text-sm"
             />
             {showRecent && recentSearches.length > 0 && (
               <div ref={recentDropdownRef} className="absolute z-50 w-full mt-1.5 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] shadow-lg overflow-hidden">
@@ -293,6 +294,7 @@ export default function DiscoverPage() {
                           prev.includes(source) ? prev.filter((s) => s !== source) : [...prev, source]
                         )
                       }}
+                      aria-pressed={activeSources.length === 0 || activeSources.includes(source)}
                       className={`px-2 py-0.5 rounded-full text-[10px] border transition-all ${
                         activeSources.length === 0 || activeSources.includes(source)
                           ? SOURCE_COLORS[source]

@@ -7,6 +7,7 @@ const schema = z.object({
   cvText: z.string().optional(),
   applicationId: z.string().uuid().optional(),
   role: z.string().optional(),
+  role_title: z.string().optional(),
   company: z.string().optional(),
   job_description: z.string().optional(),
 })
@@ -23,10 +24,11 @@ export const POST = withAuth(async (request, { supabase, user }) => {
   let cvText = data.cvText || ""
   const applicationId = data.applicationId
 
-  if (!applicationId && data.role) {
+  if (!applicationId && (data.role_title || data.role)) {
     const { data: profile } = await supabase.from("user_profiles").select("cv_text").eq("id", user.id).maybeSingle()
     cvText = profile?.cv_text || ""
-    jobDescription = jobDescription || `Role: ${data.role}${data.company ? ` at ${data.company}` : ""}`
+    const roleName = data.role_title || data.role
+    jobDescription = jobDescription || `Role: ${roleName}${data.company ? ` at ${data.company}` : ""}`
   }
 
   if (applicationId && !cvText) {
@@ -38,7 +40,7 @@ export const POST = withAuth(async (request, { supabase, user }) => {
     jobDescription = jobDescription || appRes.data?.job_description || appRes.data?.notes || ""
   }
 
-  if (!jobDescription) jobDescription = data.role ? `Position: ${data.role}` : ""
+  if (!jobDescription) jobDescription = data.role_title || data.role ? `Position: ${data.role_title || data.role}` : ""
   if (!cvText) cvText = "No CV provided"
 
   const result = await generateInterviewPrep({ jobDescription, cvText })

@@ -11,6 +11,7 @@ const schema = z.object({
   cvText: z.string().min(1).optional(),
   company: z.string().optional(),
   role: z.string().optional(),
+  role_title: z.string().optional(),
 })
 
 export const POST = withAuth(async (request, { supabase, user }) => {
@@ -30,8 +31,8 @@ export const POST = withAuth(async (request, { supabase, user }) => {
     cvText = profile?.cv_text || ""
   }
 
-  if (!jobDescription && (d.role || d.company)) {
-    jobDescription = `Role: ${d.role || "Unknown"}${d.company ? ` at ${d.company}` : ""}`
+  if (!jobDescription && (d.role_title || d.role || d.company)) {
+    jobDescription = `Role: ${d.role_title || d.role || "Unknown"}${d.company ? ` at ${d.company}` : ""}`
   }
   if (!jobDescription) jobDescription = "General analysis"
   if (!cvText) return apiError("No CV text provided. Please add a CV in your profile.", 400)

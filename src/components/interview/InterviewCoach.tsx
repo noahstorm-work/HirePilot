@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Sparkles, ChevronDown, ChevronUp } from "lucide-react"
+import { logError } from "@/lib/error-service"
 import type { InterviewQuestions } from "@/types"
 
 interface Props {
@@ -30,7 +31,7 @@ export function InterviewCoach({ applicationId, jobDescription, cvText }: Props)
       })
       const json = await res.json()
       if (json.success) setResult(json.data)
-    } catch (err) { console.error("Interview coach error:", err) }
+    } catch (err) { logError("Interview coach failed", err instanceof Error ? err.message : String(err), "interview-coach") }
     setLoading(false)
   }
 

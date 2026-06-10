@@ -150,7 +150,7 @@ export function LocationAutocomplete({
             if (suggestions.length > 0) setIsOpen(true)
           }}
           placeholder={placeholder}
-          className="w-full pl-9 pr-8 h-10 rounded-xl text-sm bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-focus)] focus:outline-none transition-colors"
+          className="w-full pl-9 pr-8 h-10 rounded-xl text-sm bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-border-focus)] focus-visible:outline-none transition-colors"
           autoComplete="off"
           role="combobox"
           aria-expanded={isOpen}

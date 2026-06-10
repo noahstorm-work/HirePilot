@@ -4,8 +4,18 @@ import type { ZodSchema } from "zod"
 import type { SupabaseClient } from "@supabase/supabase-js"
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
+const RATE_LIMIT_MAX_ENTRIES = 10_000
+
+function evictRateLimitMap() {
+  if (rateLimitMap.size <= RATE_LIMIT_MAX_ENTRIES) return
+  const now = Date.now()
+  for (const [key, entry] of rateLimitMap) {
+    if (now > entry.resetAt) rateLimitMap.delete(key)
+  }
+}
 
 export function checkRateLimit(key: string, maxRequests = 5, windowMs = 60_000): NextResponse | null {
+  evictRateLimitMap()
   const now = Date.now()
   const entry = rateLimitMap.get(key)
 
@@ -49,11 +59,6 @@ export async function authenticate() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   return { supabase, user }
-}
-
-export function requireAuth(user: { id: string } | null): NextResponse | null {
-  if (!user) return apiError("Unauthorized", 401)
-  return null
 }
 
 export function validateBody<T>(schema: ZodSchema<T>, body: unknown): { data: T; error: null } | { data: null; error: NextResponse } {

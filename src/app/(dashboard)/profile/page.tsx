@@ -245,7 +245,7 @@ export default function ProfilePage() {
         <Label className="text-[11px] font-medium text-[var(--color-text-tertiary)] block">Personal Info</Label>
         <div>
           <Label htmlFor="profile-name" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Full Name</Label>
-          <Input id="profile-name" value={fullName} onChange={(e) => { setFullName(e.target.value); scheduleAutoSave() }} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="John Doe" />
+          <Input id="profile-name" value={fullName} onChange={(e) => { setFullName(e.target.value); scheduleAutoSave() }} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus-visible:border-[var(--color-border-focus)] h-9 text-sm" placeholder="John Doe" />
         </div>
       </div>
 
@@ -256,21 +256,21 @@ export default function ProfilePage() {
           <Label htmlFor="profile-linkedin" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">LinkedIn URL</Label>
           <div className="relative">
             <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
-            <Input id="profile-linkedin" value={linkedin} onChange={(e) => { setLinkedin(e.target.value); scheduleAutoSave() }} className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://linkedin.com/in/..." />
+            <Input id="profile-linkedin" value={linkedin} onChange={(e) => { setLinkedin(e.target.value); scheduleAutoSave() }} className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus-visible:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://linkedin.com/in/..." />
           </div>
         </div>
         <div>
           <Label htmlFor="profile-github" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">GitHub URL</Label>
           <div className="relative">
             <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
-            <Input id="profile-github" value={github} onChange={(e) => { setGithub(e.target.value); scheduleAutoSave() }} className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://github.com/..." />
+            <Input id="profile-github" value={github} onChange={(e) => { setGithub(e.target.value); scheduleAutoSave() }} className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus-visible:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://github.com/..." />
           </div>
         </div>
         <div>
           <Label htmlFor="profile-portfolio" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Portfolio URL</Label>
           <div className="relative">
             <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
-            <Input id="profile-portfolio" value={portfolio} onChange={(e) => { setPortfolio(e.target.value); scheduleAutoSave() }} className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://..." />
+            <Input id="profile-portfolio" value={portfolio} onChange={(e) => { setPortfolio(e.target.value); scheduleAutoSave() }} className="pl-9 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus-visible:border-[var(--color-border-focus)] h-9 text-sm" placeholder="https://..." />
           </div>
         </div>
       </div>
@@ -285,7 +285,7 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <Label htmlFor="profile-years" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Years of Experience</Label>
-            <Input id="profile-years" type="number" min="0" max="30" value={yearsExperience} onChange={(e) => { setYearsExperience(e.target.value); scheduleAutoSave() }} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="0" />
+            <Input id="profile-years" type="number" min="0" max="30" value={yearsExperience} onChange={(e) => { setYearsExperience(e.target.value); scheduleAutoSave() }} className="bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus-visible:border-[var(--color-border-focus)] h-9 text-sm" placeholder="0" />
           </div>
           <div>
             <Label htmlFor="profile-seniority" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Seniority Level</Label>
@@ -305,7 +305,7 @@ export default function ProfilePage() {
         <div>
           <Label htmlFor="profile-skills" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Skills</Label>
           <div className="flex gap-2">
-            <Input id="profile-skills" value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSkill())} className="flex-1 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="Type a skill and press Enter" />
+            <Input id="profile-skills" value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSkill())} className="flex-1 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus-visible:border-[var(--color-border-focus)] h-9 text-sm" placeholder="Type a skill and press Enter" />
             <Button type="button" onClick={addSkill} variant="outline" size="sm" className="h-9 px-3 border-[var(--color-border-subtle)] text-[var(--color-text-secondary)]">Add</Button>
           </div>
           {skills.length > 0 && (
@@ -348,7 +348,7 @@ export default function ProfilePage() {
         <div>
           <Label htmlFor="profile-new-password" className="text-[10px] text-[var(--color-text-muted)] mb-1 block">Change Password</Label>
           <div className="flex gap-2">
-            <Input id="profile-new-password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="flex-1 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:border-[var(--color-border-focus)] h-9 text-sm" placeholder="New password (8+ chars)" minLength={8} />
+            <Input id="profile-new-password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="flex-1 bg-[var(--color-bg-elevated)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus-visible:border-[var(--color-border-focus)] h-9 text-sm" placeholder="New password (8+ chars)" minLength={8} />
             <Button onClick={handleChangePassword} disabled={changingPassword || newPassword.length < 8} variant="outline" size="sm" className="h-9 px-3 border-[var(--color-border-subtle)] text-[var(--color-text-secondary)]">
               {changingPassword ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Lock className="h-3.5 w-3.5" />}
             </Button>

@@ -49,6 +49,7 @@ export function AutocompleteInput({
     setQuery(val)
     setHighlightIndex(-1)
     setLoading(true)
+    onChange(val)
 
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => handleFetch(val), 300)
@@ -131,7 +132,7 @@ export function AutocompleteInput({
           onKeyDown={handleKeyDown}
           onFocus={() => { if (suggestions.length > 0) setIsOpen(true) }}
           placeholder={placeholder}
-          className={`w-full h-9 rounded-xl text-sm bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-border-focus)] focus:outline-none transition-colors ${icon ? "pl-9" : "pl-3"} pr-8`}
+          className={`w-full h-9 rounded-xl text-sm bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-border-focus)] focus-visible:outline-none transition-colors ${icon ? "pl-9" : "pl-3"} pr-8`}
           autoComplete="off"
           role="combobox"
           aria-expanded={isOpen}
