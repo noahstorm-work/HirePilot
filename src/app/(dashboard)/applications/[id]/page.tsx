@@ -34,8 +34,6 @@ export default function ApplicationDetailPage() {
   const [activeTab, setActiveTab] = useState<"analysis" | "cover" | "followup" | "rejection">("analysis")
   const supabase = createClient()
 
-  useEffect(() => { loadApplication() }, [params.id])
-
   const loadApplication = async () => {
     const { data } = await supabase.from("applications").select("*").eq("id", params.id).maybeSingle()
     if (data) {
@@ -49,6 +47,9 @@ export default function ApplicationDetailPage() {
     }
     setLoading(false)
   }
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { loadApplication() }, [params.id])
 
   const handleAnalyze = async () => {
     if (!app) return

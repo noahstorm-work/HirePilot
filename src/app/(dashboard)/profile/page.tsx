@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/select"
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [autoSaved, setAutoSaved] = useState(false)
@@ -38,7 +37,6 @@ export default function ProfilePage() {
   const [skills, setSkills] = useState<string[]>([])
   const [skillInput, setSkillInput] = useState("")
   const [userEmail, setUserEmail] = useState("")
-  const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [changingPassword, setChangingPassword] = useState(false)
   const [exporting, setExporting] = useState(false)
@@ -90,15 +88,12 @@ export default function ProfilePage() {
     return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current) }
   }, [])
 
-  useEffect(() => { loadProfile() }, [])
-
   const loadProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     setUserEmail(user.email || "")
     const { data } = await supabase.from("user_profiles").select("*").eq("id", user.id).maybeSingle()
     if (data) {
-      setProfile(data)
       setCvText(data.cv_text || "")
       setFullName(data.full_name || "")
       setLinkedin(data.linkedin_url || "")
@@ -112,6 +107,9 @@ export default function ProfilePage() {
     setLoading(false)
   }
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { loadProfile() }, [])
+
   const handleChangePassword = async () => {
     if (!newPassword.trim()) return
     setChangingPassword(true)
@@ -124,7 +122,6 @@ export default function ProfilePage() {
       const json = await res.json()
       if (json.success) {
         toast.success("Password updated")
-        setCurrentPassword("")
         setNewPassword("")
       } else {
         toast.error(json.error || "Failed to update password")

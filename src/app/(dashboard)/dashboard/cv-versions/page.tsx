@@ -24,8 +24,6 @@ export default function CVVersionsPage() {
   const [restoring, setRestoring] = useState<string | null>(null)
   const supabase = createClient()
 
-  useEffect(() => { loadVersions() }, [])
-
   const loadVersions = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
@@ -33,6 +31,9 @@ export default function CVVersionsPage() {
     if (data) setVersions(data as CVVersion[])
     setLoading(false)
   }
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { loadVersions() }, [])
 
   const handleCreateVersion = async () => {
     setCreating(true)

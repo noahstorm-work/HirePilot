@@ -74,12 +74,14 @@ export function CommandPalette() {
 
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuery("")
       setSelectedIndex(0)
       setTimeout(() => inputRef.current?.focus(), 50)
     }
   }, [open])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- reset selection on query change
   useEffect(() => { setSelectedIndex(0) }, [query])
 
   // Focus trap

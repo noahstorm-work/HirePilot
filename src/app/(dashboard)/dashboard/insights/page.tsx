@@ -28,8 +28,6 @@ export default function InsightsPage() {
   const [generating, setGenerating] = useState(false)
   const supabase = createClient()
 
-  useEffect(() => { loadInsights() }, [])
-
   const loadInsights = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setLoading(false); return }
@@ -65,6 +63,9 @@ export default function InsightsPage() {
     })
     setLoading(false)
   }
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { loadInsights() }, [])
 
   const handleGenerateReport = async () => {
     setGenerating(true)

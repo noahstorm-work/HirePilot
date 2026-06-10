@@ -45,6 +45,15 @@ export default function ApplicationsPage() {
   })
   const supabase = createClient()
 
+  const loadApplications = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data } = await supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
+    if (data) setApplications(data as AppItem[])
+    setLoading(false)
+  }
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadApplications() }, [])
 
   useEffect(() => {
@@ -54,14 +63,6 @@ export default function ApplicationsPage() {
   useEffect(() => {
     localStorage.setItem(`${APPS_STORAGE_KEY}_view`, viewMode)
   }, [viewMode])
-
-  const loadApplications = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    const { data } = await supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
-    if (data) setApplications(data as AppItem[])
-    setLoading(false)
-  }
 
   const handleCreate = async () => {
     if (!newApp.company || !newApp.role_title) return

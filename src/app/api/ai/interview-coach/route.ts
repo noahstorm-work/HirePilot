@@ -1,4 +1,4 @@
-import { withAuth, apiSuccess, apiError, validateBody, checkRateLimit } from "@/lib/api-handler"
+import { withAuth, apiSuccess, validateBody, checkRateLimit } from "@/lib/api-handler"
 import { generateInterviewPrep } from "@/lib/ai-service"
 import { z } from "zod"
 

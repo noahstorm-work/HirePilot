@@ -23,31 +23,16 @@ function Logo({ collapsed }: { collapsed?: boolean }) {
   )
 }
 
-export function Sidebar() {
-  const pathname = usePathname()
-  const router = useRouter()
-  const supabase = createClient()
-  const [collapsed, setCollapsed] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [user, setUser] = useState<User | null>(null)
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) setUser(data.user)
-    })
-  }, [])
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push("/login")
-  }
-
-  const isActive = (href: string) => {
-    if (href === "/dashboard") return pathname === "/dashboard"
-    return pathname.startsWith(href)
-  }
-
-  const NavItems = ({ collapsed: isCollapsed }: { collapsed: boolean }) => (
+function NavItems({
+  collapsed: isCollapsed,
+  isActive,
+  onNavigate,
+}: {
+  collapsed: boolean
+  isActive: (href: string) => boolean
+  onNavigate: () => void
+}) {
+  return (
     <nav className="flex-1 px-2 py-1 overflow-y-auto">
       {NAV_SECTIONS.map((section) => (
         <div key={section.title} className="mb-3">
@@ -64,7 +49,7 @@ export function Sidebar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => setMobileOpen(false)}
+                  onClick={onNavigate}
                   className={`group flex items-center gap-2.5 px-3 py-2 rounded-[10px] text-[13px] transition-all duration-150 ${
                     isCollapsed ? "justify-center" : ""
                   } ${
@@ -92,11 +77,23 @@ export function Sidebar() {
       ))}
     </nav>
   )
+}
 
-  const UserFooter = () => (
+function UserFooter({
+  user,
+  collapsed,
+  onSignOut,
+  onNavigate,
+}: {
+  user: User | null
+  collapsed: boolean
+  onSignOut: () => void
+  onNavigate: () => void
+}) {
+  return (
     <div className="px-2 py-3 border-t border-[var(--color-border-subtle)]">
       {user && !collapsed && (
-        <Link href="/profile" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-3 py-2 mb-1 rounded-[10px] hover:bg-[var(--color-bg-hover)] transition-colors">
+        <Link href="/profile" onClick={onNavigate} className="flex items-center gap-2.5 px-3 py-2 mb-1 rounded-[10px] hover:bg-[var(--color-bg-hover)] transition-colors">
           <div className="h-7 w-7 rounded-full bg-gradient-to-br from-[var(--color-accent-violet)] to-[var(--color-accent-blue)] flex items-center justify-center text-[11px] font-bold text-white shrink-0">
             {(user.email || "U")[0].toUpperCase()}
           </div>
@@ -107,7 +104,7 @@ export function Sidebar() {
         </Link>
       )}
       <button
-        onClick={handleSignOut}
+        onClick={onSignOut}
         aria-label="Sign out"
         className={`flex items-center gap-2.5 w-full px-3 py-2 rounded-[10px] text-[13px] text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] transition-colors ${collapsed ? "justify-center" : ""}`}
       >
@@ -116,26 +113,31 @@ export function Sidebar() {
       </button>
     </div>
   )
+}
 
-  const SidebarContent = () => (
-    <>
-      <Logo collapsed={collapsed} />
-      {!collapsed && (
-        <div className="px-3 mb-2">
-          <button
-            onClick={() => document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))}
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-[10px] text-xs text-[var(--color-text-muted)] bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] hover:border-[var(--color-border-default)] hover:text-[var(--color-text-tertiary)] transition-all"
-          >
-            <Command className="h-3 w-3" />
-            <span>Search</span>
-            <span className="ml-auto text-[10px] opacity-50">⌘K</span>
-          </button>
-        </div>
-      )}
-      <NavItems collapsed={collapsed} />
-      <UserFooter />
-    </>
-  )
+export function Sidebar() {
+  const pathname = usePathname()
+  const router = useRouter()
+  const supabase = createClient()
+  const [collapsed, setCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) setUser(data.user)
+    })
+  }, [supabase.auth])
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    router.push("/login")
+  }
+
+  const isActive = (href: string) => {
+    if (href === "/dashboard") return pathname === "/dashboard"
+    return pathname.startsWith(href)
+  }
 
   return (
     <>
@@ -159,8 +161,8 @@ export function Sidebar() {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <NavItems collapsed={false} />
-            <UserFooter />
+            <NavItems collapsed={false} isActive={isActive} onNavigate={() => setMobileOpen(false)} />
+            <UserFooter user={user} collapsed={false} onSignOut={handleSignOut} onNavigate={() => setMobileOpen(false)} />
           </div>
         </div>
       )}
@@ -171,7 +173,21 @@ export function Sidebar() {
           collapsed ? "w-[68px]" : "w-[240px]"
         }`}
       >
-        <SidebarContent />
+        <Logo collapsed={collapsed} />
+        {!collapsed && (
+          <div className="px-3 mb-2">
+            <button
+              onClick={() => document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))}
+              className="flex items-center gap-2 w-full px-3 py-2 rounded-[10px] text-xs text-[var(--color-text-muted)] bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] hover:border-[var(--color-border-default)] hover:text-[var(--color-text-tertiary)] transition-all"
+            >
+              <Command className="h-3 w-3" />
+              <span>Search</span>
+              <span className="ml-auto text-[10px] opacity-50">⌘K</span>
+            </button>
+          </div>
+        )}
+        <NavItems collapsed={collapsed} isActive={isActive} onNavigate={() => setMobileOpen(false)} />
+        <UserFooter user={user} collapsed={collapsed} onSignOut={handleSignOut} onNavigate={() => setMobileOpen(false)} />
         <button
           onClick={() => setCollapsed(!collapsed)}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}

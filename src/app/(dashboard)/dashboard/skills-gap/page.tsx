@@ -31,8 +31,6 @@ export default function SkillsGapPage() {
   const [rerunning, setRerunning] = useState(false)
   const supabase = createClient()
 
-  useEffect(() => { loadSkillsGap() }, [])
-
   const loadSkillsGap = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
@@ -46,6 +44,9 @@ export default function SkillsGapPage() {
     }
     setLoading(false)
   }
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { loadSkillsGap() }, [])
 
   const updateSkillStatus = async (skillName: string, status: string) => {
     const { data: { user } } = await supabase.auth.getUser()

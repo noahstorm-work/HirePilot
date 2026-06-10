@@ -5,7 +5,6 @@ describe("logError", () => {
   const mockFetch = vi.fn()
 
   beforeEach(() => {
-    // @ts-ignore - mocking global fetch
     global.fetch = mockFetch
     mockFetch.mockResolvedValue(new Response(JSON.stringify({ success: true }), {
       status: 200,

@@ -27,8 +27,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
-  useEffect(() => { loadDashboard() }, [])
-
   const loadDashboard = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
@@ -46,6 +44,9 @@ export default function DashboardPage() {
     })
     setLoading(false)
   }
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { loadDashboard() }, [])
 
   if (loading) return <LoadingScreen />
 

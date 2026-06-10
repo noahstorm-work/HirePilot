@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingSkeleton } from "@/components/ui/loading-screen"
-import { Search, MapPin, Briefcase, ExternalLink, Bookmark, BookmarkCheck, Trash2, Plus, Clock, X, Link as LinkIcon, ChevronDown, Send, Mail } from "lucide-react"
+import { Search, MapPin, Bookmark, BookmarkCheck, Trash2, Plus, Clock, X, ChevronDown, Send, Mail } from "lucide-react"
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete"
 import { PasteUrlDialog } from "@/components/discover/PasteUrlDialog"
 import { toast } from "sonner"
@@ -48,7 +48,15 @@ export default function DiscoverPage() {
   const recentDropdownRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
+  const loadSavedJobs = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data } = await supabase.from("saved_jobs").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
+    if (data) setSavedJobs(data as SavedJob[])
+  }
+
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadSavedJobs()
     const stored = localStorage.getItem("recentJobSearches")
     if (stored) setRecentSearches(JSON.parse(stored))
@@ -65,13 +73,6 @@ export default function DiscoverPage() {
   useEffect(() => {
     localStorage.setItem(SEARCH_STATE_KEY, JSON.stringify({ query, location }))
   }, [query, location])
-
-  const loadSavedJobs = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    const { data } = await supabase.from("saved_jobs").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
-    if (data) setSavedJobs(data as SavedJob[])
-  }
 
   const saveRecentSearch = (term: string) => {
     const updated = [term, ...recentSearches.filter((s) => s !== term)].slice(0, 8)

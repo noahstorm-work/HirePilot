@@ -31,8 +31,6 @@ export default function CareerAnalysisPage() {
   const [saving, setSaving] = useState(false)
   const supabase = createClient()
 
-  useEffect(() => { loadProfile() }, [])
-
   const loadProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
@@ -46,6 +44,9 @@ export default function CareerAnalysisPage() {
       setTargetRole(data.target_role || "")
     }
   }
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { loadProfile() }, [])
 
   const handleAnalyze = async () => {
     setLoading(true)

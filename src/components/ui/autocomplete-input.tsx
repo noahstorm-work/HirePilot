@@ -33,6 +33,7 @@ export function AutocompleteInput({
   const dropdownRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- legitimate prop-to-state sync for controlled input
   useEffect(() => { setQuery(value) }, [value])
 
   const handleFetch = useCallback(async (q: string) => {
@@ -114,6 +115,7 @@ export function AutocompleteInput({
   }, [])
 
   const showChips = !value && query.length === 0 && popularSuggestions.length > 0
+  const listboxId = id ? `${id}-listbox` : undefined
 
   return (
     <div className={`relative ${className}`}>
@@ -137,6 +139,7 @@ export function AutocompleteInput({
           role="combobox"
           aria-expanded={isOpen}
           aria-haspopup="listbox"
+          aria-controls={listboxId}
         />
         {query && (
           <button
@@ -168,6 +171,7 @@ export function AutocompleteInput({
           ref={dropdownRef}
           className="absolute z-50 w-full mt-1.5 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] shadow-lg overflow-hidden"
           role="listbox"
+          id={listboxId}
         >
           {suggestions.map((s, i) => (
             <button

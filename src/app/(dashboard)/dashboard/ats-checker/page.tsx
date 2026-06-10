@@ -29,14 +29,15 @@ export default function ATSCheckerPage() {
   const [error, setError] = useState("")
   const supabase = createClient()
 
-  useEffect(() => { loadProfile() }, [])
-
   const loadProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     const { data } = await supabase.from("user_profiles").select("cv_text").eq("id", user.id).maybeSingle()
     if (data?.cv_text) setCvText(data.cv_text)
   }
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { loadProfile() }, [])
 
   const handleCheck = async () => {
     if (!cvText.trim()) return

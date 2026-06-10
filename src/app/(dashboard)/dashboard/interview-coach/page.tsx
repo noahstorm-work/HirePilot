@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import dynamic from "next/dynamic"
 const RichTextEditor = dynamic(() => import("@/components/ui/rich-text-editor").then(m => ({ default: m.RichTextEditor })), { ssr: false, loading: () => <div className="h-32 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] animate-pulse" /> })
@@ -28,11 +27,19 @@ export default function InterviewCoachPage() {
   const [activeTab, setActiveTab] = useState<"technical" | "behavioral" | "star" | "company">("technical")
   const supabase = createClient()
 
+  const loadProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data } = await supabase.from("user_profiles").select("target_role").eq("id", user.id).maybeSingle()
+    if (data?.target_role) setRole(data.target_role)
+  }
+
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
       try {
         const draft = JSON.parse(saved)
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (draft.company) setCompany(draft.company)
         if (draft.role) setRole(draft.role)
         if (draft.jobDescription) setJobDescription(draft.jobDescription)
@@ -45,13 +52,6 @@ export default function InterviewCoachPage() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ company, role, jobDescription }))
   }, [company, role, jobDescription])
-
-  const loadProfile = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    const { data } = await supabase.from("user_profiles").select("target_role").eq("id", user.id).maybeSingle()
-    if (data?.target_role) setRole(data.target_role)
-  }
 
   const handleGenerate = async () => {
     if (!role.trim()) return

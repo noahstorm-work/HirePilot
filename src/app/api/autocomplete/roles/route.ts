@@ -1,4 +1,4 @@
-import { withAuth, apiSuccess, apiError, checkRateLimit } from "@/lib/api-handler"
+import { withAuth, apiSuccess, checkRateLimit } from "@/lib/api-handler"
 
 const COMMON_ROLES = [
   "Software Engineer", "Senior Software Engineer", "Staff Software Engineer",

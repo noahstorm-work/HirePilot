@@ -1,4 +1,4 @@
-import { withAuth, apiSuccess, apiError, checkRateLimit } from "@/lib/api-handler"
+import { withAuth, apiSuccess, checkRateLimit } from "@/lib/api-handler"
 
 export const GET = withAuth(async (request, { supabase, user }) => {
   const rl = checkRateLimit(`ac:co:${user.id}`, 30, 60_000)

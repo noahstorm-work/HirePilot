@@ -1,6 +1,5 @@
 import { getLLM, AI_MODEL } from "./llm-client"
 import type {
-  SkillsGap, Improvement, WeeklyPlan,
   CareerAnalysisResult, JobAnalyzeResult, CvImproveResult,
   InterviewCoachResult, RejectionAnalysisResult, FollowupResult,
   WeeklyReportResult,

@@ -19,7 +19,7 @@ function isPrivateIP(ip: string): boolean {
   return false
 }
 
-export const POST = withAuth(async (request, { supabase, user }) => {
+export const POST = withAuth(async (request, { user }) => {
   const rl = checkRateLimit(`paste-url:${user.id}`, 10, 60_000)
   if (rl) return rl
 

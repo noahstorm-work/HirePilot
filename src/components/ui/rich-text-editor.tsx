@@ -16,6 +16,33 @@ interface RichTextEditorProps {
   defaultHeight?: number
 }
 
+function ToolbarButton({
+  onClick,
+  isActive = false,
+  "aria-label": ariaLabel,
+  children,
+}: {
+  onClick: () => void
+  isActive?: boolean
+  "aria-label"?: string
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={ariaLabel}
+      className={`p-1.5 rounded-lg transition-colors ${
+        isActive
+          ? "bg-violet-500/20 text-violet-400"
+          : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
+      }`}
+    >
+      {children}
+    </button>
+  )
+}
+
 export function RichTextEditor({
   value,
   onChange,
@@ -78,31 +105,6 @@ export function RichTextEditor({
   }, [dragging])
 
   if (!editor) return null
-
-  const ToolbarButton = ({
-    onClick,
-    isActive = false,
-    "aria-label": ariaLabel,
-    children,
-  }: {
-    onClick: () => void
-    isActive?: boolean
-    "aria-label"?: string
-    children: React.ReactNode
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={ariaLabel}
-      className={`p-1.5 rounded-lg transition-colors ${
-        isActive
-          ? "bg-violet-500/20 text-violet-400"
-          : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
-      }`}
-    >
-      {children}
-    </button>
-  )
 
   return (
     <div className={`rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] overflow-hidden ${className}`}>

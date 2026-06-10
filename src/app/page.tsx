@@ -1,8 +1,8 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
-  Brain, Target, TrendingUp, Briefcase, BarChart3,
-  ArrowRight, FileCheck, Sparkles, Zap, ChevronRight
+  Brain, Target, TrendingUp, BarChart3,
+  ArrowRight, FileCheck, Sparkles, Zap
 } from "lucide-react"
 
 const features = [

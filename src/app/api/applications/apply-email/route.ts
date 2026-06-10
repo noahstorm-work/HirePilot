@@ -9,15 +9,6 @@ const schema = z.object({
   role_title: z.string().min(1),
 })
 
-function extractEmails(text: string): string[] {
-  const regex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g
-  const found = text.match(regex) || []
-  const excluded = new Set(["example.com", "email.com", "company.com", "domain.com", "gmail.com", "yahoo.com", "hotmail.com", "outlook.com"])
-  return [...new Set(found.filter((e) => !excluded.has(e.split("@")[1].toLowerCase())))]
-}
-
-export { extractEmails }
-
 export const POST = withAuth(async (request, { supabase, user }) => {
   const rl = checkRateLimit(`email:${user.id}`, 5, 60_000)
   if (rl) return rl
