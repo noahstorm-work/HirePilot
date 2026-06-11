@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Bookmark, Trash2, Plus } from "lucide-react"
@@ -11,7 +12,7 @@ interface SavedJobsSidebarProps {
   onSaveAsApplication: (saved: SavedJob) => void
 }
 
-export function SavedJobsSidebar({ savedJobs, onRemove, onSaveAsApplication }: SavedJobsSidebarProps) {
+export const SavedJobsSidebar = React.memo(function SavedJobsSidebar({ savedJobs, onRemove, onSaveAsApplication }: SavedJobsSidebarProps) {
   return (
     <div className="lg:sticky lg:top-8 self-start">
       <div className="p-4 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)]">
@@ -44,4 +45,4 @@ export function SavedJobsSidebar({ savedJobs, onRemove, onSaveAsApplication }: S
       </div>
     </div>
   )
-}
+})

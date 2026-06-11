@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ArrowRight, Mail, Lock, Zap } from "lucide-react"
+import { logError } from "@/lib/error-service"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -55,6 +56,7 @@ export default function LoginPage() {
     } catch {
       setError("Failed to load demo credentials")
       setLoading(false)
+      logError("Demo credential load failed", "Failed to load demo credentials", "login-demo")
     }
   }
 

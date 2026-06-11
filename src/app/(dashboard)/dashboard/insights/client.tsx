@@ -26,6 +26,10 @@ export function InsightsClient() {
   const [data, setData] = useState<InsightsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
+  const [emailEnabled, setEmailEnabled] = useState(() => {
+    if (typeof window === "undefined") return false
+    return localStorage.getItem("weekly_email_optin") === "true"
+  })
   const supabase = createClient()
 
   const loadInsights = async () => {
@@ -66,6 +70,17 @@ export function InsightsClient() {
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadInsights() }, [])
+
+  const handleEmailToggle = (checked: boolean) => {
+    setEmailEnabled(checked)
+    localStorage.setItem("weekly_email_optin", String(checked))
+    // Also persist to user metadata via API
+    fetch("/api/account/update-metadata", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ weekly_email_optin: checked }),
+    }).catch(() => {})
+  }
 
   const handleGenerateReport = async () => {
     setGenerating(true)
@@ -123,7 +138,19 @@ export function InsightsClient() {
 
       {/* Weekly Report */}
       {data.weeklyReport && (
-        <div className="surface-card p-5">
+        <>
+          <div className="flex items-center justify-end">
+            <label className="flex items-center gap-2 text-xs text-[var(--color-text-muted)] cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={emailEnabled}
+                onChange={(e) => handleEmailToggle(e.target.checked)}
+                className="rounded border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] accent-[var(--color-accent-violet)]"
+              />
+              Email me weekly reports
+            </label>
+          </div>
+          <div className="surface-card p-5">
           <SectionHeader title="This Week's Report" icon={<TrendingUp className="h-4 w-4 text-[var(--color-accent-emerald)]" />} />
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
             <div>
@@ -169,6 +196,7 @@ export function InsightsClient() {
             </div>
           )}
         </div>
+        </>
       )}
 
       <div className="grid lg:grid-cols-2 gap-5">

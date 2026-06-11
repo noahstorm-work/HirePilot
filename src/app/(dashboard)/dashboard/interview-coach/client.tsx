@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -76,12 +76,12 @@ export function InterviewCoachClient() {
     setLoading(false)
   }
 
-  const tabs = [
+  const tabs = useMemo(() => [
     { key: "technical", label: "Technical", icon: Code },
     { key: "behavioral", label: "Behavioral", icon: MessageSquare },
     { key: "star", label: "STAR Method", icon: CheckCircle2 },
     { key: "company", label: "Company Prep", icon: Building2 },
-  ] as const
+  ] as const, [])
 
   return (
     <div className="space-y-5">

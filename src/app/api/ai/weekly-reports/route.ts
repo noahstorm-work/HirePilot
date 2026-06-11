@@ -1,7 +1,11 @@
 import { withAuth, apiSuccess, apiError, checkRateLimit } from "@/lib/api-handler"
 import { generateWeeklyReport } from "@/lib/ai-service"
+import { Resend } from "resend"
+import { weeklyReportEmail } from "@/lib/email-templates/weekly-report"
+import type { User } from "@supabase/supabase-js"
 
 export const POST = withAuth(async (request, { supabase, user }) => {
+  const fullUser = user as User
   const rl = checkRateLimit(`ai:weekly:${user.id}`, 3, 60_000)
   if (rl) return rl
   const [analysisRes, profileRes, appsRes] = await Promise.all([
@@ -57,5 +61,30 @@ export const POST = withAuth(async (request, { supabase, user }) => {
     console.error("Failed to save weekly report:", error)
     return apiError("Failed to save weekly report", 500)
   }
+
+  // Fire-and-forget email if user opted in
+  if (fullUser.user_metadata?.weekly_email_optin && fullUser.email) {
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY)
+      const html = weeklyReportEmail(
+        {
+          skills_in_demand: result.skills_in_demand,
+          market_trends: result.market_trends,
+          salary_ranges: result.salary_ranges,
+          recommendations: result.recommendations,
+        },
+        fullUser.user_metadata?.full_name || fullUser.email || "there"
+      )
+      await resend.emails.send({
+        from: process.env.EMAIL_FROM || "HirePilot <apply@hirepilot.app>",
+        to: fullUser.email,
+        subject: "Your Weekly Career Report from HirePilot",
+        html,
+      })
+    } catch (err) {
+      console.error("Failed to send weekly report email:", err)
+    }
+  }
+
   return apiSuccess(data)
 })

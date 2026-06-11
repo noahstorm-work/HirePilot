@@ -1,3 +1,5 @@
+import { logError } from "@/lib/error-service"
+
 export async function triggerAnalysis(
   applicationId: string,
   jobDescription: string,
@@ -15,7 +17,7 @@ export async function triggerAnalysis(
         role_title: roleTitle,
       }),
     })
-  } catch {
-    // fire-and-forget — analysis can be retried from the detail page
+  } catch (error) {
+    logError("Trigger analysis failed", error instanceof Error ? error.message : String(error), "trigger-analysis")
   }
 }

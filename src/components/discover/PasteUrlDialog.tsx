@@ -11,6 +11,7 @@ import {
 import { Link as LinkIcon } from "lucide-react"
 import { toast } from "sonner"
 import { triggerAnalysis } from "@/lib/trigger-analysis"
+import { logError } from "@/lib/error-service"
 import type { JobSearchResult } from "@/lib/jobs/types"
 
 export function PasteUrlDialog() {
@@ -73,6 +74,7 @@ export function PasteUrlDialog() {
       }
     } catch {
       toast.error("Failed to save application")
+      logError("Save application failed", "Failed to save application", "paste-url-dialog-save")
     } finally {
       setSaving(false)
     }

@@ -10,6 +10,7 @@ import { LoadingScreen } from "@/components/ui/loading-screen"
 import type { ExtractedMetadata } from "@/lib/document-parser"
 import { User, Save, Check } from "lucide-react"
 import { toast } from "sonner"
+import { logError } from "@/lib/error-service"
 import { CvSection } from "@/components/profile/CvSection"
 import { LinksSection } from "@/components/profile/LinksSection"
 import { CareerSettingsSection } from "@/components/profile/CareerSettingsSection"
@@ -82,27 +83,29 @@ export function ProfileClient() {
     return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current) }
   }, [])
 
-  const loadProfile = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    setUserEmail(user.email || "")
-    const { data } = await supabase.from("user_profiles").select("*").eq("id", user.id).maybeSingle()
-    if (data) {
-      setCvText(data.cv_text || "")
-      setFullName(data.full_name || "")
-      setLinkedin(data.linkedin_url || "")
-      setGithub(data.github_url || "")
-      setPortfolio(data.portfolio_url || "")
-      setTargetRole(data.target_role || "")
-      setYearsExperience(data.years_experience?.toString() || "")
-      setTargetSeniority(data.target_seniority || "")
-      setSkills(data.skills || [])
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      if (mounted) setUserEmail(user.email || "")
+      const { data } = await supabase.from("user_profiles").select("*").eq("id", user.id).maybeSingle()
+      if (mounted && data) {
+        setCvText(data.cv_text || "")
+        setFullName(data.full_name || "")
+        setLinkedin(data.linkedin_url || "")
+        setGithub(data.github_url || "")
+        setPortfolio(data.portfolio_url || "")
+        setTargetRole(data.target_role || "")
+        setYearsExperience(data.years_experience?.toString() || "")
+        setTargetSeniority(data.target_seniority || "")
+        setSkills(data.skills || [])
+      }
+      if (mounted) setLoading(false)
     }
-    setLoading(false)
-  }
-
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { loadProfile() }, [])
+    load()
+    return () => { mounted = false }
+  }, [])
 
   const handleChangePassword = async () => {
     if (!newPassword.trim()) return
@@ -122,6 +125,7 @@ export function ProfileClient() {
       }
     } catch {
       toast.error("Failed to update password")
+      logError("Password change failed", "Failed to update password", "profile-change-password")
     }
     setChangingPassword(false)
   }
@@ -149,6 +153,7 @@ export function ProfileClient() {
       }
     } catch {
       toast.error("Export failed")
+      logError("Data export failed", "Export failed", "profile-export-data")
     }
     setExporting(false)
   }
@@ -172,6 +177,7 @@ export function ProfileClient() {
       }
     } catch {
       toast.error("Failed to delete account")
+      logError("Account deletion failed", "Failed to delete account", "profile-delete-account")
     }
     setDeleting(false)
   }

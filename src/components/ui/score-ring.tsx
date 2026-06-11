@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useMemo } from "react"
 
 interface ScoreRingProps {
   score: number
@@ -35,11 +35,14 @@ export function ScoreRing({
   animated = true,
 }: ScoreRingProps) {
   const { width, stroke, fontSize, labelSize } = sizeMap[size]
-  const radius = (width - stroke) / 2
-  const circumference = 2 * Math.PI * radius
-  const percentage = Math.min((score / maxScore) * 100, 100)
-  const dashoffset = circumference - (percentage / 100) * circumference
-  const color = getColor(score)
+  const { radius, circumference, dashoffset, color } = useMemo(() => {
+    const radius = (width - stroke) / 2
+    const circumference = 2 * Math.PI * radius
+    const percentage = Math.min((score / maxScore) * 100, 100)
+    const dashoffset = circumference - (percentage / 100) * circumference
+    const color = getColor(score)
+    return { radius, circumference, dashoffset, color }
+  }, [score, maxScore, width, stroke])
   const circleRef = useRef<SVGCircleElement>(null)
 
   useEffect(() => {

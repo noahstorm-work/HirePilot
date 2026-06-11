@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -16,6 +16,7 @@ import { toast } from "sonner"
 import Link from "next/link"
 import type { Application, AiResult, RejectionAnalysis } from "@/types"
 import { APPLICATION_STATUSES } from "@/lib/constants"
+import { logError } from "@/lib/error-service"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
@@ -32,22 +33,24 @@ export function ApplicationDetailClient() {
   const [activeTab, setActiveTab] = useState<"analysis" | "cover" | "followup" | "rejection">("analysis")
   const supabase = createClient()
 
-  const loadApplication = async () => {
-    const { data } = await supabase.from("applications").select("*").eq("id", params.id).maybeSingle()
-    if (data) {
-      setApp(data)
-      const { data: ai } = await supabase.from("ai_results").select("*").eq("application_id", params.id).maybeSingle()
-      if (ai) setAiResult(ai)
-      if (data.status === "Rejected") {
-        const { data: rej } = await supabase.from("rejection_analyses").select("*").eq("application_id", params.id).maybeSingle()
-        if (rej) setRejectionResult(rej)
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      const { data } = await supabase.from("applications").select("*").eq("id", params.id).maybeSingle()
+      if (mounted && data) {
+        setApp(data)
+        const { data: ai } = await supabase.from("ai_results").select("*").eq("application_id", params.id).maybeSingle()
+        if (mounted && ai) setAiResult(ai)
+        if (data.status === "Rejected") {
+          const { data: rej } = await supabase.from("rejection_analyses").select("*").eq("application_id", params.id).maybeSingle()
+          if (mounted && rej) setRejectionResult(rej)
+        }
       }
+      if (mounted) setLoading(false)
     }
-    setLoading(false)
-  }
-
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { loadApplication() }, [params.id])
+    load()
+    return () => { mounted = false }
+  }, [params.id])
 
   const handleAnalyze = async () => {
     if (!app) return
@@ -61,7 +64,10 @@ export function ApplicationDetailClient() {
       const json = await res.json()
       if (json.success) { setAiResult(json.data); toast.success("Analysis complete") }
       else { toast.error(json.error || "Analysis failed") }
-    } catch { toast.error("Analysis failed") }
+    } catch {
+      toast.error("Analysis failed")
+      logError("Job analysis failed", "Analysis failed", "applications-detail-analyze")
+    }
     setAnalyzing(false)
   }
 
@@ -89,7 +95,10 @@ export function ApplicationDetailClient() {
       } else {
         toast.error(json.error || "Failed to generate")
       }
-    } catch { toast.error("Failed to generate follow-up") }
+    } catch {
+      toast.error("Failed to generate follow-up")
+      logError("Follow-up generation failed", "Failed to generate follow-up", "applications-detail-followup")
+    }
     setGeneratingFollowup(false)
   }
 
@@ -110,7 +119,10 @@ export function ApplicationDetailClient() {
       } else {
         toast.error(json.error || "Analysis failed")
       }
-    } catch { toast.error("Rejection analysis failed") }
+    } catch {
+      toast.error("Rejection analysis failed")
+      logError("Rejection analysis failed", "Rejection analysis failed", "applications-detail-rejection")
+    }
     setAnalyzingRejection(false)
   }
 
@@ -126,17 +138,17 @@ export function ApplicationDetailClient() {
     toast.success(`Status changed to ${status}`)
   }
 
-  if (loading) return <LoadingScreen />
-  if (!app) return <div className="text-center py-16 text-xs text-[var(--color-text-muted)]">Application not found</div>
+  const isRejected = app?.status === "Rejected"
 
-  const isRejected = app.status === "Rejected"
-
-  const tabs = [
+  const tabs = useMemo(() => [
     { key: "analysis" as const, label: "Analysis", icon: Target },
     { key: "cover" as const, label: "Cover Letter", icon: Mail },
     { key: "followup" as const, label: "Follow-up", icon: MessageSquare },
     ...(isRejected ? [{ key: "rejection" as const, label: "Rejection Analysis", icon: Ban }] : []),
-  ]
+  ], [isRejected])
+
+  if (loading) return <LoadingScreen />
+  if (!app) return <div className="text-center py-16 text-xs text-[var(--color-text-muted)]">Application not found</div>
 
   return (
     <div className="space-y-5">

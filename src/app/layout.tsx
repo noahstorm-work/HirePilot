@@ -4,12 +4,14 @@ import localFont from "next/font/local"
 import { cookies } from "next/headers"
 import "./globals.css"
 import { ErrorLogging } from "@/components/ErrorLogging"
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Toaster } from "sonner"
 
 const syne = Syne({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "600", "700"],
 })
 
 const satoshi = localFont({
@@ -61,6 +63,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" className="dark" nonce={nonce}>
       <body nonce={nonce} className={`${syne.variable} ${satoshi.variable} min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] antialiased`}>
         <ErrorLogging />
+        <Analytics />
+        <SpeedInsights />
         <Toaster theme="dark" position="bottom-right" richColors />
         {children}
       </body>

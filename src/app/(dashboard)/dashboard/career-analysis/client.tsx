@@ -16,6 +16,13 @@ import { Brain, Sparkles, Target, TrendingUp, BarChart3 } from "lucide-react"
 import { toast } from "sonner"
 import type { CareerAnalysis, Improvement, WeeklyPlan } from "@/types"
 
+const SCORE_GRID_ITEMS = [
+  { label: "CV Score", icon: Target, color: "text-[var(--color-accent-violet)]", key: "cv_score" as const },
+  { label: "LinkedIn", icon: TrendingUp, color: "text-[var(--color-accent-blue)]", key: "linkedin_score" as const },
+  { label: "Portfolio", icon: BarChart3, color: "text-[var(--color-accent-emerald)]", key: "portfolio_score" as const },
+  { label: "Market Fit", icon: Brain, color: "text-[var(--color-accent-amber)]", key: "market_competitiveness_score" as const },
+]
+
 export function CareerAnalysisClient() {
   const [cvText, setCvText] = useState("")
   const [linkedinUrl, setLinkedinUrl] = useState("")
@@ -28,22 +35,24 @@ export function CareerAnalysisClient() {
   const [error, setError] = useState("")
   const supabase = createClient()
 
-  const loadProfile = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    const { data } = await supabase.from("user_profiles").select("*").eq("id", user.id).maybeSingle()
-    if (data) {
-      setCvText(data.cv_text || "")
-      setLinkedinUrl(data.linkedin_url || "")
-      setLinkedinAbout(typeof data.linkedin_data === "object" && data.linkedin_data ? (data.linkedin_data as Record<string, unknown>).about as string || "" : "")
-      setGithubUrl(data.github_url || "")
-      setPortfolioUrl(data.portfolio_url || "")
-      setTargetRole(data.target_role || "")
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase.from("user_profiles").select("*").eq("id", user.id).maybeSingle()
+      if (mounted && data) {
+        setCvText(data.cv_text || "")
+        setLinkedinUrl(data.linkedin_url || "")
+        setLinkedinAbout(typeof data.linkedin_data === "object" && data.linkedin_data ? (data.linkedin_data as Record<string, unknown>).about as string || "" : "")
+        setGithubUrl(data.github_url || "")
+        setPortfolioUrl(data.portfolio_url || "")
+        setTargetRole(data.target_role || "")
+      }
     }
-  }
-
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { loadProfile() }, [])
+    load()
+    return () => { mounted = false }
+  }, [])
 
   const handleAnalyze = async () => {
     setLoading(true)
@@ -159,15 +168,10 @@ export function CareerAnalysisClient() {
               <ScoreRing score={score} size="xl" label="Interview Readiness" />
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {[
-                { label: "CV Score", value: result.cv_score || 0, icon: Target, color: "text-[var(--color-accent-violet)]" },
-                { label: "LinkedIn", value: result.linkedin_score || 0, icon: TrendingUp, color: "text-[var(--color-accent-blue)]" },
-                { label: "Portfolio", value: result.portfolio_score || 0, icon: BarChart3, color: "text-[var(--color-accent-emerald)]" },
-                { label: "Market Fit", value: result.market_competitiveness_score || 0, icon: Brain, color: "text-[var(--color-accent-amber)]" },
-              ].map((item) => (
+              {SCORE_GRID_ITEMS.map((item) => (
                 <div key={item.label} className="p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-center">
                   <item.icon className={`h-3.5 w-3.5 ${item.color} mx-auto mb-1.5`} />
-                  <p className="text-lg font-bold font-[family-name:var(--font-display)]">{item.value}</p>
+                  <p className="text-lg font-bold font-[family-name:var(--font-display)]">{result[item.key] || 0}</p>
                   <p className="text-[9px] text-[var(--color-text-muted)]">{item.label}</p>
                 </div>
               ))}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,20 +10,18 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
-import { Briefcase, Plus, ChevronRight, Send, Trash2, Link as LinkIcon, Loader2 } from "lucide-react"
+import { KanbanBoard } from "@/components/applications/KanbanBoard"
+import { Briefcase, Plus, Trash2, Link as LinkIcon, Loader2 } from "lucide-react"
 import { CompanyAutocomplete } from "@/components/ui/company-autocomplete"
 import { RoleAutocomplete } from "@/components/ui/role-autocomplete"
 import { toast } from "sonner"
 import Link from "next/link"
 import { APPLICATION_STATUSES, STATUS_COLORS } from "@/lib/constants"
 import { triggerAnalysis } from "@/lib/trigger-analysis"
+import { logError } from "@/lib/error-service"
+import type { Application } from "@/types"
 
-interface AppItem {
-  id: string; company: string; role_title: string; job_url: string | null;
-  status: string; match_score: number | null; created_at: string; notes: string | null; location: string | null;
-}
-
-const columns = APPLICATION_STATUSES.map((status) => ({ key: status, color: STATUS_COLORS[status].text, dot: STATUS_COLORS[status].dot }))
+type AppItem = Application
 
 const APPS_STORAGE_KEY = "applications_prefs"
 
@@ -45,16 +43,18 @@ export function ApplicationsClient() {
   })
   const supabase = createClient()
 
-  const loadApplications = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    const { data } = await supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
-    if (data) setApplications(data as AppItem[])
-    setLoading(false)
-  }
-
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { loadApplications() }, [])
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
+      if (mounted && data) setApplications(data as AppItem[])
+      if (mounted) setLoading(false)
+    }
+    load()
+    return () => { mounted = false }
+  }, [])
 
   useEffect(() => {
     localStorage.setItem(`${APPS_STORAGE_KEY}_filter`, filterStatus)
@@ -119,32 +119,63 @@ export function ApplicationsClient() {
       }
     } catch {
       toast.error("Failed to fetch job details")
+      logError("URL fetch failed", "Failed to fetch job details", "applications-handleFetchUrl")
     }
     setFetchingUrl(false)
   }
 
-  const handleMarkApplied = async (app: AppItem) => {
-    const { error } = await supabase.from("applications").update({ status: "Applied" }).eq("id", app.id)
-    if (!error) {
-      setApplications((prev) => prev.map((a) => a.id === app.id ? { ...a, status: "Applied" } : a))
-      toast.success("Marked as applied")
-    }
-  }
+  const handleStatusChange = useCallback(async (appId: string, newStatus: string) => {
+    const previousApps = applications
+    setApplications((prev) => prev.map((a) => a.id === appId ? { ...a, status: newStatus as Application["status"] } : a))
 
-  const handleDelete = async (app: AppItem) => {
-    const res = await fetch(`/api/applications/${app.id}`, { method: "DELETE" })
-    const json = await res.json()
-    if (json.success) {
-      setApplications((prev) => prev.filter((a) => a.id !== app.id))
-      toast.success(`Deleted ${app.company}`)
-    } else {
+    try {
+      const res = await fetch(`/api/applications/${appId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      })
+      const json = await res.json()
+      if (!json.success) {
+        setApplications(previousApps)
+        toast.error("Failed to update status")
+      }
+    } catch {
+      setApplications(previousApps)
+      toast.error("Failed to update status")
+    }
+  }, [applications])
+
+  const handleDelete = useCallback(async (appId: string) => {
+    const previousApps = applications
+    const app = applications.find((a) => a.id === appId)
+    setApplications((prev) => prev.filter((a) => a.id !== appId))
+
+    try {
+      const res = await fetch(`/api/applications/${appId}`, { method: "DELETE" })
+      const json = await res.json()
+      if (json.success) {
+        toast.success(`Deleted ${app?.company || "application"}`)
+      } else {
+        setApplications(previousApps)
+        toast.error("Failed to delete")
+      }
+    } catch {
+      setApplications(previousApps)
       toast.error("Failed to delete")
     }
-  }
+  }, [applications])
+
+  const filteredApps = useMemo(() => filterStatus === "All" ? applications : applications.filter((a) => a.status === filterStatus), [applications, filterStatus])
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { All: applications.length }
+    for (const app of applications) {
+      counts[app.status] = (counts[app.status] || 0) + 1
+    }
+    return counts
+  }, [applications])
 
   if (loading) return <LoadingScreen />
-
-  const filteredApps = filterStatus === "All" ? applications : applications.filter((a) => a.status === filterStatus)
 
   return (
     <div className="space-y-5">
@@ -219,9 +250,10 @@ export function ApplicationsClient() {
 
       {/* Filter tabs */}
       <div className="flex gap-1 p-0.5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] overflow-x-auto">
-        {(["All", ...columns.map((c) => c.key)] as const).map((status) => {
-          const col = columns.find((c) => c.key === status)
-          const count = status === "All" ? applications.length : applications.filter((a) => a.status === status).length
+        {(["All", ...APPLICATION_STATUSES] as const).map((status) => {
+          const statusKey = status as keyof typeof STATUS_COLORS
+          const colorConfig = STATUS_COLORS[statusKey]
+          const count = statusCounts[status] || 0
           return (
             <button
               key={status}
@@ -230,7 +262,7 @@ export function ApplicationsClient() {
                 filterStatus === status ? "bg-[var(--color-accent-violet)]/10 text-[var(--color-accent-violet)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
               }`}
             >
-              {col && <span className={`h-1.5 w-1.5 rounded-full ${col.dot}`} />}
+              {colorConfig && <span className={`h-1.5 w-1.5 rounded-full ${colorConfig.dot}`} />}
               {status}
               <span className="opacity-60">{count}</span>
             </button>
@@ -251,63 +283,11 @@ export function ApplicationsClient() {
           }
         />
       ) : viewMode === "kanban" && filterStatus === "All" ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-          {columns.map((col) => {
-            const colApps = applications.filter((a) => a.status === col.key)
-            return (
-              <div key={col.key}>
-                <div className="flex items-center gap-2 mb-2.5">
-                  <span className={`h-1.5 w-1.5 rounded-full ${col.dot}`} />
-                  <span className="text-[11px] font-medium text-[var(--color-text-secondary)]">{col.key}</span>
-                  <span className="text-[10px] text-[var(--color-text-muted)]">{colApps.length}</span>
-                </div>
-                <div className="space-y-2">
-                  {colApps.map((app) => (
-                    <Link key={app.id} href={`/applications/${app.id}`}>
-                      <div className="p-3 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-border-default)] transition-default cursor-pointer group">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="text-xs font-medium font-[family-name:var(--font-display)] truncate">{app.company}</p>
-                            <p className="text-[10px] text-[var(--color-text-muted)] truncate mt-0.5">{app.role_title}</p>
-                          </div>
-                          {app.match_score != null && (
-                            <span className="text-[10px] font-bold font-[family-name:var(--font-mono)] text-[var(--color-accent-violet)] shrink-0">{app.match_score}</span>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-[var(--color-border-subtle)]">
-                          <span className="text-[9px] text-[var(--color-text-muted)]">{new Date(app.created_at).toLocaleDateString()}</span>
-                          <div className="flex items-center gap-1.5">
-                            {col.key === "Saved" && (
-                              <button
-                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleMarkApplied(app) }}
-                                className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium text-[var(--color-accent-violet)] hover:bg-[var(--color-accent-violet)]/10 transition-colors opacity-0 group-hover:opacity-100"
-                              >
-                                <Send className="h-2.5 w-2.5" /> Apply
-                              </button>
-                            )}
-                            <button
-                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(app) }}
-                              aria-label={`Delete ${app.role_title} application`}
-                              className="p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)] transition-colors opacity-0 group-hover:opacity-100"
-                            >
-                              <Trash2 className="h-2.5 w-2.5" />
-                            </button>
-                            <ChevronRight className="h-2.5 w-2.5 text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                  {colApps.length === 0 && (
-                    <div className="p-3 rounded-xl border border-dashed border-[var(--color-border-subtle)] text-center">
-                      <p className="text-[10px] text-[var(--color-text-muted)]">Empty</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
+        <KanbanBoard
+          applications={applications}
+          onStatusChange={handleStatusChange}
+          onDelete={handleDelete}
+        />
       ) : (
         <div className="space-y-2">
           {filteredApps.map((app) => (
@@ -327,7 +307,7 @@ export function ApplicationsClient() {
                     } ${STATUS_COLORS[app.status as keyof typeof STATUS_COLORS]?.text || "text-[var(--color-text-muted)]"}`}>{app.status}</span>
                     <span className="text-[10px] text-[var(--color-text-muted)]">{new Date(app.created_at).toLocaleDateString()}</span>
                     <button
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(app) }}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(app.id) }}
                       aria-label={`Delete ${app.role_title} application`}
                       className="p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)] transition-colors opacity-0 group-hover:opacity-100"
                     >

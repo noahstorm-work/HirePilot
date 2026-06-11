@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { ScoreRing } from "@/components/ui/score-ring"
@@ -22,31 +22,58 @@ interface DashboardData {
   savedJobs: Record<string, unknown>[]
 }
 
+const QUICK_ACTIONS = [
+  { label: "Run Analysis", href: "/dashboard/career-analysis", icon: Brain, color: "text-[var(--color-accent-violet)]" },
+  { label: "Find Jobs", href: "/discover", icon: Search, color: "text-[var(--color-accent-blue)]" },
+  { label: "Coach Me", href: "/dashboard/interview-coach", icon: Sparkles, color: "text-[var(--color-accent-emerald)]" },
+  { label: "ATS Check", href: "/dashboard/ats-checker", icon: FileCheck, color: "text-[var(--color-accent-amber)]" },
+]
+
+const CAREER_HEALTH_METRICS = [
+  { label: "CV Score", icon: Target, color: "text-[var(--color-accent-violet)]", key: "cv_score" as const },
+  { label: "LinkedIn", icon: TrendingUp, color: "text-[var(--color-accent-blue)]", key: "linkedin_score" as const },
+  { label: "Portfolio", icon: BarChart3, color: "text-[var(--color-accent-emerald)]", key: "portfolio_score" as const },
+  { label: "Recruiter Appeal", icon: Brain, color: "text-[var(--color-accent-amber)]", key: "recruiter_appeal_score" as const },
+  { label: "Market Fit", icon: Briefcase, color: "text-[var(--color-accent-cyan)]", key: "market_competitiveness_score" as const },
+]
+
 export function DashboardClient() {
   const [data, setData] = useState<DashboardData>({ analysis: null, applications: [], savedJobs: [] })
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
-  const loadDashboard = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
-    const [analysisRes, appsRes, savedRes] = await Promise.all([
-      supabase.from("career_analyses").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
-      supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("saved_jobs").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-    ])
+      const [analysisRes, appsRes, savedRes] = await Promise.all([
+        supabase.from("career_analyses").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("saved_jobs").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+      ])
 
-    setData({
-      analysis: analysisRes.data,
-      applications: appsRes.data || [],
-      savedJobs: savedRes.data || [],
-    })
-    setLoading(false)
-  }
+      if (mounted) {
+        setData({
+          analysis: analysisRes.data,
+          applications: appsRes.data || [],
+          savedJobs: savedRes.data || [],
+        })
+        setLoading(false)
+      }
+    }
+    load()
+    return () => { mounted = false }
+  }, [])
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { loadDashboard() }, [])
+  const appsByStatus = useMemo(() => {
+    const counts = { Saved: 0, Applied: 0, Interview: 0, Offer: 0, Rejected: 0 }
+    for (const app of data.applications) {
+      if (app.status in counts) counts[app.status as keyof typeof counts]++
+    }
+    return counts
+  }, [data.applications])
 
   if (loading) return <LoadingScreen />
 
@@ -73,13 +100,6 @@ export function DashboardClient() {
 
   const score = data.analysis.interview_readiness_score || 0
   const target = data.analysis.target_score || 90
-  const appsByStatus = {
-    Saved: data.applications.filter((a) => a.status === "Saved").length,
-    Applied: data.applications.filter((a) => a.status === "Applied").length,
-    Interview: data.applications.filter((a) => a.status === "Interview").length,
-    Offer: data.applications.filter((a) => a.status === "Offer").length,
-    Rejected: data.applications.filter((a) => a.status === "Rejected").length,
-  }
 
   return (
     <div className="space-y-6">
@@ -113,12 +133,7 @@ export function DashboardClient() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        {[
-          { label: "Run Analysis", href: "/dashboard/career-analysis", icon: Brain, color: "text-[var(--color-accent-violet)]" },
-          { label: "Find Jobs", href: "/discover", icon: Search, color: "text-[var(--color-accent-blue)]" },
-          { label: "Coach Me", href: "/dashboard/interview-coach", icon: Sparkles, color: "text-[var(--color-accent-emerald)]" },
-          { label: "ATS Check", href: "/dashboard/ats-checker", icon: FileCheck, color: "text-[var(--color-accent-amber)]" },
-        ].map((action) => (
+        {QUICK_ACTIONS.map((action) => (
           <Link key={action.href} href={action.href}>
             <div className="group flex items-center gap-2.5 p-3.5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-border-default)] transition-default cursor-pointer">
               <action.icon className={`h-4 w-4 ${action.color} shrink-0`} />
@@ -132,19 +147,13 @@ export function DashboardClient() {
       <div>
         <SectionHeader title="Career Health" description="Your key metrics" icon={<BarChart3 className="h-4 w-4 text-[var(--color-accent-violet)]" />} />
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 mt-3">
-          {[
-            { label: "CV Score", value: data.analysis.cv_score || 0, icon: Target, color: "text-[var(--color-accent-violet)]" },
-            { label: "LinkedIn", value: data.analysis.linkedin_score || 0, icon: TrendingUp, color: "text-[var(--color-accent-blue)]" },
-            { label: "Portfolio", value: data.analysis.portfolio_score || 0, icon: BarChart3, color: "text-[var(--color-accent-emerald)]" },
-            { label: "Recruiter Appeal", value: data.analysis.recruiter_appeal_score || 0, icon: Brain, color: "text-[var(--color-accent-amber)]" },
-            { label: "Market Fit", value: data.analysis.market_competitiveness_score || 0, icon: Briefcase, color: "text-[var(--color-accent-cyan)]" },
-          ].map((item) => (
+          {CAREER_HEALTH_METRICS.map((item) => (
             <div key={item.label} className="surface-card p-4 transition-default hover:border-[var(--color-border-default)]">
               <div className="flex items-center gap-2 mb-2.5">
                 <item.icon className={`h-3.5 w-3.5 ${item.color}`} />
                 <span className="text-[10px] text-[var(--color-text-muted)]">{item.label}</span>
               </div>
-              <p className="text-xl font-bold font-[family-name:var(--font-display)]">{item.value}</p>
+              <p className="text-xl font-bold font-[family-name:var(--font-display)]">{data.analysis?.[item.key] || 0}</p>
             </div>
           ))}
         </div>

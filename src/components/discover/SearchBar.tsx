@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, Clock, X } from "lucide-react"
@@ -22,7 +23,7 @@ interface SearchBarProps {
   recentDropdownRef: React.RefObject<HTMLDivElement | null>
 }
 
-export function SearchBar({
+export const SearchBar = React.memo(function SearchBar({
   query,
   setQuery,
   location,
@@ -88,4 +89,4 @@ export function SearchBar({
       </div>
     </div>
   )
-}
+})

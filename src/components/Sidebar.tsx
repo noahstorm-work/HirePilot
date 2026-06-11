@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { LogOut, ChevronLeft, ChevronRight, X, Menu, Command } from "lucide-react"
 import { NAV_SECTIONS, ICON_MAP } from "@/lib/navigation"
 import type { User } from "@supabase/supabase-js"
@@ -138,15 +138,15 @@ export function Sidebar() {
     })
   }, [supabase.auth])
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     await supabase.auth.signOut()
     router.push("/login")
-  }
+  }, [supabase, router])
 
-  const isActive = (href: string) => {
+  const isActive = useCallback((href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard"
     return pathname.startsWith(href)
-  }
+  }, [pathname])
 
   return (
     <>

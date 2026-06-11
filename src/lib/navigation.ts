@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Brain, Search, Briefcase, Sparkles,
-  FileCheck, Target, BarChart3, GitBranch, User
+  FileCheck, Target, BarChart3, GitBranch, User, AlertTriangle
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
@@ -40,6 +40,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Insights", href: "/dashboard/insights", icon: "BarChart3", shortcut: "⌘8" },
       { label: "CV Versions", href: "/dashboard/cv-versions", icon: "GitBranch", shortcut: "⌘9" },
+      { label: "Error Logs", href: "/dashboard/admin/errors", icon: "AlertTriangle", shortcut: "⌘0" },
     ],
   },
 ]
@@ -55,6 +56,7 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   BarChart3,
   GitBranch,
   User,
+  AlertTriangle,
 }
 
 export const ALL_NAV_ITEMS = NAV_SECTIONS.flatMap(s => s.items)

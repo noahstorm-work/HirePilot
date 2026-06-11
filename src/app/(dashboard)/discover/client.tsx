@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -35,26 +35,26 @@ export function DiscoverClient() {
   const recentDropdownRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
-  const loadSavedJobs = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    const { data } = await supabase.from("saved_jobs").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
-    if (data) setSavedJobs(data as SavedJob[])
-  }
-
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadSavedJobs()
-    const stored = localStorage.getItem("recentJobSearches")
-    if (stored) setRecentSearches(JSON.parse(stored))
-    const savedState = localStorage.getItem(SEARCH_STATE_KEY)
-    if (savedState) {
-      try {
-        const { query: q, location: l } = JSON.parse(savedState)
-        if (q) setQuery(q)
-        if (l) setLocation(l)
-      } catch {}
+    let mounted = true
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase.from("saved_jobs").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
+      if (mounted && data) setSavedJobs(data as SavedJob[])
+      const stored = localStorage.getItem("recentJobSearches")
+      if (mounted && stored) setRecentSearches(JSON.parse(stored))
+      const savedState = localStorage.getItem(SEARCH_STATE_KEY)
+      if (savedState) {
+        try {
+          const { query: q, location: l } = JSON.parse(savedState)
+          if (mounted && q) setQuery(q)
+          if (mounted && l) setLocation(l)
+        } catch {}
+      }
     }
+    load()
+    return () => { mounted = false }
   }, [])
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export function DiscoverClient() {
     localStorage.setItem("recentJobSearches", JSON.stringify(updated))
   }
 
-  const handleSearch = async (pageNum = 1) => {
+  const handleSearch = useCallback(async (pageNum = 1) => {
     if (!query.trim()) return
     if (pageNum === 1) {
       saveRecentSearch(query.trim())
@@ -92,23 +92,23 @@ export function DiscoverClient() {
     } catch (err) { logError("Job search failed", err instanceof Error ? err.message : String(err), "discover-search") }
     setLoading(false)
     setLoadingMore(false)
-  }
+  }, [query, location, activeSources])
 
-  const handleLoadMore = () => {
+  const handleLoadMore = useCallback(() => {
     handleSearch(page + 1)
-  }
+  }, [handleSearch, page])
 
-  const handleClearRecent = (term: string) => {
+  const handleClearRecent = useCallback((term: string) => {
     const updated = recentSearches.filter((s) => s !== term)
     setRecentSearches(updated)
     localStorage.setItem("recentJobSearches", JSON.stringify(updated))
-  }
+  }, [recentSearches])
 
-  const handleSelectRecent = (term: string) => {
+  const handleSelectRecent = useCallback((term: string) => {
     setQuery(term)
     setShowRecent(false)
     searchInputRef.current?.focus()
-  }
+  }, [])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -125,7 +125,7 @@ export function DiscoverClient() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const handleSave = async (job: JobSearchResult) => {
+  const handleSave = useCallback(async (job: JobSearchResult) => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     if (savedJobs.some((s) => s.external_id === job.external_id)) return
@@ -136,15 +136,15 @@ export function DiscoverClient() {
       location: job.location, source: job.source,
     }).select().single()
     if (data) { setSavedJobs((prev) => [data as SavedJob, ...prev]); toast.success("Job saved") }
-  }
+  }, [supabase, savedJobs])
 
-  const handleRemoveSaved = async (id: string) => {
+  const handleRemoveSaved = useCallback(async (id: string) => {
     await supabase.from("saved_jobs").delete().eq("id", id)
     setSavedJobs((prev) => prev.filter((s) => s.id !== id))
     toast.success("Job removed")
-  }
+  }, [supabase])
 
-  const handleSaveAsApplication = async (saved: SavedJob) => {
+  const handleSaveAsApplication = useCallback(async (saved: SavedJob) => {
     const res = await fetch("/api/applications/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -163,9 +163,9 @@ export function DiscoverClient() {
     } else {
       toast.error("Failed to add to applications")
     }
-  }
+  }, [])
 
-  const handleQuickApply = async (job: JobSearchResult) => {
+  const handleQuickApply = useCallback(async (job: JobSearchResult) => {
     const salary = job.salary_min ? `${job.salary_currency}${job.salary_min.toLocaleString()}${job.salary_max ? ` - ${job.salary_max.toLocaleString()}` : ""}` : null
     const res = await fetch("/api/applications/create", {
       method: "POST",
@@ -207,7 +207,7 @@ export function DiscoverClient() {
     } else {
       toast.error(json.error || "Failed to apply")
     }
-  }
+  }, [])
 
   return (
     <div className="space-y-5">

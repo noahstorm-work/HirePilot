@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { Button } from "@/components/ui/button"
 import { MapPin, Bookmark, BookmarkCheck, Send, Mail } from "lucide-react"
 import { formatSalary } from "@/lib/jobs"
@@ -13,7 +14,7 @@ interface JobResultCardProps {
   onQuickApply: (job: JobSearchResult) => void
 }
 
-export function JobResultCard({ job, isSaved, onSave, onQuickApply }: JobResultCardProps) {
+export const JobResultCard = React.memo(function JobResultCard({ job, isSaved, onSave, onQuickApply }: JobResultCardProps) {
   const salary = formatSalary(job.salary_min, job.salary_max, job.salary_currency, job.location)
 
   return (
@@ -54,4 +55,4 @@ export function JobResultCard({ job, isSaved, onSave, onQuickApply }: JobResultC
       </div>
     </a>
   )
-}
+})

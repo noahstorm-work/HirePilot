@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { Target, TrendingUp, AlertTriangle, CheckCircle2, Sparkles, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { logError } from "@/lib/error-service"
 import type { CareerAnalysis, SkillsGap } from "@/types"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -89,7 +90,10 @@ export function SkillsGapClient() {
       } else {
         toast.error(json.error || "Failed to re-run analysis")
       }
-    } catch { toast.error("Failed to re-run analysis") }
+    } catch {
+      toast.error("Failed to re-run analysis")
+      logError("Re-run analysis failed", "Failed to re-run analysis", "skills-gap-rerun-analysis")
+    }
     setRerunning(false)
   }
 
