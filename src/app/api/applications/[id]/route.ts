@@ -31,7 +31,10 @@ export const PATCH = withAuthParams<{ id: string }>(async (request, { supabase, 
     .select()
     .single()
 
-  if (error) return apiError(error.message, 500)
+  if (error) {
+    console.error("Failed to update application:", error)
+    return apiError("Failed to update application", 500)
+  }
   return apiSuccess(data)
 })
 
@@ -68,6 +71,9 @@ export const DELETE = withAuthParams<{ id: string }>(async (request, { supabase,
     .eq("id", params.id)
     .eq("user_id", user.id)
 
-  if (error) return apiError(error.message, 500)
+  if (error) {
+    console.error("Failed to delete application:", error)
+    return apiError("Failed to delete application", 500)
+  }
   return apiSuccess(null)
 })

@@ -1,7 +1,7 @@
-import { apiSuccess, apiError, checkRateLimit } from "@/lib/api-handler"
+import { withAuth, apiSuccess, apiError, checkRateLimit } from "@/lib/api-handler"
 
-export async function GET() {
-  const rl = checkRateLimit("demo-creds", 10, 60_000)
+export const GET = withAuth(async (_request, { user }) => {
+  const rl = checkRateLimit(`demo-creds:${user.id}`, 10, 60_000)
   if (rl) return rl
   const email = process.env.DEMO_EMAIL || process.env.NEXT_PUBLIC_DEMO_EMAIL
   const password = process.env.DEMO_PASSWORD || process.env.NEXT_PUBLIC_DEMO_PASSWORD
@@ -11,4 +11,4 @@ export async function GET() {
   }
 
   return apiSuccess({ email, password })
-}
+})

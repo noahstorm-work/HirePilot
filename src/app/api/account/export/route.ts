@@ -23,7 +23,10 @@ export const GET = withAuth(async (_request, { supabase, user }) => {
     .filter((r) => r.error)
     .map((r) => r.error!.message)
 
-  if (errors.length > 0) return apiError(`Failed to fetch some data: ${errors.join("; ")}`, 500)
+  if (errors.length > 0) {
+    console.error("Failed to export account data:", errors)
+    return apiError("Failed to export account data", 500)
+  }
 
   return apiSuccess({
     exported_at: new Date().toISOString(),

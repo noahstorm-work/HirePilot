@@ -104,7 +104,7 @@ export interface WeeklyPlan {
 export interface AiResult {
   id: string
   application_id: string
-  match_score: number
+  match_score: number | null
   strengths: string[]
   missing_skills: string[]
   cv_suggestions: string[]
@@ -128,7 +128,6 @@ export interface InterviewQuestions {
 
 export interface ErrorLog {
   id: string
-  timestamp: string
   level: "error" | "warn" | "info"
   message: string
   stack?: string

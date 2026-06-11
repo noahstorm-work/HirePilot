@@ -45,7 +45,8 @@ export async function POST(request: NextRequest) {
     })
 
     if (error) {
-      return apiError(error.message, 500)
+      console.error("Failed to save error log:", error)
+      return apiError("Failed to save error log", 500)
     }
 
     return apiSuccess({ id: null })

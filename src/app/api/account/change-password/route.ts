@@ -16,7 +16,10 @@ export const POST = withAuth(async (request, { supabase, user }) => {
     password: parsed.data.newPassword,
   })
 
-  if (error) return apiError(error.message, 400)
+  if (error) {
+    console.error("Failed to update password:", error)
+    return apiError("Failed to update password", 400)
+  }
 
   return apiSuccess({ updated: true })
 })

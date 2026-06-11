@@ -28,6 +28,9 @@ export const POST = withAuth(async (request, { supabase, user }) => {
     .select()
     .single()
 
-  if (error) return apiError(error.message, 500)
+  if (error) {
+    console.error("Failed to save feedback:", error)
+    return apiError("Failed to save feedback", 500)
+  }
   return apiSuccess(data)
 })

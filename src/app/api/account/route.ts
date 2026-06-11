@@ -17,7 +17,8 @@ export const DELETE = withAuth(async (request, { user }) => {
   const { error: deleteError } = await supabaseAuth.auth.admin.deleteUser(user.id)
 
   if (deleteError) {
-    return apiError(deleteError.message, 500)
+    console.error("Failed to delete account:", deleteError)
+    return apiError("Failed to delete account", 500)
   }
 
   return apiSuccess({ deleted: true })

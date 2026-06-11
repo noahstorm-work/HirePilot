@@ -20,6 +20,9 @@ export const PATCH = withAuthParams<{ id: string }>(async (request, { supabase, 
     .select()
     .single()
 
-  if (error) return apiError(error.message, 500)
+  if (error) {
+    console.error("Failed to update application status:", error)
+    return apiError("Failed to update application status", 500)
+  }
   return apiSuccess(data)
 })

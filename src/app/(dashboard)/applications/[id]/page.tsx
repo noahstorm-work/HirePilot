@@ -210,7 +210,7 @@ export default function ApplicationDetailPage() {
               <div className="h-10 w-px bg-[var(--color-border-subtle)]" />
               <div className="flex-1">
                 <p className="text-[10px] text-[var(--color-text-muted)] mb-1">Interview Probability</p>
-                <p className="text-xs font-medium">{aiResult.match_score >= 80 ? "High" : aiResult.match_score >= 60 ? "Medium" : "Low"}</p>
+                <p className="text-xs font-medium">{(aiResult.match_score ?? 0) >= 80 ? "High" : (aiResult.match_score ?? 0) >= 60 ? "Medium" : "Low"}</p>
               </div>
             </div>
 

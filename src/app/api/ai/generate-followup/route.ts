@@ -50,7 +50,10 @@ export const POST = withAuth(async (request, { supabase, user }) => {
     .update({ follow_up_email: emailBody })
     .eq("application_id", applicationId)
 
-  if (error) return apiError(error.message, 500)
+  if (error) {
+    console.error("Failed to save follow-up email:", error)
+    return apiError("Failed to save follow-up email", 500)
+  }
 
   return apiSuccess({ subject: result.subject, body: result.body })
 })

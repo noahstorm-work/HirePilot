@@ -9,6 +9,9 @@ export const GET = withAuth(async (request, { supabase, user }) => {
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
 
-  if (error) return apiError(error.message, 500)
+  if (error) {
+    console.error("Failed to fetch applications:", error)
+    return apiError("Failed to fetch applications", 500)
+  }
   return apiSuccess(data)
 })

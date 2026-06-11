@@ -33,7 +33,7 @@ export const POST = withAuth(async (request, { supabase, user }) => {
 
   if (applicationId && !cvText) {
     const [appRes, profileRes] = await Promise.all([
-      supabase.from("applications").select("notes, job_description").eq("id", applicationId).maybeSingle(),
+      supabase.from("applications").select("notes, job_description").eq("id", applicationId).eq("user_id", user.id).maybeSingle(),
       supabase.from("user_profiles").select("cv_text").eq("id", user.id).maybeSingle(),
     ])
     cvText = profileRes.data?.cv_text || ""

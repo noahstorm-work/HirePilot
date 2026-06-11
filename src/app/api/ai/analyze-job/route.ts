@@ -40,6 +40,15 @@ export const POST = withAuth(async (request, { supabase, user }) => {
   const result = await analyzeJobMatch({ jobDescription, cvText })
 
   if (applicationId) {
+    const { data: ownership } = await supabase
+      .from("applications")
+      .select("id")
+      .eq("id", applicationId)
+      .eq("user_id", user.id)
+      .maybeSingle()
+
+    if (!ownership) return apiError("Application not found", 404)
+
     const analysis = {
       application_id: applicationId,
       match_score: result.match_score,

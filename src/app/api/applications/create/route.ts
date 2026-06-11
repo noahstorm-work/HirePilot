@@ -29,6 +29,9 @@ export const POST = withAuth(async (request, { supabase, user }) => {
     .select()
     .single()
 
-  if (error) return apiError(error.message, 500)
+  if (error) {
+    console.error("Failed to create application:", error)
+    return apiError("Failed to create application", 500)
+  }
   return apiSuccess(data)
 })

@@ -100,7 +100,7 @@ export default function SkillsGapPage() {
   const missingExp = data?.missing_experience_areas || []
   const skillsGap = data?.skills_gap_analysis || []
 
-  const allSkills = [...new Set([...missingTech, ...skillsGap.map((g: SkillsGap) => g.skill || g.name || "").filter(Boolean)])]
+  const allSkills = [...new Set([...missingTech, ...skillsGap.map((g: SkillsGap) => g.area || g.skill || g.name || "").filter(Boolean)])]
   const identified = allSkills.filter((s) => (skillProgress.get(s) || "identified") === "identified").length
   const inProgress = allSkills.filter((s) => skillProgress.get(s) === "in_progress").length
   const completed = allSkills.filter((s) => skillProgress.get(s) === "completed").length
@@ -212,7 +212,7 @@ export default function SkillsGapPage() {
               <SectionHeader title="Detailed Skills Analysis" icon={<Target className="h-4 w-4 text-[var(--color-accent-emerald)]" />} />
               <div className="space-y-2 mt-3">
                 {skillsGap.map((gap: SkillsGap, i: number) => {
-                  const skillName = gap.skill || gap.name || `Skill ${i + 1}`
+                  const skillName = gap.area || gap.skill || gap.name || `Skill ${i + 1}`
                   const status = (skillProgress.get(skillName) || "identified") as keyof typeof STATUS_CONFIG
                   const config = STATUS_CONFIG[status]
                   return (
@@ -241,6 +241,7 @@ export default function SkillsGapPage() {
                         </div>
                       </div>
                       {gap.impact && <p className="text-[10px] text-[var(--color-text-muted)] ml-4">Impact: {gap.impact}</p>}
+                      {gap.detail && <p className="text-[10px] text-[var(--color-text-muted)] ml-4 mt-0.5">{gap.detail}</p>}
                     </div>
                   )
                 })}

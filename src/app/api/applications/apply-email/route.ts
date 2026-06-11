@@ -73,6 +73,7 @@ ${candidateEmail}`
 
     return apiSuccess({ sent: true, to: parsed.data.to_email })
   } catch (err) {
-    return apiError(err instanceof Error ? err.message : "Failed to send email", 500)
+    console.error("Failed to send application email:", err)
+    return apiError("Failed to send application email", 500)
   }
 })
