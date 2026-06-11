@@ -13,7 +13,7 @@ const schema = z.object({
 })
 
 export const POST = withAuth(async (request, { supabase, user }) => {
-  const rl = checkRateLimit(`ai:${user.id}`, 10, 60_000)
+  const rl = checkRateLimit(`ai:interview:${user.id}`, 10, 60_000)
   if (rl) return rl
   const body = await request.json()
   const parsed = validateBody(schema, body)

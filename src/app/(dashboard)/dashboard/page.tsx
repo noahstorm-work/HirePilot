@@ -164,10 +164,10 @@ export default function DashboardPage() {
             {(data.analysis.top_improvements || []).slice(0, 5).map((item: Improvement, i: number) => (
               <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
                 <span className="text-xs font-bold font-[family-name:var(--font-mono)] text-[var(--color-accent-emerald)] shrink-0">
-                  +{item.impact || item.points || 3}
+                  +{item.impact || "3"}
                 </span>
                 <div className="h-px w-6 bg-[var(--color-border-subtle)] shrink-0" />
-                <span className="text-xs text-[var(--color-text-secondary)]">{item.action || item.description || ""}</span>
+                <span className="text-xs text-[var(--color-text-secondary)]">{item.action || ""}</span>
               </div>
             ))}
             {(!data.analysis.top_improvements || data.analysis.top_improvements.length === 0) && (

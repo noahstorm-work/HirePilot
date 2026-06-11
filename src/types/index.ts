@@ -84,18 +84,12 @@ export interface SkillsGap {
 export interface Improvement {
   action: string
   impact?: string
-  points?: number
   difficulty?: "easy" | "medium" | "hard"
-  priority?: string
-  description?: string
   [key: string]: unknown
 }
 
 export interface WeeklyPlan {
   week?: number
-  title?: string
-  description?: string
-  tasks?: string
   actions?: string[]
   expected_score?: number
   [key: string]: unknown
@@ -163,22 +157,6 @@ export interface SavedJob {
   created_at: string
 }
 
-export interface Job {
-  id: string
-  external_id: string | null
-  source: string | null
-  company: string
-  role_title: string
-  description: string | null
-  salary_min: number | null
-  salary_max: number | null
-  salary_currency: string | null
-  location: string | null
-  remote_type: string | null
-  company_logo: string | null
-  created_at: string
-}
-
 export interface RejectionAnalysis {
   id: string
   application_id: string
@@ -196,19 +174,13 @@ export interface RejectionImprovement {
   priority: "low" | "medium" | "high"
 }
 
-export interface SalaryRange {
-  min: number
-  max: number
-  currency: string
-}
-
 export interface WeeklyReport {
   id: string
   user_id: string
   week_start: string
   skills_in_demand: string[]
   market_trends: string[]
-  salary_ranges: SalaryRange | null
+  salary_ranges: { min: number; max: number; currency: string } | null
   user_weaknesses: string[]
   recommendations: string[]
   created_at: string
@@ -217,7 +189,7 @@ export interface WeeklyReport {
 export interface WeeklyReportResult {
   skills_in_demand: string[]
   market_trends: string[]
-  salary_ranges: SalaryRange | null
+  salary_ranges: { min: number; max: number; currency: string } | null
   user_weaknesses: string[]
   recommendations: string[]
 }
@@ -259,27 +231,6 @@ export interface CvImproveResult {
   keyword_additions: string[]
   sections_to_remove: string[]
   estimated_match_improvement: string
-}
-
-export interface InterviewCoachResult {
-  technical_questions: Array<{
-    question: string
-    expected_areas: string[]
-    sample_answer: string
-  }>
-  behavioral_questions: Array<{
-    type: string
-    question: string
-    situation: string
-    task: string
-    action: string
-    result: string
-  }>
-  company_preparation: {
-    common_interview_format: string
-    key_areas_to_review: string[]
-    questions_to_ask: string[]
-  }
 }
 
 export interface RejectionAnalysisResult {

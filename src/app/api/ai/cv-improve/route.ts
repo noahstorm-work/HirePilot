@@ -10,8 +10,8 @@ const schema = z.object({
   job_description: z.string().optional(),
 })
 
-export const POST = withAuth(async (request, { supabase, user }) => {
-  const rl = checkRateLimit(`ai:${user.id}`, 5, 60_000)
+export const POST = withAuth(async (request, { user }) => {
+  const rl = checkRateLimit(`ai:cv:${user.id}`, 5, 60_000)
   if (rl) return rl
   const body = await request.json()
   const parsed = validateBody(schema, body)

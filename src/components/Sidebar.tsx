@@ -124,6 +124,15 @@ export function Sidebar() {
   const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
+    if (!mobileOpen) return
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false)
+    }
+    document.addEventListener("keydown", handleEscape)
+    return () => document.removeEventListener("keydown", handleEscape)
+  }, [mobileOpen])
+
+  useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) setUser(data.user)
     })
@@ -154,7 +163,7 @@ export function Sidebar() {
       {mobileOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <div className="absolute left-0 top-0 bottom-0 w-[260px] bg-[var(--color-bg-primary)] border-r border-[var(--color-border-subtle)] flex flex-col animate-slide-in-left">
+          <div role="dialog" aria-modal="true" className="absolute left-0 top-0 bottom-0 w-[260px] bg-[var(--color-bg-primary)] border-r border-[var(--color-border-subtle)] flex flex-col animate-slide-in-left">
             <div className="flex items-center justify-between px-3 py-5">
               <Logo />
               <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] transition-colors">

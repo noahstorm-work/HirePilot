@@ -100,6 +100,12 @@ export function AutocompleteInput({
   }
 
   useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [])
+
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -140,6 +146,7 @@ export function AutocompleteInput({
           aria-expanded={isOpen}
           aria-haspopup="listbox"
           aria-controls={listboxId}
+          aria-activedescendant={highlightIndex >= 0 && listboxId ? `${listboxId}-option-${highlightIndex}` : undefined}
         />
         {query && (
           <button
@@ -176,6 +183,7 @@ export function AutocompleteInput({
           {suggestions.map((s, i) => (
             <button
               key={`${s}-${i}`}
+              id={listboxId ? `${listboxId}-option-${i}` : undefined}
               onClick={() => handleSelect(s)}
               onMouseEnter={() => setHighlightIndex(i)}
               className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors ${

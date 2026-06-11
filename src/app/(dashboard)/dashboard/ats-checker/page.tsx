@@ -10,7 +10,7 @@ import { DocumentUpload } from "@/components/ui/document-upload"
 import { ScoreRing } from "@/components/ui/score-ring"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
-import { FileCheck, AlertTriangle, CheckCircle2, Target, Sparkles } from "lucide-react"
+import { FileCheck, AlertTriangle, CheckCircle2, Target } from "lucide-react"
 import { toast } from "sonner"
 
 interface AtsCheckResult {

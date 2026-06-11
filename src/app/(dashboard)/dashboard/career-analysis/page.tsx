@@ -8,13 +8,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { ScoreRing } from "@/components/ui/score-ring"
 import { SectionHeader } from "@/components/ui/section-header"
-import { LoadingScreen } from "@/components/ui/loading-screen"
 import dynamic from "next/dynamic"
 const RichTextEditor = dynamic(() => import("@/components/ui/rich-text-editor").then(m => ({ default: m.RichTextEditor })), { ssr: false, loading: () => <div className="h-32 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] animate-pulse" /> })
 import { DocumentUpload } from "@/components/ui/document-upload"
-import type { ExtractedMetadata } from "@/lib/document-parser"
 import { RoleAutocomplete } from "@/components/ui/role-autocomplete"
-import { Brain, Sparkles, Target, TrendingUp, BarChart3, ExternalLink } from "lucide-react"
+import { Brain, Sparkles, Target, TrendingUp, BarChart3 } from "lucide-react"
 import { toast } from "sonner"
 import type { CareerAnalysis, Improvement, WeeklyPlan } from "@/types"
 
@@ -28,7 +26,6 @@ export default function CareerAnalysisPage() {
   const [result, setResult] = useState<CareerAnalysis | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const [saving, setSaving] = useState(false)
   const supabase = createClient()
 
   const loadProfile = async () => {
@@ -54,7 +51,6 @@ export default function CareerAnalysisPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const plainText = cvText.replace(/<[^>]*>/g, "").trim()
         await supabase.from("user_profiles").upsert({
           id: user.id,
           cv_text: cvText,

@@ -1,10 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SectionHeader } from "@/components/ui/section-header"
 import { LoadingScreen } from "@/components/ui/loading-screen"
@@ -23,7 +22,6 @@ import {
 
 export default function ApplicationDetailPage() {
   const params = useParams()
-  const router = useRouter()
   const [app, setApp] = useState<Application | null>(null)
   const [aiResult, setAiResult] = useState<AiResult | null>(null)
   const [rejectionResult, setRejectionResult] = useState<RejectionAnalysis | null>(null)

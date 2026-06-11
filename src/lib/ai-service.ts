@@ -1,7 +1,7 @@
 import { getLLM, AI_MODEL } from "./llm-client"
 import type {
   CareerAnalysisResult, JobAnalyzeResult, CvImproveResult,
-  InterviewCoachResult, RejectionAnalysisResult, FollowupResult,
+  InterviewQuestions, RejectionAnalysisResult, FollowupResult,
   WeeklyReportResult,
 } from "@/types"
 import {
@@ -154,7 +154,7 @@ export async function generateInterviewPrep(input: InterviewCoachInput) {
     input.yearsExperience !== undefined ? `Years of Experience: ${input.yearsExperience}` : null,
     input.company ? `Company: ${input.company}` : null,
   ]
-  return callAI<InterviewCoachResult>(INTERVIEW_COACH_PROMPT, parts.filter(Boolean).join("\n\n"), 0.4)
+  return callAI<InterviewQuestions>(INTERVIEW_COACH_PROMPT, parts.filter(Boolean).join("\n\n"), 0.4)
 }
 
 export async function analyzeRejection(input: RejectionAnalysisInput) {

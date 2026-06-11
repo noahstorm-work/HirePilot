@@ -19,6 +19,7 @@ export function PasteUrlDialog() {
   const [company, setCompany] = useState("")
   const [roleTitle, setRoleTitle] = useState("")
   const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [result, setResult] = useState<Partial<JobSearchResult> | null>(null)
   const router = useRouter()
 
@@ -41,7 +42,8 @@ export function PasteUrlDialog() {
   }
 
   const handleSaveAsApplication = async () => {
-    if (!result) return
+    if (!result || saving) return
+    setSaving(true)
     try {
       const res = await fetch("/api/applications/create", {
         method: "POST",
@@ -71,6 +73,8 @@ export function PasteUrlDialog() {
       }
     } catch {
       toast.error("Failed to save application")
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -112,8 +116,8 @@ export function PasteUrlDialog() {
             <p className="text-sm font-medium text-[var(--color-text-primary)]">{result.role_title}</p>
             {result.company && <p className="text-xs text-[var(--color-text-muted)]">{result.company}</p>}
             {result.description && <p className="text-xs text-[var(--color-text-muted)] line-clamp-3">{result.description}</p>}
-            <Button size="sm" className="w-full gradient-violet text-white border-0 hover:opacity-90" onClick={handleSaveAsApplication}>
-              Save as Application
+            <Button size="sm" className="w-full gradient-violet text-white border-0 hover:opacity-90" disabled={saving} onClick={handleSaveAsApplication}>
+              {saving ? "Saving..." : "Save as Application"}
             </Button>
           </div>
         )}

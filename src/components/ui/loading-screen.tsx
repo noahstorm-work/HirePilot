@@ -1,6 +1,6 @@
 export function LoadingScreen() {
   return (
-    <div className="flex items-center justify-center py-32">
+    <div role="status" aria-live="polite" className="flex items-center justify-center py-32">
       <div className="flex flex-col items-center gap-4">
         <div className="relative">
           <div className="h-10 w-10 rounded-full border-2 border-[var(--color-border-subtle)] border-t-[var(--color-accent-violet)] animate-spin" />
@@ -13,7 +13,7 @@ export function LoadingScreen() {
 
 export function LoadingSkeleton({ rows = 3, className = "" }: { rows?: number; className?: string }) {
   return (
-    <div className={`space-y-3 ${className}`}>
+    <div role="status" aria-live="polite" className={`space-y-3 ${className}`}>
       {Array.from({ length: rows }).map((_, i) => (
         <div key={i} className="surface-card p-4">
           <div className="flex items-center gap-3">

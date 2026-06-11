@@ -2,7 +2,7 @@ import { withAuth, apiSuccess, apiError, checkRateLimit } from "@/lib/api-handle
 import { generateWeeklyReport } from "@/lib/ai-service"
 
 export const POST = withAuth(async (request, { supabase, user }) => {
-  const rl = checkRateLimit(`ai:${user.id}`, 3, 60_000)
+  const rl = checkRateLimit(`ai:weekly:${user.id}`, 3, 60_000)
   if (rl) return rl
   const [analysisRes, profileRes, appsRes] = await Promise.all([
     supabase.from("career_analyses").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),

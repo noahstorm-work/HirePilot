@@ -14,7 +14,6 @@ import type { ExtractedMetadata } from "@/lib/document-parser"
 import { RoleAutocomplete } from "@/components/ui/role-autocomplete"
 import { User, Save, ExternalLink, X, Check, Lock, Download, Trash2, Loader2, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
-import type { UserProfile } from "@/types"
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog"
