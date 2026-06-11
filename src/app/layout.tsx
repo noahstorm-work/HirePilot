@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Syne } from "next/font/google"
 import localFont from "next/font/local"
+import { cookies } from "next/headers"
 import "./globals.css"
 import { ErrorLogging } from "@/components/ErrorLogging"
 import { Toaster } from "sonner"
@@ -52,10 +53,13 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies()
+  const nonce = cookieStore.get("csp-nonce")?.value ?? ""
+
   return (
-    <html lang="en" className="dark">
-      <body className={`${syne.variable} ${satoshi.variable} min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] antialiased`}>
+    <html lang="en" className="dark" nonce={nonce}>
+      <body nonce={nonce} className={`${syne.variable} ${satoshi.variable} min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] antialiased`}>
         <ErrorLogging />
         <Toaster theme="dark" position="bottom-right" richColors />
         {children}

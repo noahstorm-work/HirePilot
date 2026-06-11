@@ -1,8 +1,14 @@
+import type { Metadata } from "next"
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { InterviewCoach } from "@/components/interview/InterviewCoach"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
+
+export const metadata: Metadata = {
+  title: "Interview Preparation",
+  description: "AI-powered interview coaching with tailored questions, STAR responses, and company-specific preparation.",
+}
 
 export default async function InterviewPrepPage({
   params,
