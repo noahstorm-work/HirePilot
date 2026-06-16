@@ -6,7 +6,8 @@ import "./globals.css"
 import { ErrorLogging } from "@/components/ErrorLogging"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
-import { Toaster } from "sonner"
+import { ThemeProvider } from "@/lib/theme"
+import { ThemedToaster } from "@/components/ThemedToaster"
 
 const syne = Syne({
   subsets: ["latin"],
@@ -69,13 +70,32 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const nonce = cookieStore.get("csp-nonce")?.value ?? ""
 
   return (
-    <html lang="en" className="dark" nonce={nonce}>
+    <html lang="en" className="dark" nonce={nonce} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  if (theme === 'light') {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body nonce={nonce} className={`${syne.variable} ${satoshi.variable} min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] antialiased`}>
-        <ErrorLogging />
-        <Analytics />
-        <SpeedInsights />
-        <Toaster theme="dark" position="bottom-right" richColors />
-        {children}
+        <ThemeProvider>
+          <ErrorLogging />
+          <Analytics />
+          <SpeedInsights />
+          <ThemedToaster />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )

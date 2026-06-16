@@ -50,11 +50,19 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] overflow-hidden">
+      {/* Skip link */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--color-accent-violet)] focus:text-white focus:text-sm"
+      >
+        Skip to main content
+      </a>
+
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass-strong border-b border-[var(--color-border-subtle)]">
+      <nav className="fixed top-0 left-0 right-0 z-50 glass-strong border-b border-[var(--color-border-subtle)]" aria-label="Main navigation">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-[10px] gradient-violet shadow-glow">
+            <div className="flex h-8 w-8 items-center justify-center rounded-[10px] gradient-violet shadow-glow" aria-hidden="true">
               <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
               </svg>
@@ -76,8 +84,10 @@ export default function LandingPage() {
         </div>
       </nav>
 
+      {/* Main content */}
+      <main id="main-content" tabIndex={-1} className="outline-none">
       {/* Hero */}
-      <section className="relative pt-32 pb-20 px-5">
+      <section className="relative pt-32 pb-20 px-5" aria-labelledby="hero-heading">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-[var(--color-accent-violet)]/8 rounded-full blur-[120px]" />
           <div className="absolute top-40 left-1/4 w-[300px] h-[300px] bg-[var(--color-accent-blue)]/5 rounded-full blur-[100px]" />
@@ -86,11 +96,11 @@ export default function LandingPage() {
         <div className="relative mx-auto max-w-5xl">
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] px-4 py-1.5 text-xs font-medium text-[var(--color-text-tertiary)] mb-8 animate-fade-in">
-              <Zap className="h-3 w-3 text-[var(--color-accent-amber)]" />
+              <Zap className="h-3 w-3 text-[var(--color-accent-amber)]" aria-hidden="true" />
               AI-Powered Career Intelligence
             </div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-[family-name:var(--font-display)] tracking-tight leading-[1.08] mb-6 animate-slide-up text-balance">
+            <h1 id="hero-heading" className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-[family-name:var(--font-display)] tracking-tight leading-[1.08] mb-6 animate-slide-up text-balance">
               Why Aren&apos;t You
               <br />
               <span className="gradient-text-hero">Getting Interviews?</span>
@@ -185,7 +195,7 @@ export default function LandingPage() {
       </section>
 
       {/* Social Proof */}
-      <section className="py-10 px-5 border-y border-[var(--color-border-subtle)]">
+      <section className="py-10 px-5 border-y border-[var(--color-border-subtle)]" aria-label="Key statistics">
         <div className="mx-auto max-w-4xl flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
           {[
             { value: "8", label: "Career dimensions analyzed" },
@@ -201,11 +211,11 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <section className="py-20 px-5">
+      <section className="py-20 px-5" aria-labelledby="how-it-works-heading">
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-14">
             <p className="text-[11px] font-semibold text-[var(--color-accent-violet)] uppercase tracking-widest mb-2">How It Works</p>
-            <h2 className="text-2xl sm:text-3xl font-bold font-[family-name:var(--font-display)] tracking-tight">
+            <h2 id="how-it-works-heading" className="text-2xl sm:text-3xl font-bold font-[family-name:var(--font-display)] tracking-tight">
               Five steps to your next role
             </h2>
           </div>
@@ -228,11 +238,11 @@ export default function LandingPage() {
       </section>
 
       {/* Features */}
-      <section className="py-20 px-5 bg-[var(--color-bg-secondary)]">
+      <section className="py-20 px-5 bg-[var(--color-bg-secondary)]" aria-labelledby="features-heading">
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-14">
             <p className="text-[11px] font-semibold text-[var(--color-accent-violet)] uppercase tracking-widest mb-2">Features</p>
-            <h2 className="text-2xl sm:text-3xl font-bold font-[family-name:var(--font-display)] tracking-tight">
+            <h2 id="features-heading" className="text-2xl sm:text-3xl font-bold font-[family-name:var(--font-display)] tracking-tight">
               Everything you need to get hired
             </h2>
           </div>
@@ -241,7 +251,7 @@ export default function LandingPage() {
             {features.map((feature, i) => (
               <div key={i} className="group p-5 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] hover:border-[var(--color-border-default)] transition-default">
                 <div className="inline-flex p-2 rounded-[10px] bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] mb-3">
-                  <feature.icon className={`h-4 w-4 ${feature.color}`} />
+                  <feature.icon className={`h-4 w-4 ${feature.color}`} aria-hidden="true" />
                 </div>
                 <h3 className="text-sm font-semibold mb-1 font-[family-name:var(--font-display)]">{feature.title}</h3>
                 <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">{feature.description}</p>
@@ -252,12 +262,12 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 px-5">
+      <section className="py-20 px-5" aria-labelledby="cta-heading">
         <div className="mx-auto max-w-2xl text-center">
           <div className="relative p-10 sm:p-12 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-card)] overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-accent-violet)]/8 via-transparent to-[var(--color-accent-blue)]/8" />
+            <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-accent-violet)]/8 via-transparent to-[var(--color-accent-blue)]/8" aria-hidden="true" />
             <div className="relative">
-              <h2 className="text-2xl sm:text-3xl font-bold font-[family-name:var(--font-display)] tracking-tight mb-3">
+              <h2 id="cta-heading" className="text-2xl sm:text-3xl font-bold font-[family-name:var(--font-display)] tracking-tight mb-3">
                 Start Landing Better Jobs Today
               </h2>
               <p className="text-sm text-[var(--color-text-secondary)] mb-7 max-w-md mx-auto">
@@ -273,6 +283,7 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
       <footer className="py-6 px-5 border-t border-[var(--color-border-subtle)]">

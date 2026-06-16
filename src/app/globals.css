@@ -1,5 +1,64 @@
 @import "tailwindcss";
 
+/* ── Light Mode Overrides ── */
+:root.light {
+  /* ── Backgrounds ── */
+  --color-bg-primary: #fafafa;
+  --color-bg-secondary: #f4f4f5;
+  --color-bg-card: #ffffff;
+  --color-bg-elevated: #f9f9fb;
+  --color-bg-hover: #f0f0f2;
+  --color-bg-active: #e8e8ec;
+  --color-bg-overlay: rgba(0, 0, 0, 0.4);
+
+  /* ── Borders ── */
+  --color-border-subtle: #e4e4e7;
+  --color-border-default: #d4d4d8;
+  --color-border-strong: #a1a1aa;
+  --color-border-focus: #7c3aed;
+
+  /* ── Text ── */
+  --color-text-primary: #18181b;
+  --color-text-secondary: #52525b;
+  --color-text-tertiary: #71717a;
+  --color-text-muted: #a1a1aa;
+  --color-text-inverse: #fafafa;
+
+  /* ── Surface effects ── */
+  --color-surface-glow: rgba(139, 92, 246, 0.04);
+  --color-surface-glow-strong: rgba(139, 92, 246, 0.08);
+  --color-surface-glow-blue: rgba(59, 130, 246, 0.04);
+  --color-surface-glow-emerald: rgba(16, 185, 129, 0.04);
+
+  /* ── Shadows ── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.06);
+  --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.1);
+  --shadow-glow-lg: 0 0 40px rgba(139, 92, 246, 0.15), 0 0 80px rgba(139, 92, 246, 0.05);
+  --shadow-glow-blue: 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+/* ── Light mode glass effects ── */
+:root.light .glass {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+:root.light .glass-strong {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+:root.light .glass-overlay {
+  background: rgba(250, 250, 250, 0.8);
+}
+
+/* ── Light mode skeleton ── */
+:root.light .skeleton {
+  background: linear-gradient(90deg, #e4e4e7 25%, #d4d4d8 50%, #e4e4e7 75%);
+}
+
 @theme {
   /* ── Backgrounds ── */
   --color-bg-primary: #09090b;
@@ -139,6 +198,30 @@
     outline: 2px solid var(--color-accent-violet);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
+  }
+
+  /* ── Visually hidden (screen reader only) ── */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .sr-only-focusable:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
   }
 }
 

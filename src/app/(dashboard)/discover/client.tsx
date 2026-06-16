@@ -42,10 +42,12 @@ export function DiscoverClient() {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      const { data } = await supabase.from("saved_jobs").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
-      if (mounted && data) setSavedJobs(data as SavedJob[])
-      const { data: profile } = await supabase.from("user_profiles").select("skills").eq("id", user.id).single()
-      if (mounted && profile?.skills) setUserSkills(profile.skills)
+      const [savedRes, profileRes] = await Promise.all([
+        supabase.from("saved_jobs").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("user_profiles").select("skills").eq("id", user.id).single(),
+      ])
+      if (mounted && savedRes.data) setSavedJobs(savedRes.data as SavedJob[])
+      if (mounted && profileRes.data?.skills) setUserSkills(profileRes.data.skills)
       const stored = localStorage.getItem("recentJobSearches")
       if (mounted && stored) setRecentSearches(JSON.parse(stored))
       const savedState = localStorage.getItem(SEARCH_STATE_KEY)

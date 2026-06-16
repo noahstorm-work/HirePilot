@@ -10,6 +10,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttribu
           className,
         )}
         ref={ref}
+        aria-required={props.required}
         {...props}
       />
     )

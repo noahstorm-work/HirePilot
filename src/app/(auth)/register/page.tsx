@@ -56,7 +56,7 @@ export default function RegisterPage() {
     <>
       <div className="text-center mb-7">
         <Link href="/" className="inline-flex items-center gap-2 mb-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-[10px] gradient-violet shadow-glow">
+          <div className="flex h-9 w-9 items-center justify-center rounded-[10px] gradient-violet shadow-glow" aria-hidden="true">
             <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
             </svg>
@@ -72,7 +72,7 @@ export default function RegisterPage() {
           <div>
             <Label htmlFor="register-name" className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-1.5 block">Full Name</Label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" aria-hidden="true" />
               <Input
                 id="register-name"
                 type="text"
@@ -87,7 +87,7 @@ export default function RegisterPage() {
           <div>
             <Label htmlFor="register-email" className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-1.5 block">Email</Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" aria-hidden="true" />
               <Input
                 id="register-email"
                 type="email"
@@ -102,7 +102,7 @@ export default function RegisterPage() {
           <div>
             <Label htmlFor="register-password" className="text-[11px] font-medium text-[var(--color-text-tertiary)] mb-1.5 block">Password</Label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" aria-hidden="true" />
               <Input
                 id="register-password"
                 type="password"
@@ -115,7 +115,7 @@ export default function RegisterPage() {
               />
             </div>
             {password.length > 0 && (
-              <div className="flex items-center gap-2 mt-1.5">
+              <div className="flex items-center gap-2 mt-1.5" aria-live="polite">
                 <div className="flex-1 h-1 rounded-full bg-[var(--color-bg-elevated)] overflow-hidden">
                   <div className={`h-full rounded-full transition-all duration-300 ${strengthColor}`} style={{ width: `${(strength / 5) * 100}%` }} />
                 </div>
@@ -125,14 +125,14 @@ export default function RegisterPage() {
           </div>
 
           {error && (
-            <div className="p-2.5 rounded-lg bg-[var(--color-accent-rose)]/10 border border-[var(--color-accent-rose)]/20">
+            <div className="p-2.5 rounded-lg bg-[var(--color-accent-rose)]/10 border border-[var(--color-accent-rose)]/20" role="alert" aria-live="assertive">
               <p className="text-[11px] text-[var(--color-accent-rose)]">{error}</p>
             </div>
           )}
 
           <Button type="submit" disabled={loading} className="w-full gradient-violet text-white border-0 h-10 text-sm font-semibold hover:opacity-90 shadow-glow group">
             {loading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" aria-label="Loading" role="status" />
             ) : (
               <>
                 Create Account
