@@ -69,6 +69,7 @@ interface CareerAnalysisInput extends BaseAIInput {
 interface JobAnalyzeInput extends BaseAIInput {
   jobDescription: string
   targetRole?: string
+  templateStyle?: string
 }
 
 interface CvImproveInput extends BaseAIInput {
@@ -127,6 +128,7 @@ export async function analyzeJobMatch(input: JobAnalyzeInput) {
     `CV:\n${stripHtml(input.cvText)}`,
     input.targetRole ? `Target Role: ${input.targetRole}` : null,
     input.yearsExperience !== undefined ? `Years of Experience: ${input.yearsExperience}` : null,
+    input.templateStyle ? `COVER LETTER STYLE: ${input.templateStyle}` : null,
   ]
   if (input.skills && input.skills.length > 0) {
     parts.push(`Stated Skills: ${input.skills.join(", ")}`)

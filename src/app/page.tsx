@@ -1,9 +1,15 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
   Brain, Target, TrendingUp, BarChart3,
   ArrowRight, FileCheck, Sparkles, Zap
 } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "HirePilot AI — Your AI Co-Pilot For Getting Hired",
+  description: "AI-powered career operating system. Analyze your CV, discover why you're not getting interviews, match jobs, and land offers faster. Free career analysis.",
+}
 
 const features = [
   { icon: Brain, title: "Career Analysis", description: "AI analyzes 8 career dimensions to find exactly what's holding you back.", color: "text-[var(--color-accent-violet)]" },

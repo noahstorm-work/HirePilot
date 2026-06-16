@@ -11,7 +11,7 @@ import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingScreen } from "@/components/ui/loading-screen"
 import { KanbanBoard } from "@/components/applications/KanbanBoard"
-import { Briefcase, Plus, Trash2, Link as LinkIcon, Loader2 } from "lucide-react"
+import { Briefcase, Plus, Trash2, Link as LinkIcon, Loader2, Search } from "lucide-react"
 import { CompanyAutocomplete } from "@/components/ui/company-autocomplete"
 import { RoleAutocomplete } from "@/components/ui/role-autocomplete"
 import { toast } from "sonner"
@@ -138,6 +138,9 @@ export function ApplicationsClient() {
       if (!json.success) {
         setApplications(previousApps)
         toast.error("Failed to update status")
+      } else {
+        const app = applications.find((a) => a.id === appId)
+        toast.success(`Moved to ${newStatus}`, { description: `${app?.company || "Application"} — ${app?.role_title || ""}` })
       }
     } catch {
       setApplications(previousApps)
@@ -272,16 +275,38 @@ export function ApplicationsClient() {
 
       {/* Content */}
       {applications.length === 0 ? (
-        <EmptyState
-          icon={Briefcase}
-          title="No applications yet"
-          description="Start tracking your career progress by adding your first application."
-          action={
-            <Button onClick={() => setDialogOpen(true)} className="gradient-violet text-white border-0 hover:opacity-90 shadow-glow text-sm">
-              <Plus className="h-3.5 w-3.5 mr-1.5" /> Add Application
+        <div className="flex flex-col items-center justify-center py-16">
+          <div className="h-14 w-14 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] flex items-center justify-center mb-4">
+            <Briefcase className="h-6 w-6 text-[var(--color-text-muted)]" />
+          </div>
+          <h3 className="text-sm font-semibold text-[var(--color-text-secondary)] font-[family-name:var(--font-display)] mb-1">
+            No applications yet
+          </h3>
+          <p className="text-xs text-[var(--color-text-muted)] max-w-sm text-center mb-5">
+            Track your job applications through each stage of the hiring pipeline — from first save to offer.
+          </p>
+          <div className="flex items-center gap-1.5 mb-5">
+            {APPLICATION_STATUSES.map((status) => {
+              const colorConfig = STATUS_COLORS[status]
+              return (
+                <div key={status} className="flex items-center gap-1 px-2 py-1 rounded-full bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
+                  <span className={`h-1.5 w-1.5 rounded-full ${colorConfig.dot}`} />
+                  <span className="text-[9px] text-[var(--color-text-muted)]">{status}</span>
+                </div>
+              )
+            })}
+          </div>
+          <div className="flex items-center gap-2">
+            <Link href="/discover">
+              <Button variant="outline" size="sm" className="border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] h-8 text-xs">
+                <Search className="h-3 w-3 mr-1.5" /> Discover Jobs
+              </Button>
+            </Link>
+            <Button onClick={() => setDialogOpen(true)} size="sm" className="gradient-violet text-white border-0 hover:opacity-90 shadow-glow h-8 text-xs">
+              <Plus className="h-3.5 w-3.5 mr-1.5" /> Add Manually
             </Button>
-          }
-        />
+          </div>
+        </div>
       ) : viewMode === "kanban" && filterStatus === "All" ? (
         <KanbanBoard
           applications={applications}

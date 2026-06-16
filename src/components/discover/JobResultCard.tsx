@@ -12,9 +12,10 @@ interface JobResultCardProps {
   isSaved: boolean
   onSave: (job: JobSearchResult) => void
   onQuickApply: (job: JobSearchResult) => void
+  matchScore?: number
 }
 
-export const JobResultCard = React.memo(function JobResultCard({ job, isSaved, onSave, onQuickApply }: JobResultCardProps) {
+export const JobResultCard = React.memo(function JobResultCard({ job, isSaved, onSave, onQuickApply, matchScore }: JobResultCardProps) {
   const salary = formatSalary(job.salary_min, job.salary_max, job.salary_currency, job.location)
 
   return (
@@ -31,6 +32,11 @@ export const JobResultCard = React.memo(function JobResultCard({ job, isSaved, o
             <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium border shrink-0 ${SOURCE_COLORS[job.source]}`}>
               {SOURCE_LABELS[job.source]}
             </span>
+            {matchScore != null && matchScore > 0 && (
+              <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold border shrink-0 ${matchScore >= 80 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : matchScore >= 50 ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-rose-500/10 text-rose-400 border-rose-500/20"}`}>
+                {matchScore}% match
+              </span>
+            )}
             {job.apply_email && (
               <span className="px-1.5 py-0.5 rounded text-[9px] font-medium border shrink-0 bg-emerald-500/10 text-emerald-400 border-emerald-500/20 flex items-center gap-1">
                 <Mail className="h-2.5 w-2.5" /> Email

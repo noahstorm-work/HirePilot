@@ -1,5 +1,6 @@
 import { withAuth, apiSuccess, apiError, validateBody, checkRateLimit } from "@/lib/api-handler"
 import { analyzeJobMatch } from "@/lib/ai-service"
+import { COVER_LETTER_TEMPLATES } from "@/components/cover-letter/TemplatesPanel"
 import { z } from "zod"
 
 const schema = z.object({
@@ -12,6 +13,7 @@ const schema = z.object({
   company: z.string().optional(),
   role: z.string().optional(),
   role_title: z.string().optional(),
+  template: z.string().optional(),
 })
 
 export const POST = withAuth(async (request, { supabase, user }) => {
@@ -37,7 +39,8 @@ export const POST = withAuth(async (request, { supabase, user }) => {
   if (!jobDescription) jobDescription = "General analysis"
   if (!cvText) return apiError("No CV text provided. Please add a CV in your profile.", 400)
 
-  const result = await analyzeJobMatch({ jobDescription, cvText })
+  const templateStyle = COVER_LETTER_TEMPLATES.find((t) => t.id === d.template)?.promptModifier || ""
+  const result = await analyzeJobMatch({ jobDescription, cvText, templateStyle })
 
   if (applicationId) {
     const { data: ownership } = await supabase

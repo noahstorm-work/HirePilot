@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, useRef, useCallback } from "react"
 import { useParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,7 @@ import {
   Mail, MessageSquare, ExternalLink,
   CheckCircle2, AlertTriangle, Ban, Send, Loader2
 } from "lucide-react"
+import { TemplatesPanel, COVER_LETTER_TEMPLATES } from "@/components/cover-letter/TemplatesPanel"
 import { toast } from "sonner"
 import Link from "next/link"
 import type { Application, AiResult, RejectionAnalysis } from "@/types"
@@ -30,7 +31,11 @@ export function ApplicationDetailClient() {
   const [analyzing, setAnalyzing] = useState(false)
   const [generatingFollowup, setGeneratingFollowup] = useState(false)
   const [analyzingRejection, setAnalyzingRejection] = useState(false)
-  const [activeTab, setActiveTab] = useState<"analysis" | "cover" | "followup" | "rejection">("analysis")
+  const [activeTab, setActiveTab] = useState<"analysis" | "cover" | "followup" | "rejection" | "notes">("analysis")
+  const [notes, setNotes] = useState("")
+  const [savingNotes, setSavingNotes] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState("professional")
+  const notesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -39,6 +44,7 @@ export function ApplicationDetailClient() {
       const { data } = await supabase.from("applications").select("*").eq("id", params.id).maybeSingle()
       if (mounted && data) {
         setApp(data)
+        setNotes(data.notes || "")
         const { data: ai } = await supabase.from("ai_results").select("*").eq("application_id", params.id).maybeSingle()
         if (mounted && ai) setAiResult(ai)
         if (data.status === "Rejected") {
@@ -59,7 +65,7 @@ export function ApplicationDetailClient() {
       const res = await fetch("/api/ai/analyze-job", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ application_id: app.id, job_description: app.job_description || app.notes || "", company: app.company, role_title: app.role_title }),
+        body: JSON.stringify({ application_id: app.id, job_description: app.job_description || app.notes || "", company: app.company, role_title: app.role_title, template: selectedTemplate }),
       })
       const json = await res.json()
       if (json.success) { setAiResult(json.data); toast.success("Analysis complete") }
@@ -140,10 +146,23 @@ export function ApplicationDetailClient() {
 
   const isRejected = app?.status === "Rejected"
 
+  const handleNotesChange = useCallback((value: string) => {
+    setNotes(value)
+    if (notesTimerRef.current) clearTimeout(notesTimerRef.current)
+    notesTimerRef.current = setTimeout(async () => {
+      if (!app) return
+      setSavingNotes(true)
+      await supabase.from("applications").update({ notes: value }).eq("id", app.id)
+      setApp({ ...app, notes: value })
+      setSavingNotes(false)
+    }, 1000)
+  }, [app, supabase])
+
   const tabs = useMemo(() => [
     { key: "analysis" as const, label: "Analysis", icon: Target },
     { key: "cover" as const, label: "Cover Letter", icon: Mail },
     { key: "followup" as const, label: "Follow-up", icon: MessageSquare },
+    { key: "notes" as const, label: "Notes", icon: MessageSquare },
     ...(isRejected ? [{ key: "rejection" as const, label: "Rejection Analysis", icon: Ban }] : []),
   ], [isRejected])
 
@@ -256,8 +275,11 @@ export function ApplicationDetailClient() {
               </div>
             )}
             {activeTab === "cover" && (
-              <div className="p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
-                <p className="text-xs text-[var(--color-text-secondary)] whitespace-pre-wrap leading-relaxed">{aiResult.cover_letter || "No cover letter generated."}</p>
+              <div className="space-y-3">
+                <TemplatesPanel selectedTemplate={selectedTemplate} onSelect={setSelectedTemplate} />
+                <div className="p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
+                  <p className="text-xs text-[var(--color-text-secondary)] whitespace-pre-wrap leading-relaxed">{aiResult.cover_letter || "No cover letter generated."}</p>
+                </div>
               </div>
             )}
             {activeTab === "followup" && (
@@ -275,6 +297,20 @@ export function ApplicationDetailClient() {
                     </Button>
                   </div>
                 )}
+              </div>
+            )}
+            {activeTab === "notes" && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] text-[var(--color-text-muted)]">Personal notes about this application</p>
+                  {savingNotes && <span className="text-[10px] text-[var(--color-text-muted)]">Saving...</span>}
+                </div>
+                <textarea
+                  value={notes}
+                  onChange={(e) => handleNotesChange(e.target.value)}
+                  placeholder="Add notes about this application — interview prep, contacts, follow-up reminders..."
+                  className="w-full min-h-[200px] p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-xs text-[var(--color-text-secondary)] placeholder:text-[var(--color-text-muted)] resize-y focus:outline-none focus:border-[var(--color-accent-violet)]/50 transition-colors"
+                />
               </div>
             )}
             {activeTab === "rejection" && isRejected && (

@@ -40,11 +40,20 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "HirePilot AI",
     locale: "en_US",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "HirePilot AI — Your AI Co-Pilot For Getting Hired",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "HirePilot AI — Your AI Co-Pilot For Getting Hired",
     description: "AI-powered career operating system. Understand why you're not getting interviews.",
+    images: ["/opengraph-image"],
   },
   icons: {
     icon: "/favicon.ico",

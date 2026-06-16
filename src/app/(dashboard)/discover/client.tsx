@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client"
 import { SectionHeader } from "@/components/ui/section-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { LoadingSkeleton } from "@/components/ui/loading-screen"
-import { Search, ChevronDown } from "lucide-react"
+import { Search, ChevronDown, Zap, Globe, Lightbulb } from "lucide-react"
 import { toast } from "sonner"
 import { logError } from "@/lib/error-service"
 import type { JobSearchResult } from "@/lib/jobs"
@@ -15,6 +15,7 @@ import { SearchBar } from "@/components/discover/SearchBar"
 import { JobResultCard } from "@/components/discover/JobResultCard"
 import { SavedJobsSidebar } from "@/components/discover/SavedJobsSidebar"
 import { SOURCE_COLORS, SOURCE_LABELS } from "@/components/discover/source-labels"
+import { calculateSkillMatch } from "@/lib/skill-match"
 
 const SEARCH_STATE_KEY = "discover_search_state"
 
@@ -23,6 +24,7 @@ export function DiscoverClient() {
   const [location, setLocation] = useState("")
   const [results, setResults] = useState<JobSearchResult[]>([])
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>([])
+  const [userSkills, setUserSkills] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
   const [searched, setSearched] = useState(false)
@@ -42,6 +44,8 @@ export function DiscoverClient() {
       if (!user) return
       const { data } = await supabase.from("saved_jobs").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
       if (mounted && data) setSavedJobs(data as SavedJob[])
+      const { data: profile } = await supabase.from("user_profiles").select("skills").eq("id", user.id).single()
+      if (mounted && profile?.skills) setUserSkills(profile.skills)
       const stored = localStorage.getItem("recentJobSearches")
       if (mounted && stored) setRecentSearches(JSON.parse(stored))
       const savedState = localStorage.getItem(SEARCH_STATE_KEY)
@@ -271,6 +275,7 @@ export function DiscoverClient() {
                   isSaved={savedJobs.some((s) => s.external_id === job.external_id)}
                   onSave={handleSave}
                   onQuickApply={handleQuickApply}
+                  matchScore={userSkills.length > 0 ? calculateSkillMatch(userSkills, `${job.role_title} ${job.description}`) : undefined}
                 />
               ))}
               {results.length < total && (
@@ -283,7 +288,64 @@ export function DiscoverClient() {
               )}
             </>
           ) : (
-            <EmptyState icon={Search} title="Discover jobs" description="Search for jobs to get started" />
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="h-14 w-14 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] flex items-center justify-center mb-4">
+                <Search className="h-6 w-6 text-[var(--color-text-muted)]" />
+              </div>
+              <h3 className="text-sm font-semibold text-[var(--color-text-secondary)] font-[family-name:var(--font-display)] mb-1">
+                Discover jobs
+              </h3>
+              <p className="text-xs text-[var(--color-text-muted)] max-w-sm text-center mb-5">
+                Search across multiple job boards or paste a listing URL to get AI-powered match analysis.
+              </p>
+
+              <div className="w-full max-w-sm space-y-3 mb-5">
+                <p className="text-[10px] text-[var(--color-text-muted)] text-center">Try searching for</p>
+                <div className="flex flex-wrap justify-center gap-1.5">
+                  {["Software Engineer", "Product Manager", "Data Scientist", "Designer", "DevOps Engineer"].map((term) => (
+                    <button
+                      key={term}
+                      onClick={() => { setQuery(term); searchInputRef.current?.focus() }}
+                      className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent-violet)]/30 hover:text-[var(--color-accent-violet)] transition-all cursor-pointer"
+                    >
+                      {term}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="w-full max-w-sm grid grid-cols-3 gap-2 mb-5">
+                {[
+                  { icon: Globe, label: "Adzuna", desc: "Global job data" },
+                  { icon: Zap, label: "Jooble", desc: "Aggregated listings" },
+                  { icon: Search, label: "JSearch", desc: "Indeed + more" },
+                ].map(({ icon: Icon, label, desc }) => (
+                  <div key={label} className="flex flex-col items-center gap-1 p-2.5 rounded-xl bg-[var(--color-bg-elevated)]/50 border border-[var(--color-border-subtle)]">
+                    <Icon className="h-3.5 w-3.5 text-[var(--color-text-muted)]" />
+                    <span className="text-[10px] font-medium text-[var(--color-text-secondary)]">{label}</span>
+                    <span className="text-[9px] text-[var(--color-text-muted)]">{desc}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="w-full max-w-sm p-3 rounded-xl bg-[var(--color-bg-elevated)]/50 border border-[var(--color-border-subtle)]">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Lightbulb className="h-3 w-3 text-[var(--color-accent-amber)]" />
+                  <span className="text-[10px] font-medium text-[var(--color-text-secondary)]">Quick tips</span>
+                </div>
+                <ul className="space-y-1">
+                  {[
+                    "Add a location to find remote or nearby roles",
+                    "Use specific titles for better results",
+                    "Paste a job URL to auto-fill and analyze it",
+                  ].map((tip) => (
+                    <li key={tip} className="text-[10px] text-[var(--color-text-muted)] flex items-start gap-1.5">
+                      <span className="text-[var(--color-accent-violet)] mt-px">•</span> {tip}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           )}
         </div>
 
