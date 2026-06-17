@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Brain, Search, Briefcase, Sparkles,
-  FileCheck, Target, BarChart3, GitBranch, User, AlertTriangle, Shield
+  FileCheck, Target, BarChart3, GitBranch, User, AlertTriangle, Shield, Rocket
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
@@ -59,6 +59,13 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   User,
   AlertTriangle,
   Shield,
+  Rocket,
 }
 
 export const ALL_NAV_ITEMS = NAV_SECTIONS.flatMap(s => s.items)
+
+export const ONBOARDING_ITEM: NavItem = {
+  label: "Onboarding",
+  href: "/onboarding",
+  icon: "Rocket",
+}

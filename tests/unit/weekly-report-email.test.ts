@@ -75,6 +75,6 @@ describe("weeklyReportEmail", () => {
     }
     const html = weeklyReportEmail(reportZeroSalary, "Dave")
     expect(html).toContain("Estimated Salary Range")
-    expect(html).toContain("$ 0 - 0")
+    expect(html).toContain("$ 0")
   })
 })

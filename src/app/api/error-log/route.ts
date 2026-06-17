@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest } from "next/server"
 import { apiSuccess, apiError, checkRateLimit } from "@/lib/api-handler"
+import { sendErrorAlert } from "@/lib/error-alerts"
 import { z } from "zod"
 
 const schema = z.object({
@@ -48,6 +49,8 @@ export async function POST(request: NextRequest) {
       console.error("Failed to save error log:", error)
       return apiError("Failed to save error log", 500)
     }
+
+    sendErrorAlert({ message, level, url }).catch(() => {})
 
     return apiSuccess({ id: null })
   } catch {

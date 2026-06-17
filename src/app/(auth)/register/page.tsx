@@ -35,7 +35,7 @@ export default function RegisterPage() {
       setLoading(false)
       return
     }
-    router.push("/profile")
+    router.push("/onboarding")
   }
 
   const passwordStrength = (pw: string) => {
