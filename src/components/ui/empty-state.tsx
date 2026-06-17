@@ -19,7 +19,7 @@ export function EmptyState({
   return (
     <div className={`flex flex-col items-center justify-center py-16 ${className}`}>
       <div className="h-14 w-14 rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] flex items-center justify-center mb-4">
-        <Icon className="h-6 w-6 text-[var(--color-text-muted)]" />
+        <Icon className="h-6 w-6 text-[var(--color-text-muted)]" aria-hidden="true" />
       </div>
       <h3 className="text-sm font-semibold text-[var(--color-text-secondary)] font-[family-name:var(--font-display)] mb-1">
         {title}

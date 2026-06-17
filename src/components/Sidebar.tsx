@@ -56,6 +56,7 @@ function NavItems({
                   key={item.href}
                   href={item.href}
                   onClick={onNavigate}
+                  aria-current={active ? "page" : undefined}
                   className={`group flex items-center gap-2.5 px-3 py-2 rounded-[10px] text-[13px] transition-all duration-150 ${
                     isCollapsed ? "justify-center" : ""
                   } ${

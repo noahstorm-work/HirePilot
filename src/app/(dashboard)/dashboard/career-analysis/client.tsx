@@ -159,6 +159,34 @@ export function CareerAnalysisClient() {
 
       {error && <div className="p-2.5 rounded-lg bg-[var(--color-accent-rose)]/10 border border-[var(--color-accent-rose)]/20"><p className="text-[11px] text-[var(--color-accent-rose)]">{error}</p></div>}
 
+      {/* Loading skeleton */}
+      {loading && !result && (
+        <div className="space-y-5 animate-pulse">
+          <div className="surface-card p-6">
+            <div className="flex flex-col items-center mb-6">
+              <div className="h-32 w-32 rounded-full bg-[var(--color-bg-elevated)]" />
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] text-center">
+                  <div className="h-3.5 w-3.5 mx-auto mb-1.5 rounded bg-[var(--color-border-subtle)]" />
+                  <div className="h-6 w-10 mx-auto mb-1 rounded bg-[var(--color-border-subtle)]" />
+                  <div className="h-2 w-12 mx-auto rounded bg-[var(--color-border-subtle)]" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="surface-card p-5">
+            <div className="h-4 w-32 mb-3 rounded bg-[var(--color-border-subtle)]" />
+            <div className="flex gap-1.5">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-6 w-16 rounded-full bg-[var(--color-border-subtle)]" />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Results */}
       {result && (
         <div className="space-y-5 animate-fade-in">

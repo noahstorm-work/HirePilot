@@ -66,7 +66,7 @@ export function InterviewCoach({ applicationId, jobDescription, cvText }: Props)
         <TabsContent value="technical" className="space-y-3">
           {result.technical_questions?.map((q: { question: string; expected_areas?: string[]; sample_answer?: string }, i: number) => (
             <div key={i} className="p-4 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)]">
-              <button onClick={() => setExpandedQuestion(expandedQuestion === i ? null : i)} className="flex items-start justify-between w-full text-left">
+              <button onClick={() => setExpandedQuestion(expandedQuestion === i ? null : i)} aria-expanded={expandedQuestion === i} className="flex items-start justify-between w-full text-left">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-accent-violet)]/10 text-xs text-[var(--color-accent-violet)] font-medium">{i + 1}</span>
@@ -93,7 +93,7 @@ export function InterviewCoach({ applicationId, jobDescription, cvText }: Props)
         <TabsContent value="behavioral" className="space-y-3">
           {result.behavioral_questions?.map((q: { question: string; type?: string; situation?: string; task?: string; action?: string; result?: string }, i: number) => (
             <div key={i} className="p-4 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)]">
-              <button onClick={() => setExpandedBehavioral(expandedBehavioral === i ? null : i)} className="flex items-start justify-between w-full text-left">
+              <button onClick={() => setExpandedBehavioral(expandedBehavioral === i ? null : i)} aria-expanded={expandedBehavioral === i} className="flex items-start justify-between w-full text-left">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-accent-amber)]/10 text-xs text-[var(--color-accent-amber)] font-medium">{i + 1}</span>

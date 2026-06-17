@@ -47,6 +47,7 @@ export function TemplatesPanel({ selectedTemplate, onSelect }: TemplatesPanelPro
     <div className="space-y-2">
       <button
         onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
         className="flex items-center gap-2 text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors"
       >
         <FileText className="h-3 w-3" />

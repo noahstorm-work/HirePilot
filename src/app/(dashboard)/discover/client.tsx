@@ -64,7 +64,10 @@ export function DiscoverClient() {
   }, [])
 
   useEffect(() => {
-    localStorage.setItem(SEARCH_STATE_KEY, JSON.stringify({ query, location }))
+    const timeout = setTimeout(() => {
+      localStorage.setItem(SEARCH_STATE_KEY, JSON.stringify({ query, location }))
+    }, 500)
+    return () => clearTimeout(timeout)
   }, [query, location])
 
   const saveRecentSearch = (term: string) => {
