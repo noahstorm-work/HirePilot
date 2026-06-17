@@ -250,14 +250,14 @@ export function ApplicationDetailClient() {
             {/* Tabs */}
             <div className="flex gap-1 p-0.5 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)] overflow-x-auto w-full" role="tablist">
               {tabs.map((tab) => (
-                <button key={tab.key} onClick={() => setActiveTab(tab.key)} role="tab" aria-selected={activeTab === tab.key} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium whitespace-nowrap transition-all ${activeTab === tab.key ? "bg-[var(--color-accent-violet)]/10 text-[var(--color-accent-violet)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"}`}>
+                <button key={tab.key} onClick={() => setActiveTab(tab.key)} role="tab" id={`tab-${tab.key}`} aria-selected={activeTab === tab.key} aria-controls={`panel-${tab.key}`} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium whitespace-nowrap transition-all ${activeTab === tab.key ? "bg-[var(--color-accent-violet)]/10 text-[var(--color-accent-violet)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"}`}>
                   <tab.icon className="h-3 w-3" /> {tab.label}
                 </button>
               ))}
             </div>
 
             {activeTab === "analysis" && (
-              <div className="space-y-3">
+              <div role="tabpanel" id="panel-analysis" aria-labelledby="tab-analysis" className="space-y-3">
                 {aiResult.strengths?.length > 0 && (
                   <div className="p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
                     <h3 className="text-[11px] font-medium text-[var(--color-accent-emerald)] mb-2 flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Strengths</h3>
@@ -279,7 +279,7 @@ export function ApplicationDetailClient() {
               </div>
             )}
             {activeTab === "cover" && (
-              <div className="space-y-3">
+              <div role="tabpanel" id="panel-cover" aria-labelledby="tab-cover" className="space-y-3">
                 <TemplatesPanel selectedTemplate={selectedTemplate} onSelect={setSelectedTemplate} />
                 <div className="p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
                   <p className="text-xs text-[var(--color-text-secondary)] whitespace-pre-wrap leading-relaxed">{aiResult.cover_letter || "No cover letter generated."}</p>
@@ -287,7 +287,7 @@ export function ApplicationDetailClient() {
               </div>
             )}
             {activeTab === "followup" && (
-              <div className="space-y-3">
+              <div role="tabpanel" id="panel-followup" aria-labelledby="tab-followup" className="space-y-3">
                 {aiResult.follow_up_email ? (
                   <div className="p-4 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
                     <p className="text-xs text-[var(--color-text-secondary)] whitespace-pre-wrap leading-relaxed">{aiResult.follow_up_email}</p>
@@ -304,12 +304,13 @@ export function ApplicationDetailClient() {
               </div>
             )}
             {activeTab === "notes" && (
-              <div className="space-y-3">
+              <div role="tabpanel" id="panel-notes" aria-labelledby="tab-notes" className="space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="text-[10px] text-[var(--color-text-muted)]">Personal notes about this application</p>
                   {savingNotes && <span className="text-[10px] text-[var(--color-text-muted)]">Saving...</span>}
                 </div>
                 <textarea
+                  id="app-notes"
                   value={notes}
                   onChange={(e) => handleNotesChange(e.target.value)}
                   placeholder="Add notes about this application — interview prep, contacts, follow-up reminders..."
@@ -318,7 +319,7 @@ export function ApplicationDetailClient() {
               </div>
             )}
             {activeTab === "rejection" && isRejected && (
-              <div className="space-y-3">
+              <div role="tabpanel" id="panel-rejection" aria-labelledby="tab-rejection" className="space-y-3">
                 {rejectionResult ? (
                   <>
                     {rejectionResult.likely_reasons?.length > 0 && (

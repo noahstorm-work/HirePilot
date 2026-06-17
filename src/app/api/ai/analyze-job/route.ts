@@ -1,6 +1,6 @@
 import { withAuth, apiSuccess, apiError, validateBody, checkRateLimit } from "@/lib/api-handler"
 import { analyzeJobMatch } from "@/lib/ai-service"
-import { COVER_LETTER_TEMPLATES } from "@/components/cover-letter/TemplatesPanel"
+import { COVER_LETTER_TEMPLATES } from "@/lib/cover-letter-templates"
 import { z } from "zod"
 
 const schema = z.object({

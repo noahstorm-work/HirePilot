@@ -2,38 +2,13 @@
 
 import { useState } from "react"
 import { FileText, MessageSquare, Code } from "lucide-react"
+import { COVER_LETTER_TEMPLATES } from "@/lib/cover-letter-templates"
 
-export interface CoverLetterTemplate {
-  id: string
-  name: string
-  description: string
-  icon: React.ComponentType<{ className?: string }>
-  promptModifier: string
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  professional: FileText,
+  conversational: MessageSquare,
+  technical: Code,
 }
-
-export const COVER_LETTER_TEMPLATES: CoverLetterTemplate[] = [
-  {
-    id: "professional",
-    name: "Professional",
-    description: "Formal, traditional tone suitable for corporate roles",
-    icon: FileText,
-    promptModifier: "Write in a formal, professional tone. Use structured paragraphs and traditional business letter format.",
-  },
-  {
-    id: "conversational",
-    name: "Conversational",
-    description: "Friendly, approachable tone for startups and modern companies",
-    icon: MessageSquare,
-    promptModifier: "Write in a warm, conversational tone. Show personality while remaining professional. Use shorter paragraphs.",
-  },
-  {
-    id: "technical",
-    name: "Technical",
-    description: "Focus on technical skills and project details for engineering roles",
-    icon: Code,
-    promptModifier: "Emphasize technical skills, specific technologies, and project contributions. Be precise and data-driven.",
-  },
-]
 
 interface TemplatesPanelProps {
   selectedTemplate: string
@@ -57,7 +32,7 @@ export function TemplatesPanel({ selectedTemplate, onSelect }: TemplatesPanelPro
       {expanded && (
         <div className="grid grid-cols-3 gap-2">
           {COVER_LETTER_TEMPLATES.map((template) => {
-            const Icon = template.icon
+            const Icon = ICON_MAP[template.id] || FileText
             const isSelected = selectedTemplate === template.id
             return (
               <button
