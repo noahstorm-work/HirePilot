@@ -50,7 +50,10 @@ export function InterviewCoachClient() {
   }, [])
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ company, role, jobDescription }))
+    const timeout = setTimeout(() => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ company, role, jobDescription }))
+    }, 500)
+    return () => clearTimeout(timeout)
   }, [company, role, jobDescription])
 
   const handleGenerate = async () => {

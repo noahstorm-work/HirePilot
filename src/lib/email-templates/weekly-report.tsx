@@ -1,3 +1,7 @@
+function esc(str: string): string {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+}
+
 export function weeklyReportEmail(
   report: {
     skills_in_demand: string[]
@@ -22,7 +26,7 @@ export function weeklyReportEmail(
     <div style="font-size: 28px; font-weight: 800; color: #7c3aed; letter-spacing: -0.5px; margin-bottom: 4px;">HirePilot</div>
     <div style="font-size: 11px; color: #6b5b95; letter-spacing: 2px; text-transform: uppercase;">AI Career Operating System</div>
     <h1 style="color: #ffffff; font-size: 22px; font-weight: 600; margin: 20px 0 6px;">Your Weekly Career Report</h1>
-    <p style="color: #8b8ba3; font-size: 14px; margin: 0;">Hi ${userName}, here's your career intelligence for this week.</p>
+    <p style="color: #8b8ba3; font-size: 14px; margin: 0;">Hi ${esc(userName)}, here's your career intelligence for this week.</p>
   </div>
 
   <div style="padding: 24px;">
@@ -50,13 +54,13 @@ export function weeklyReportEmail(
         <table style="width: 100%; border-collapse: collapse; ${i > 0 ? "margin-top: 12px;" : ""}">
           <tr>
             <td style="width: 28px; height: 28px; background: ${i === 0 ? "#7c3aed" : i === 1 ? "#6d28d9" : "#5b21b6"}; border-radius: 50%; text-align: center; vertical-align: middle; color: #fff; font-size: 12px; font-weight: 700;">${i + 1}</td>
-            <td style="padding-left: 12px; color: #e0e0e0; font-size: 14px; font-weight: 500;">${s}</td>
+            <td style="padding-left: 12px; color: #e0e0e0; font-size: 14px; font-weight: 500;">${esc(s)}</td>
           </tr>
         </table>`).join("")}
         ${remainingSkills.length > 0 ? `
         <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #1e1e2e;">
           <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-            ${remainingSkills.map(s => `<span style="background: rgba(124,58,237,0.08); color: #9b8ec4; padding: 3px 10px; border-radius: 16px; font-size: 11px; border: 1px solid rgba(124,58,237,0.15);">${s}</span>`).join("")}
+            ${remainingSkills.map(s => `<span style="background: rgba(124,58,237,0.08); color: #9b8ec4; padding: 3px 10px; border-radius: 16px; font-size: 11px; border: 1px solid rgba(124,58,237,0.15);">${esc(s)}</span>`).join("")}
           </div>
         </div>` : ""}
       </div>
@@ -85,7 +89,7 @@ export function weeklyReportEmail(
         <table style="width: 100%; border-collapse: collapse; ${i > 0 ? "margin-top: 12px;" : ""}">
           <tr>
             <td style="width: 6px; min-height: 6px; background: #3b82f6; border-radius: 3px; vertical-align: top; margin-top: 6px;"></td>
-            <td style="padding-left: 12px; color: #d1d5db; font-size: 14px; line-height: 1.5;">${t}</td>
+            <td style="padding-left: 12px; color: #d1d5db; font-size: 14px; line-height: 1.5;">${esc(t)}</td>
           </tr>
         </table>`).join("")}
       </div>
@@ -141,7 +145,7 @@ export function weeklyReportEmail(
         <table style="width: 100%; border-collapse: collapse; ${i > 0 ? "margin-top: 12px;" : ""}">
           <tr>
             <td style="width: 24px; height: 24px; background: rgba(168,85,247,0.2); border-radius: 6px; text-align: center; vertical-align: middle; color: #a855f7; font-size: 11px; font-weight: 700;">${i + 1}</td>
-            <td style="padding-left: 12px; color: #d1d5db; font-size: 14px; line-height: 1.5;">${r}</td>
+            <td style="padding-left: 12px; color: #d1d5db; font-size: 14px; line-height: 1.5;">${esc(r)}</td>
           </tr>
         </table>`).join("")}
       </div>

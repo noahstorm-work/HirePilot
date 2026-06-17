@@ -196,7 +196,7 @@ export function DashboardClient() {
             />
           </div>
           <div className="p-5">
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
               {APPLICATION_STATUSES.map((status) => (
                 <div key={status} className="text-center p-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-subtle)]">
                   <p className="text-lg sm:text-xl font-bold font-[family-name:var(--font-display)]">

@@ -64,9 +64,3 @@ export const ICON_MAP: Record<string, LucideIcon> = {
 }
 
 export const ALL_NAV_ITEMS = NAV_SECTIONS.flatMap(s => s.items)
-
-export const ONBOARDING_ITEM: NavItem = {
-  label: "Onboarding",
-  href: "/onboarding",
-  icon: "Rocket",
-}

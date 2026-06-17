@@ -148,10 +148,16 @@ export function DiscoverClient() {
   }, [supabase, savedJobs])
 
   const handleRemoveSaved = useCallback(async (id: string) => {
-    await supabase.from("saved_jobs").delete().eq("id", id)
+    const removed = savedJobs.find((s) => s.id === id)
     setSavedJobs((prev) => prev.filter((s) => s.id !== id))
-    toast.success("Job removed")
-  }, [supabase])
+    const { error } = await supabase.from("saved_jobs").delete().eq("id", id)
+    if (error) {
+      toast.error("Failed to remove job")
+      if (removed) setSavedJobs((prev) => [...prev, removed].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
+    } else {
+      toast.success("Job removed")
+    }
+  }, [supabase, savedJobs])
 
   const handleSaveAsApplication = useCallback(async (saved: SavedJob) => {
     const res = await fetch("/api/applications/create", {

@@ -12,7 +12,7 @@ import {
   Mail, MessageSquare, ExternalLink,
   CheckCircle2, AlertTriangle, Ban, Send, Loader2
 } from "lucide-react"
-import { TemplatesPanel, COVER_LETTER_TEMPLATES } from "@/components/cover-letter/TemplatesPanel"
+import { TemplatesPanel } from "@/components/cover-letter/TemplatesPanel"
 import { toast } from "sonner"
 import Link from "next/link"
 import type { Application, AiResult, RejectionAnalysis } from "@/types"
@@ -152,8 +152,12 @@ export function ApplicationDetailClient() {
     notesTimerRef.current = setTimeout(async () => {
       if (!app) return
       setSavingNotes(true)
-      await supabase.from("applications").update({ notes: value }).eq("id", app.id)
-      setApp({ ...app, notes: value })
+      const { error } = await supabase.from("applications").update({ notes: value }).eq("id", app.id)
+      if (error) {
+        toast.error("Failed to save notes")
+      } else {
+        setApp({ ...app, notes: value })
+      }
       setSavingNotes(false)
     }, 1000)
   }, [app, supabase])

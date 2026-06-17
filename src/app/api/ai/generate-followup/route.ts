@@ -47,8 +47,7 @@ export const POST = withAuth(async (request, { supabase, user }) => {
 
   const { error } = await supabase
     .from("ai_results")
-    .update({ follow_up_email: emailBody })
-    .eq("application_id", applicationId)
+    .upsert({ application_id: applicationId, follow_up_email: emailBody }, { onConflict: "application_id" })
 
   if (error) {
     console.error("Failed to save follow-up email:", error)

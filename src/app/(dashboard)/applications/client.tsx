@@ -21,12 +21,10 @@ import { triggerAnalysis } from "@/lib/trigger-analysis"
 import { logError } from "@/lib/error-service"
 import type { Application } from "@/types"
 
-type AppItem = Application
-
 const APPS_STORAGE_KEY = "applications_prefs"
 
 export function ApplicationsClient() {
-  const [applications, setApplications] = useState<AppItem[]>([])
+  const [applications, setApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [newApp, setNewApp] = useState({ company: "", role_title: "", job_url: "", notes: "" })
@@ -49,7 +47,7 @@ export function ApplicationsClient() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
       const { data } = await supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
-      if (mounted && data) setApplications(data as AppItem[])
+      if (mounted && data) setApplications(data as Application[])
       if (mounted) setLoading(false)
     }
     load()
@@ -81,7 +79,7 @@ export function ApplicationsClient() {
     const json = await res.json()
     if (!json.success) { toast.error("Failed to create application"); setCreating(false); return }
     if (json.data) {
-      setApplications((prev) => [json.data as AppItem, ...prev])
+      setApplications((prev) => [json.data as Application, ...prev])
       if (json.data.id) {
         const desc = newApp.notes || ""
         if (desc) triggerAnalysis(json.data.id, desc, newApp.company, newApp.role_title)
