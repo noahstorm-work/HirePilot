@@ -31,7 +31,7 @@ export const SavedJobsSidebar = React.memo(function SavedJobsSidebar({ savedJobs
                     <p className="text-[11px] font-medium text-[var(--color-text-primary)] truncate">{saved.role_title}</p>
                     <p className="text-[10px] text-[var(--color-text-muted)] truncate">{saved.company}</p>
                   </div>
-                  <button onClick={() => onRemove(saved.id)} aria-label={`Remove ${saved.role_title} from saved`} className="shrink-0 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                  <button onClick={() => onRemove(saved.id)} aria-label={`Remove ${saved.role_title} from saved`} className="shrink-0 sm:opacity-0 sm:group-hover/item:opacity-100 transition-opacity">
                     <Trash2 className="h-2.5 w-2.5 text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)]" />
                   </button>
                 </div>

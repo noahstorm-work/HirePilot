@@ -67,7 +67,7 @@ export const SearchBar = React.memo(function SearchBar({
                   <button
                     onClick={(e) => { e.stopPropagation(); onClearRecent(term) }}
                     aria-label={`Remove ${term} from recent searches`}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)]"
+                    className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)]"
                   >
                     <X className="h-3 w-3" />
                   </button>

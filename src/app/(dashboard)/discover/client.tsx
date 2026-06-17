@@ -210,7 +210,7 @@ export function DiscoverClient() {
               company: job.company,
               role_title: job.role_title,
             }),
-          })
+          }).catch(() => { logError("Quick apply email failed", "Email send failed", "discover-quick-apply") })
         }
       }
       window.open(job.url, "_blank", "noopener,noreferrer")

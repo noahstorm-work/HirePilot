@@ -332,7 +332,7 @@ export function ApplicationsClient() {
                     <button
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(app.id) }}
                       aria-label={`Delete ${app.role_title} application`}
-                      className="p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)] transition-colors opacity-0 group-hover:opacity-100"
+                      className="p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)] transition-colors sm:opacity-0 sm:group-hover:opacity-100"
                     >
                       <Trash2 className="h-3 w-3" />
                     </button>
