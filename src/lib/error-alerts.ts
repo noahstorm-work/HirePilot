@@ -3,6 +3,10 @@ import { Resend } from "resend"
 const recentAlerts = new Map<string, number>()
 const RATE_LIMIT_MS = 5 * 60 * 1000
 
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+}
+
 function getErrorKey(message: string, level: string): string {
   return `${level}:${message.slice(0, 200)}`
 }
@@ -38,7 +42,7 @@ export async function sendErrorAlert(error: {
     await resend.emails.send({
       from: process.env.EMAIL_FROM || "HirePilot <apply@hirepilot.app>",
       to: adminEmail,
-      subject: `[HirePilot Alert] ${error.level.toUpperCase()}: ${error.message.slice(0, 100)}`,
+      subject: `[HirePilot Alert] ${error.level.toUpperCase()}: ${escapeHtml(error.message.slice(0, 100))}`,
       html: `
 <!DOCTYPE html>
 <html>
@@ -59,13 +63,13 @@ export async function sendErrorAlert(error: {
       </tr>
       <tr>
         <td style="padding: 8px 0; color: #888; font-size: 13px;">Message</td>
-        <td style="padding: 8px 0; font-size: 14px; color: #e0e0e0; word-break: break-word;">${error.message}</td>
+        <td style="padding: 8px 0; font-size: 14px; color: #e0e0e0; word-break: break-word;">${escapeHtml(error.message)}</td>
       </tr>
       ${error.url ? `
       <tr>
         <td style="padding: 8px 0; color: #888; font-size: 13px;">URL</td>
         <td style="padding: 8px 0; font-size: 14px;">
-          <a href="${error.url}" style="color: #7c3aed; text-decoration: none;">${error.url.length > 80 ? error.url.slice(0, 80) + "..." : error.url}</a>
+          <a href="${escapeHtml(error.url)}" style="color: #7c3aed; text-decoration: none;">${escapeHtml(error.url.length > 80 ? error.url.slice(0, 80) + "..." : error.url)}</a>
         </td>
       </tr>` : ""}
       <tr>

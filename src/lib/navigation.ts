@@ -9,6 +9,7 @@ export interface NavItem {
   href: string
   icon: string
   shortcut?: string
+  admin?: boolean
 }
 
 export interface NavSection {
@@ -40,8 +41,8 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Insights", href: "/dashboard/insights", icon: "BarChart3", shortcut: "⌘8" },
       { label: "CV Versions", href: "/dashboard/cv-versions", icon: "GitBranch", shortcut: "⌘9" },
-      { label: "Error Logs", href: "/dashboard/admin/errors", icon: "AlertTriangle", shortcut: "⌘0" },
-      { label: "Rate Limits", href: "/dashboard/admin/rate-limits", icon: "Shield" },
+      { label: "Error Logs", href: "/dashboard/admin/errors", icon: "AlertTriangle", shortcut: "⌘0", admin: true },
+      { label: "Rate Limits", href: "/dashboard/admin/rate-limits", icon: "Shield", admin: true },
     ],
   },
 ]

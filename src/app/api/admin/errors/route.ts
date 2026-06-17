@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server"
-import { apiSuccess, apiError, withAuth, checkRateLimit } from "@/lib/api-handler"
+import { apiSuccess, apiError, withAuth, checkRateLimit, isAdmin } from "@/lib/api-handler"
 
 export const GET = withAuth(async (request, { user }) => {
   const rl = checkRateLimit(`admin:errors:${user.id}`, 30, 60_000)
   if (rl) return rl
+
+  if (!isAdmin(user)) return apiError("Forbidden", 403)
 
   const { searchParams } = new URL(request.url)
   const rawPage = parseInt(searchParams.get("page") || "1")

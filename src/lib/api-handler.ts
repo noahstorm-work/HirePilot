@@ -99,7 +99,11 @@ function extractSource(url: string): string {
 
 export interface AuthContext {
   supabase: SupabaseClient
-  user: { id: string; email?: string }
+  user: { id: string; email?: string; app_metadata?: Record<string, unknown>; user_metadata?: Record<string, unknown> }
+}
+
+export function isAdmin(user: AuthContext["user"]): boolean {
+  return (user.app_metadata?.role as string) === "admin" || (user.user_metadata?.role as string) === "admin"
 }
 
 export function withAuth(

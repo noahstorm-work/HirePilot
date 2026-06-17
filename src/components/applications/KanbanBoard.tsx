@@ -6,6 +6,7 @@ import {
   DragOverlay,
   closestCorners,
   PointerSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
   type DragStartEvent,
@@ -84,7 +85,7 @@ function SortableCard({ app, onDelete }: { app: Application; onDelete?: (appId: 
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-blue)] transition-colors opacity-0 group-hover:opacity-100"
+              className="p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-blue)] transition-colors sm:opacity-0 sm:group-hover:opacity-100"
             >
               <ExternalLink className="h-2.5 w-2.5" />
             </a>
@@ -92,7 +93,7 @@ function SortableCard({ app, onDelete }: { app: Application; onDelete?: (appId: 
           <Link
             href={`/applications/${app.id}`}
             onClick={(e) => e.stopPropagation()}
-            className="p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-violet)] transition-colors opacity-0 group-hover:opacity-100"
+            className="p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-violet)] transition-colors sm:opacity-0 sm:group-hover:opacity-100"
           >
             <Send className="h-2.5 w-2.5" />
           </Link>
@@ -100,7 +101,7 @@ function SortableCard({ app, onDelete }: { app: Application; onDelete?: (appId: 
             <button
               onClick={(e) => { e.stopPropagation(); onDelete(app.id) }}
               aria-label={`Delete ${app.role_title} application`}
-              className="p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)] transition-colors opacity-0 group-hover:opacity-100"
+              className="p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent-rose)] transition-colors sm:opacity-0 sm:group-hover:opacity-100"
             >
               <Trash2 className="h-2.5 w-2.5" />
             </button>
@@ -171,7 +172,8 @@ export function KanbanBoard({ applications, onStatusChange, onDelete }: KanbanBo
       activationConstraint: {
         distance: 8,
       },
-    })
+    }),
+    useSensor(KeyboardSensor)
   )
 
   const activeApp = useMemo(() => {

@@ -28,14 +28,19 @@ function NavItems({
   collapsed: isCollapsed,
   isActive,
   onNavigate,
+  isAdmin,
 }: {
   collapsed: boolean
   isActive: (href: string) => boolean
   onNavigate: () => void
+  isAdmin: boolean
 }) {
   return (
     <nav className="flex-1 px-2 py-1 overflow-y-auto">
-      {NAV_SECTIONS.map((section) => (
+      {NAV_SECTIONS.map((section) => {
+        const visibleItems = section.items.filter((item) => !item.admin || isAdmin)
+        if (visibleItems.length === 0) return null
+        return (
         <div key={section.title} className="mb-3">
           {!isCollapsed && (
             <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)]">
@@ -43,7 +48,7 @@ function NavItems({
             </p>
           )}
           <div className="space-y-0.5">
-            {section.items.map((item) => {
+            {visibleItems.map((item) => {
               const active = isActive(item.href)
               const Icon = ICON_MAP[item.icon]
               return (
@@ -75,7 +80,8 @@ function NavItems({
             })}
           </div>
         </div>
-      ))}
+        )
+      })}
     </nav>
   )
 }
@@ -163,6 +169,8 @@ export function Sidebar() {
     return pathname.startsWith(href)
   }, [pathname])
 
+  const isAdmin = (user?.app_metadata?.role as string) === "admin" || (user?.user_metadata?.role as string) === "admin"
+
   return (
     <>
       {/* Mobile toggle */}
@@ -185,7 +193,7 @@ export function Sidebar() {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <NavItems collapsed={false} isActive={isActive} onNavigate={() => setMobileOpen(false)} />
+            <NavItems collapsed={false} isActive={isActive} onNavigate={() => setMobileOpen(false)} isAdmin={isAdmin} />
             <UserFooter user={user} collapsed={false} onSignOut={handleSignOut} onNavigate={() => setMobileOpen(false)} />
           </div>
         </div>
@@ -210,7 +218,7 @@ export function Sidebar() {
             </button>
           </div>
         )}
-        <NavItems collapsed={collapsed} isActive={isActive} onNavigate={() => setMobileOpen(false)} />
+        <NavItems collapsed={collapsed} isActive={isActive} onNavigate={() => setMobileOpen(false)} isAdmin={isAdmin} />
         <UserFooter user={user} collapsed={collapsed} onSignOut={handleSignOut} onNavigate={() => setMobileOpen(false)} />
         <button
           onClick={() => setCollapsed(!collapsed)}

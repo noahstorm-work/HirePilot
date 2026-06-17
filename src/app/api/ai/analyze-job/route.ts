@@ -60,7 +60,10 @@ export const POST = withAuth(async (request, { supabase, user }) => {
       cv_suggestions: result.cv_suggestions,
       cover_letter: result.cover_letter,
     }
-    await supabase.from("ai_results").upsert(analysis, { onConflict: "application_id" })
+    const { error: upsertError } = await supabase.from("ai_results").upsert(analysis, { onConflict: "application_id" })
+    if (upsertError) {
+      console.error("Failed to save job analysis:", upsertError)
+    }
   }
 
   return apiSuccess(result)

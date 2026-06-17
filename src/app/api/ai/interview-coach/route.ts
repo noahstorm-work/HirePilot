@@ -46,10 +46,13 @@ export const POST = withAuth(async (request, { supabase, user }) => {
   const result = await generateInterviewPrep({ jobDescription, cvText })
 
   if (applicationId) {
-    await supabase.from("ai_results").upsert({
+    const { error: upsertError } = await supabase.from("ai_results").upsert({
       application_id: applicationId,
       interview_questions: result,
     }, { onConflict: "application_id" })
+    if (upsertError) {
+      console.error("Failed to save interview questions:", upsertError)
+    }
   }
 
   return apiSuccess(result)
