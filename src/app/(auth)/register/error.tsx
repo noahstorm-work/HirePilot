@@ -1,4 +1,7 @@
 "use client"
 
 import DashboardError from "@/components/ui/dashboard-error"
-export default (props: React.ComponentProps<typeof DashboardError>) => <DashboardError {...props} context="register-error-boundary" />
+function RegisterError(props: React.ComponentProps<typeof DashboardError>) {
+  return <DashboardError {...props} context="register-error-boundary" />
+}
+export default RegisterError

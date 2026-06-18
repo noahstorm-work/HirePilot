@@ -1,4 +1,7 @@
 "use client"
 
 import DashboardError from "@/components/ui/dashboard-error"
-export default (props: React.ComponentProps<typeof DashboardError>) => <DashboardError {...props} context="onboarding-error-boundary" />
+function OnboardingError(props: React.ComponentProps<typeof DashboardError>) {
+  return <DashboardError {...props} context="onboarding-error-boundary" />
+}
+export default OnboardingError

@@ -25,20 +25,6 @@ export function SkillsStep({ skills, setSkills }: SkillsStepProps) {
   const [search, setSearch] = useState("")
   const [customSkill, setCustomSkill] = useState("")
 
-  const allSkills = useMemo(
-    () => Object.values(SKILL_CATEGORIES).flat(),
-    []
-  )
-
-  const filteredSkills = useMemo(() => {
-    if (!search) return allSkills
-    return allSkills.filter(
-      (s) =>
-        s.toLowerCase().includes(search.toLowerCase()) &&
-        !skills.includes(s)
-    )
-  }, [allSkills, search, skills])
-
   const grouped = useMemo(() => {
     const groups: Record<string, string[]> = {}
     for (const [cat, skillsList] of Object.entries(SKILL_CATEGORIES)) {

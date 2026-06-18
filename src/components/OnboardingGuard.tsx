@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -12,14 +12,18 @@ export function OnboardingGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
+  const checked = useRef(false)
 
   useEffect(() => {
+    if (checked.current) return
     if (SKIP_PATHS.some((p) => pathname.startsWith(p))) {
       setLoading(false)
+      checked.current = true
       return
     }
 
     const check = async () => {
+      checked.current = true
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         setLoading(false)
