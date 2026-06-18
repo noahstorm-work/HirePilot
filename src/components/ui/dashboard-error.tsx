@@ -8,13 +8,15 @@ import { logError } from "@/lib/error-service"
 export default function DashboardError({
   error,
   reset,
+  context = "dashboard-error-boundary",
 }: {
   error: Error & { digest?: string }
   reset: () => void
+  context?: string
 }) {
   useEffect(() => {
-    logError(error.message, error.stack, "dashboard-error-boundary")
-  }, [error])
+    logError(error.message, error.stack, context)
+  }, [error, context])
 
   return (
     <div className="flex items-center justify-center min-h-[40vh] px-5">
